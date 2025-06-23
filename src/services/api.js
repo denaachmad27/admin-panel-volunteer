@@ -26,14 +26,19 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor untuk handle errors
+// Response interceptor - HAPUS AUTO REDIRECT!
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-    }
+    // Log error untuk debugging
+    console.error('API Error:', error.response?.status, error.response?.data);
+    
+    // JANGAN auto-redirect, biarkan component yang handle
+    // if (error.response?.status === 401) {
+    //   localStorage.removeItem('token')
+    //   window.location.href = '/login'
+    // }
+    
     return Promise.reject(error)
   }
 )

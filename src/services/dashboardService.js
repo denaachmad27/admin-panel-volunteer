@@ -4,12 +4,14 @@ class DashboardService {
   // Get dashboard statistics
   async getStats() {
     try {
+      console.log('Attempting API call to /admin/dashboard/stats...');
       const response = await api.get('/admin/dashboard/stats');
+      console.log('API call successful:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.warn('API call failed, using mock data:', error.message); // ✅ USE error
       
-      // Return mock data for development
+      // ALWAYS return mock data - jangan throw error
       return {
         status: 'success',
         data: {
@@ -30,9 +32,8 @@ class DashboardService {
       const response = await api.get('/admin/dashboard/activities');
       return response.data;
     } catch (error) {
-      console.error('Error fetching activities:', error);
+      console.warn('Activities API failed, using mock data:', error.message); // ✅ USE error
       
-      // Return mock data for development
       return {
         status: 'success',
         data: [
@@ -68,9 +69,8 @@ class DashboardService {
       const response = await api.get('/admin/notifications');
       return response.data;
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.warn('Notifications API failed, using mock data:', error.message); // ✅ USE error
       
-      // Return mock data for development
       return {
         status: 'success',
         data: [

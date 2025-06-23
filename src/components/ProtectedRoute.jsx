@@ -5,7 +5,12 @@ const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
   
-  console.log('ProtectedRoute check:', { token, user });
+  console.log('ProtectedRoute check:', { 
+    hasToken: !!token, 
+    hasUser: !!user,
+    tokenStart: token?.substring(0, 20) + '...',
+    currentPath: window.location.pathname
+  });
   
   if (!token) {
     console.log('No token found, redirecting to login');
