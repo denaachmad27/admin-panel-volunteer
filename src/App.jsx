@@ -6,9 +6,12 @@ import './index.css';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Pages
+// Existing Pages (sesuai dengan struktur project asli)
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
+
+// NEW: Admin Profile Page (PASTIKAN IMPORT DARI PAGES, BUKAN COMPONENTS!)
+import AdminProfilePage from './pages/AdminProfilePage';
 
 function App() {
   console.log('App component rendering...');
@@ -31,6 +34,24 @@ function App() {
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 
+            />
+            
+            {/* 🎯 FIXED: Admin Profile Route - PASTIKAN MENGGUNAKAN AdminProfilePage */}
+            <Route 
+              path="/admin/profile" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <AdminProfilePage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* 🔄 ALTERNATIVE: Jika ada route lama, redirect ke yang baru */}
+            <Route 
+              path="/profile" 
+              element={<Navigate to="/admin/profile" replace />} 
             />
             
             {/* Default redirect */}
