@@ -164,7 +164,7 @@ const AdminProfile = () => {
       newErrors.email = 'Format email tidak valid';
     }
 
-    if (formData.phone && !/^\d+$/.test(formData.phone.replace(/[\s\-\+]/g, ''))) {
+    if (formData.phone && !/^\d+$/.test(formData.phone.replace(/[\s\-+]/g, ''))) {
       newErrors.phone = 'Format nomor telepon tidak valid';
     }
 
