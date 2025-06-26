@@ -399,44 +399,6 @@ const AdminProfilePage = () => {
           </Card>
         )}
 
-        {/* Debug Info - Development Only */}
-        {import.meta.env.DEV && (
-          <Card title="🔧 Debug Info - Profile Page FIXED" className="mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div>
-                <p className="font-medium text-slate-600 mb-2">Component Status:</p>
-                <ul className="text-slate-500 space-y-1">
-                  <li>✅ Using ProtectedDashboardLayout (KONSISTEN)</li>
-                  <li>✅ Sidebar sama dengan Dashboard</li>
-                  <li>✅ Header sama dengan Dashboard</li>
-                  <li>✅ Color scheme konsisten</li>
-                  <li>✅ Navigation working properly</li>
-                  <li>✅ Form validation complete</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium text-slate-600 mb-2">Consistency Check:</p>
-                <ul className="text-slate-500 space-y-1">
-                  <li>✅ Dark sidebar maintained</li>
-                  <li>✅ Menu structure identical</li>
-                  <li>✅ User profile dropdown same</li>
-                  <li>✅ Search bar consistent</li>
-                  <li>✅ Notifications consistent</li>
-                  <li>✅ NO layout breaking changes</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-800">
-                🎯 SOLUTION APPLIED: Using ProtectedDashboardLayout ensures 100% consistency
-              </p>
-              <p className="text-sm text-green-700 mt-1">
-                Sidebar will now match Dashboard exactly. No more layout differences!
-              </p>
-            </div>
-          </Card>
-        )}
       </div>
     </ProtectedDashboardLayout>
   );

@@ -11,6 +11,7 @@ import {
   Bell, 
   Search, 
   ChevronDown,
+  ChevronRight,
   LogOut,
   User,
   Shield,
@@ -79,6 +80,7 @@ const ProtectedDashboardLayout = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState({});
 
   // 🔒 PROTECTED: User data structure yang fix
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -134,6 +136,21 @@ const ProtectedDashboardLayout = ({
     }
   };
 
+  // 🔒 PROTECTED: Toggle submenu
+  const toggleSubmenu = (menuId) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuId]: !prev[menuId]
+    }));
+  };
+
+  // Helper function to check if current page is a submenu item
+  const isSubmenuActive = (item) => {
+    if (!item.submenu) return false;
+    return item.submenu.some(subItem => window.location.pathname === subItem.path);
+  };
+
+
   const renderMenuItem = (item) => {
     if (item.type === 'separator') {
       return (
@@ -145,42 +162,92 @@ const ProtectedDashboardLayout = ({
 
     const Icon = item.icon;
     const isActive = currentPage === item.id;
+    const isSubmenuItemActive = isSubmenuActive(item);
+    const isExpanded = expandedMenus[item.id] || isSubmenuItemActive; // Auto-expand if submenu is active
+    const hasSubmenu = item.submenu && item.submenu.length > 0;
 
     return (
       <div key={item.id}>
-        <a
-          href={item.path}
-          className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+        {/* Main Menu Item */}
+        <div
+          className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group cursor-pointer ${
             isActive 
               ? 'bg-blue-500 text-white shadow-lg' 
+              : isSubmenuItemActive
+              ? 'bg-blue-100 text-blue-800 border border-blue-200'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
+          onClick={(e) => {
+            if (hasSubmenu) {
+              e.preventDefault();
+              toggleSubmenu(item.id);
+            } else {
+              window.location.href = item.path;
+            }
+          }}
         >
-          <Icon className={`w-5 h-5 ${
-            isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
-          }`} />
-          <span className="font-medium">{item.title}</span>
-          {item.badge && (
-            <span className={`ml-auto px-2 py-1 text-xs rounded-full ${
-              item.badgeColor || 'bg-blue-100 text-blue-600'
-            }`}>
-              {item.badge}
-            </span>
+          <div className="flex items-center space-x-3">
+            <Icon className={`w-5 h-5 ${
+              isActive ? 'text-white' : 
+              isSubmenuItemActive ? 'text-blue-600' :
+              'text-slate-400 group-hover:text-slate-600'
+            }`} />
+            <span className="font-medium">{item.title}</span>
+            {item.badge && (
+              <span className={`ml-auto px-2 py-1 text-xs rounded-full ${
+                item.badgeColor || 'bg-blue-100 text-blue-600'
+              }`}>
+                {item.badge}
+              </span>
+            )}
+          </div>
+          {hasSubmenu && (
+            <div className="ml-auto">
+              {isExpanded ? (
+                <ChevronDown className={`w-4 h-4 transition-transform ${
+                  isActive ? 'text-white' : 
+                  isSubmenuItemActive ? 'text-blue-600' :
+                  'text-slate-400 group-hover:text-slate-600'
+                }`} />
+              ) : (
+                <ChevronRight className={`w-4 h-4 transition-transform ${
+                  isActive ? 'text-white' : 
+                  isSubmenuItemActive ? 'text-blue-600' :
+                  'text-slate-400 group-hover:text-slate-600'
+                }`} />
+              )}
+            </div>
           )}
-        </a>
+        </div>
         
-        {/* Submenu */}
-        {item.submenu && isActive && (
-          <div className="mt-2 ml-4 space-y-1">
-            {item.submenu.map((subItem, index) => (
-              <a
-                key={index}
-                href={subItem.path}
-                className="block px-4 py-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
-              >
-                {subItem.title}
-              </a>
-            ))}
+        {/* Submenu Items */}
+        {hasSubmenu && isExpanded && (
+          <div className="mt-1 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
+            {item.submenu.map((subItem, index) => {
+              const isSubItemActive = window.location.pathname === subItem.path;
+              return (
+                <a
+                  key={index}
+                  href={subItem.path}
+                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg text-sm transition-colors ${
+                    isSubItemActive
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+                  }`}
+                  onClick={(e) => {
+                    // Don't close submenu when clicking submenu item
+                    e.stopPropagation();
+                  }}
+                >
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      isSubItemActive ? 'bg-white' : 'bg-slate-400'
+                    }`}></div>
+                  </div>
+                  <span>{subItem.title}</span>
+                </a>
+              );
+            })}
           </div>
         )}
       </div>
@@ -240,17 +307,9 @@ const ProtectedDashboardLayout = ({
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
               
-              {/* Breadcrumbs */}
-              <div className="hidden md:flex items-center space-x-2 text-sm">
-                <span className="text-slate-500">Dashboard</span>
-                {breadcrumbs.map((item, index) => (
-                  <React.Fragment key={index}>
-                    <span className="text-slate-300">/</span>
-                    <span className={index === breadcrumbs.length - 1 ? 'text-slate-900 font-medium' : 'text-slate-500'}>
-                      {item}
-                    </span>
-                  </React.Fragment>
-                ))}
+              {/* Empty space where breadcrumbs were */}
+              <div className="hidden md:block">
+                {/* Intentionally empty - removed breadcrumbs from header */}
               </div>
             </div>
 

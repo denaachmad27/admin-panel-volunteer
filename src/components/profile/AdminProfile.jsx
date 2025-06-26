@@ -665,39 +665,6 @@ const AdminProfile = () => {
         )}
       </div>
 
-      {/* Debug Section (untuk development) */}
-      <div className="bg-gray-100 rounded-lg p-4">
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">🔧 Debug Info - Admin Profile</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div>
-            <p className="font-medium text-gray-600">Status:</p>
-            <ul className="text-gray-500 space-y-1">
-              <li>✅ Simple Admin Profile: Working</li>
-              <li>✅ Basic Info Management: Complete</li>
-              <li>✅ Password Change: Complete</li>
-              <li>✅ Photo Upload: Ready</li>
-              <li>⏳ API Integration: Next Step</li>
-            </ul>
-          </div>
-          <div>
-            <p className="font-medium text-gray-600">API Endpoints:</p>
-            <ul className="text-gray-500 space-y-1">
-              <li>GET /api/auth/me - Current admin</li>
-              <li>PUT /api/auth/update - Update info</li>
-              <li>POST /api/auth/change-password</li>
-            </ul>
-          </div>
-        </div>
-        
-        <details className="mt-4">
-          <summary className="cursor-pointer text-xs font-medium text-gray-600">
-            View Admin Data (Click to expand)
-          </summary>
-          <pre className="mt-2 p-2 bg-white rounded text-xs overflow-x-auto">
-            {JSON.stringify({ adminData, formData }, null, 2)}
-          </pre>
-        </details>
-      </div>
     </div>
   );
 };

@@ -1,61 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Users, Heart, MessageSquare, FileText, TrendingUp, Calendar } from 'lucide-react';
 
 // 🔧 FIXED: Import ProtectedDashboardLayout (BUKAN DashboardLayout)
 import ProtectedDashboardLayout from '../../components/layout/ProtectedDashboardLayout';
 import { StatsCardTemplate } from '../../components/templates/PageTemplates';
 import { Card } from '../../components/ui/UIComponents';
-import dashboardService from '../../services/dashboardService';
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      console.log('Loading dashboard data...');
-      
-      // Use dashboard service - ini SELALU return mock data jika API gagal
-      const statsData = await dashboardService.getStats();
-      console.log('Dashboard data loaded:', statsData);
-      
-      setDashboardData(statsData.data);
-    } catch (err) {
-      console.error('Dashboard error:', err);
-      
-      // Jika error, gunakan mock data sebagai fallback
-      const mockData = {
-        total_users: 1248,
-        total_programs: 24,
-        total_complaints: 89,
-        total_news: 156,
-        pending_applications: 15,
-        active_programs: 18
-      };
-      
-      setDashboardData(mockData);
-      console.log('Using mock data as fallback:', mockData);
-    } finally {
-      setLoading(false);
-    }
+  // Langsung gunakan mock data tanpa loading untuk konsistensi dengan halaman lain
+  const dashboardData = {
+    total_users: 1248,
+    total_programs: 24,
+    total_complaints: 89,
+    total_news: 156,
+    pending_applications: 15,
+    active_programs: 18
   };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Memuat dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Prepare stats data for StatsCardTemplate
   const statsData = [
@@ -291,51 +251,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Debug Info - Development Only */}
-        {import.meta.env.DEV && (
-          <Card title="🔧 Debug Info - Dashboard FIXED" className="mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div>
-                <p className="font-medium text-slate-600 mb-2">Layout Status:</p>
-                <ul className="text-slate-500 space-y-1">
-                  <li>✅ Using ProtectedDashboardLayout (FIXED!)</li>
-                  <li>✅ Sidebar konsisten dengan Profile</li>
-                  <li>✅ StatsCardTemplate working</li>
-                  <li>✅ UI Components integrated</li>
-                  <li>✅ Mock data fallback ready</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium text-slate-600 mb-2">Consistency Check:</p>
-                <ul className="text-slate-500 space-y-1">
-                  <li>✅ Dashboard layout = Profile layout</li>
-                  <li>✅ Same sidebar structure</li>
-                  <li>✅ Same header design</li>
-                  <li>✅ Same navigation behavior</li>
-                  <li>✅ 100% UI consistency achieved!</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-800">
-                🎯 CONSISTENCY FIXED: Dashboard now uses ProtectedDashboardLayout
-              </p>
-              <p className="text-sm text-green-700 mt-1">
-                Sidebar Dashboard = Sidebar Profile. Problem solved! 🎉
-              </p>
-            </div>
-
-            <details className="mt-4">
-              <summary className="cursor-pointer text-xs font-medium text-slate-600">
-                View Dashboard Data (Click to expand)
-              </summary>
-              <pre className="mt-2 p-2 bg-slate-100 rounded text-xs overflow-x-auto">
-                {JSON.stringify(dashboardData, null, 2)}
-              </pre>
-            </details>
-          </Card>
-        )}
       </div>
     </ProtectedDashboardLayout>
   );
