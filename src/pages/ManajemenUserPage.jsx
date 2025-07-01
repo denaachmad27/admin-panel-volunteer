@@ -1,120 +1,95 @@
-import React, { useState } from 'react';
-import { Users, Plus, Edit3, Trash2, Eye, Search, Filter, UserPlus, Shield, Clock, CheckCircle, XCircle, Mail, Phone, MapPin, Calendar, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Plus, Edit3, Trash2, Eye, Search, Filter, UserPlus, Shield, Clock, CheckCircle, XCircle, Mail, Phone, MapPin, Calendar, AlertCircle, RefreshCw } from 'lucide-react';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import userService from '../services/userService';
+import UserModal from '../components/modals/UserModal';
+import PermissionModal from '../components/modals/PermissionModal';
+import BulkActionModal from '../components/modals/BulkActionModal';
 
 const ManajemenUserPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    admins: 0,
+    staff: 0,
+    users: 0
+  });
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    per_page: 15,
+    total: 0,
+    last_page: 1
+  });
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showBulkActionModal, setShowBulkActionModal] = useState(false);
+  const [permissionUser, setPermissionUser] = useState(null);
 
-  // Mock data untuk users
-  const users = [
-    {
-      id: 1,
-      name: 'Ahmad Santoso',
-      email: 'ahmad.santoso@email.com',
-      phone: '081234567890',
-      role: 'user',
-      status: 'active',
-      address: 'Jl. Merdeka No. 15, RT 05/RW 02',
-      joinDate: '2024-01-15',
-      lastLogin: '2024-01-20',
-      programsReceived: ['Bantuan Pangan', 'Bantuan Kesehatan'],
-      avatar: null
-    },
-    {
-      id: 2,
-      name: 'Siti Nurhaliza',
-      email: 'siti.nur@email.com',
-      phone: '081234567891',
-      role: 'user',
-      status: 'active',
-      address: 'Jl. Kenanga No. 23, RT 03/RW 01',
-      joinDate: '2024-01-12',
-      lastLogin: '2024-01-19',
-      programsReceived: ['Bantuan Pendidikan'],
-      avatar: null
-    },
-    {
-      id: 3,
-      name: 'Budi Hermawan',
-      email: 'budi.h@email.com',
-      phone: '081234567892',
-      role: 'admin',
-      status: 'active',
-      address: 'Jl. Melati No. 8, RT 02/RW 03',
-      joinDate: '2023-12-01',
-      lastLogin: '2024-01-20',
-      programsReceived: [],
-      avatar: null
-    },
-    {
-      id: 4,
-      name: 'Dewi Sartika',
-      email: 'dewi.sartika@email.com',
-      phone: '081234567893',
-      role: 'user',
-      status: 'pending',
-      address: 'Jl. Raya Utama No. 45, RT 01/RW 04',
-      joinDate: '2024-01-18',
-      lastLogin: null,
-      programsReceived: [],
-      avatar: null
-    },
-    {
-      id: 5,
-      name: 'Rini Marlina',
-      email: 'rini.marlina@email.com',
-      phone: '081234567894',
-      role: 'staff',
-      status: 'active',
-      address: 'Jl. Industri No. 12, RT 06/RW 02',
-      joinDate: '2023-11-15',
-      lastLogin: '2024-01-18',
-      programsReceived: [],
-      avatar: null
-    },
-    {
-      id: 6,
-      name: 'Andi Wijaya',
-      email: 'andi.wijaya@email.com',
-      phone: '081234567895',
-      role: 'user',
-      status: 'suspended',
-      address: 'Jl. Mawar No. 7, RT 04/RW 01',
-      joinDate: '2023-10-20',
-      lastLogin: '2024-01-10',
-      programsReceived: ['Bantuan Pangan'],
-      avatar: null
-    },
-    {
-      id: 7,
-      name: 'Lisa Permata',
-      email: 'lisa.permata@email.com',
-      phone: '081234567896',
-      role: 'user',
-      status: 'active',
-      address: 'Jl. Dahlia No. 19, RT 07/RW 03',
-      joinDate: '2024-01-08',
-      lastLogin: '2024-01-17',
-      programsReceived: ['Bantuan Usaha'],
-      avatar: null
-    },
-    {
-      id: 8,
-      name: 'Joko Susilo',
-      email: 'joko.susilo@email.com',
-      phone: '081234567897',
-      role: 'admin',
-      status: 'active',
-      address: 'Jl. Anggrek No. 25, RT 08/RW 04',
-      joinDate: '2023-09-10',
-      lastLogin: '2024-01-19',
-      programsReceived: [],
-      avatar: null
+  // Load users from API
+  const loadUsers = async (page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const params = {
+        page: page,
+        per_page: pagination.per_page,
+        search: searchQuery,
+        role: selectedRole,
+        status: activeTab
+      };
+      
+      const response = await userService.getUsers(params);
+      
+      setUsers(response.data || []);
+      setPagination({
+        current_page: response.current_page || 1,
+        per_page: response.per_page || 15,
+        total: response.total || 0,
+        last_page: response.last_page || 1
+      });
+      
+    } catch (error) {
+      console.error('Error loading users:', error);
+      setError(typeof error === 'string' ? error : 'Gagal memuat data pengguna');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+  
+  // Load statistics
+  const loadStatistics = async () => {
+    try {
+      const response = await userService.getUserStatistics();
+      setStats(response);
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    }
+  };
+  
+  // Load data on component mount and when filters change
+  useEffect(() => {
+    loadUsers(1);
+    loadStatistics();
+  }, []);
+  
+  useEffect(() => {
+    const delayedSearch = setTimeout(() => {
+      loadUsers(1);
+    }, 500);
+    
+    return () => clearTimeout(delayedSearch);
+  }, [searchQuery, selectedRole, activeTab]);
 
   const roles = [
     { value: 'all', label: 'Semua Role' },
@@ -123,28 +98,22 @@ const ManajemenUserPage = () => {
     { value: 'user', label: 'User/Penerima' }
   ];
 
-  const getStatusConfig = (status) => {
-    const configs = {
-      active: { 
+  const getStatusConfig = (isActive) => {
+    if (isActive) {
+      return { 
         bg: 'bg-green-100', 
         text: 'text-green-800', 
         label: 'Aktif', 
         icon: CheckCircle 
-      },
-      pending: { 
-        bg: 'bg-yellow-100', 
-        text: 'text-yellow-800', 
-        label: 'Pending', 
-        icon: Clock 
-      },
-      suspended: { 
+      };
+    } else {
+      return { 
         bg: 'bg-red-100', 
         text: 'text-red-800', 
-        label: 'Suspended', 
+        label: 'Tidak Aktif', 
         icon: XCircle 
-      }
-    };
-    return configs[status] || configs.pending;
+      };
+    }
   };
 
   const getRoleConfig = (role) => {
@@ -156,8 +125,8 @@ const ManajemenUserPage = () => {
     return configs[role] || configs.user;
   };
 
-  const getStatusBadge = (status) => {
-    const config = getStatusConfig(status);
+  const getStatusBadge = (isActive) => {
+    const config = getStatusConfig(isActive);
     const Icon = config.icon;
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
@@ -176,23 +145,88 @@ const ManajemenUserPage = () => {
     );
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.phone.includes(searchQuery);
-    const matchesTab = activeTab === 'all' || user.status === activeTab;
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    return matchesSearch && matchesTab && matchesRole;
-  });
-
-  const stats = {
-    total: users.length,
-    active: users.filter(u => u.status === 'active').length,
-    pending: users.filter(u => u.status === 'pending').length,
-    suspended: users.filter(u => u.status === 'suspended').length,
-    admins: users.filter(u => u.role === 'admin').length,
-    staff: users.filter(u => u.role === 'staff').length,
-    regularUsers: users.filter(u => u.role === 'user').length
+  const handlePageChange = (page) => {
+    loadUsers(page);
+  };
+  
+  const handleRefresh = () => {
+    loadUsers(pagination.current_page);
+    loadStatistics();
+  };
+  
+  const handleCreateUser = () => {
+    setSelectedUser(null);
+    setShowUserModal(true);
+  };
+  
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setShowUserModal(true);
+  };
+  
+  const handleSaveUser = async (userData) => {
+    if (selectedUser) {
+      // Update existing user
+      await userService.updateUser(selectedUser.id, userData);
+    } else {
+      // Create new user
+      await userService.createUser(userData);
+    }
+    
+    // Refresh data
+    loadUsers(pagination.current_page);
+    loadStatistics();
+  };
+  
+  const handleDeleteUser = async (user) => {
+    setDeleteConfirm(user);
+  };
+  
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    
+    try {
+      await userService.deleteUser(deleteConfirm.id);
+      
+      // Refresh data
+      loadUsers(pagination.current_page);
+      loadStatistics();
+      
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Gagal menghapus user: ' + (typeof error === 'string' ? error : 'Terjadi kesalahan'));
+    }
+  };
+  
+  const handleToggleUserStatus = async (user) => {
+    try {
+      await userService.updateUserStatus(user.id, !user.is_active);
+      
+      // Refresh data
+      loadUsers(pagination.current_page);
+      loadStatistics();
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Gagal mengubah status user: ' + (typeof error === 'string' ? error : 'Terjadi kesalahan'));
+    }
+  };
+  
+  const handleOpenPermissions = (user) => {
+    setPermissionUser(user);
+    setShowPermissionModal(true);
+  };
+  
+  const handleOpenBulkActions = () => {
+    setShowBulkActionModal(true);
+  };
+  
+  const handleBulkAction = async (action, userIds) => {
+    await userService.bulkAction(action, userIds);
+    
+    // Refresh data
+    loadUsers(pagination.current_page);
+    loadStatistics();
   };
 
   return (
@@ -223,7 +257,7 @@ const ManajemenUserPage = () => {
                 <Users className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.total}</p>
                 <p className="text-sm text-slate-600">Total Users</p>
               </div>
             </div>
@@ -235,7 +269,7 @@ const ManajemenUserPage = () => {
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
+                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.active}</p>
                 <p className="text-sm text-slate-600">Aktif</p>
               </div>
             </div>
@@ -243,12 +277,12 @@ const ManajemenUserPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Clock className="w-6 h-6 text-yellow-600" />
+              <div className="p-3 rounded-full bg-red-100 mr-4">
+                <XCircle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.pending}</p>
-                <p className="text-sm text-slate-600">Pending</p>
+                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.inactive}</p>
+                <p className="text-sm text-slate-600">Tidak Aktif</p>
               </div>
             </div>
           </Card>
@@ -259,7 +293,7 @@ const ManajemenUserPage = () => {
                 <Shield className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.admins}</p>
+                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.admins}</p>
                 <p className="text-sm text-slate-600">Admin</p>
               </div>
             </div>
@@ -274,10 +308,23 @@ const ManajemenUserPage = () => {
               <h2 className="text-lg font-semibold text-slate-900">Daftar Pengguna</h2>
               <p className="text-sm text-slate-600 mt-1">Kelola semua pengguna sistem</p>
             </div>
-            <button className="mt-4 sm:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah User
-            </button>
+            <div className="mt-4 sm:mt-0 flex gap-2">
+              <button 
+                onClick={handleRefresh}
+                disabled={loading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              <button 
+                onClick={handleCreateUser}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah User
+              </button>
+            </div>
           </div>
 
           {/* Filters and Search */}
@@ -310,13 +357,13 @@ const ManajemenUserPage = () => {
               {[
                 { id: 'all', label: 'Semua' },
                 { id: 'active', label: 'Aktif' },
-                { id: 'pending', label: 'Pending' },
-                { id: 'suspended', label: 'Suspended' }
+                { id: 'inactive', label: 'Tidak Aktif' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  disabled={loading}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 ${
                     activeTab === tab.id
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
@@ -327,6 +374,21 @@ const ManajemenUserPage = () => {
               ))}
             </div>
           </div>
+
+          {/* Error State */}
+          {error && (
+            <div className="p-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Error</p>
+                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Users Table */}
           <div className="overflow-x-auto">
@@ -341,84 +403,149 @@ const ManajemenUserPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                    {/* User Info */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-medium text-slate-900 text-sm">{user.name}</div>
-                          <div className="text-xs text-slate-500">{user.phone}</div>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    {/* Email */}
-                    <td className="py-3 px-4">
-                      <div className="text-sm text-slate-900">{user.email}</div>
-                      <div className="text-xs text-slate-500">
-                        {user.lastLogin 
-                          ? `Login: ${new Date(user.lastLogin).toLocaleDateString('id-ID')}`
-                          : 'Belum login'
-                        }
-                      </div>
-                    </td>
-                    
-                    {/* Role */}
-                    <td className="py-3 px-4 text-center">
-                      {getRoleBadge(user.role)}
-                    </td>
-                    
-                    {/* Status */}
-                    <td className="py-3 px-4 text-center">
-                      {getStatusBadge(user.status)}
-                    </td>
-                    
-                    {/* Actions */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-center space-x-1">
-                        <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Lihat Detail">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors" title="Edit User">
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Hapus User">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center">
+                      <div className="flex items-center justify-center">
+                        <RefreshCw className="w-5 h-5 animate-spin text-slate-400 mr-2" />
+                        <span className="text-slate-500">Memuat data...</span>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center">
+                      <div className="text-slate-500">
+                        <Users className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                        <p>Tidak ada pengguna ditemukan</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((user) => (
+                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                      {/* User Info */}
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-medium text-slate-900 text-sm">{user.name}</div>
+                            <div className="text-xs text-slate-500">{user.phone || 'No phone'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      
+                      {/* Email */}
+                      <td className="py-3 px-4">
+                        <div className="text-sm text-slate-900">{user.email}</div>
+                        <div className="text-xs text-slate-500">
+                          {user.updated_at 
+                            ? `Login: ${new Date(user.updated_at).toLocaleDateString('id-ID')}`
+                            : 'Belum login'
+                          }
+                        </div>
+                      </td>
+                      
+                      {/* Role */}
+                      <td className="py-3 px-4 text-center">
+                        {getRoleBadge(user.role)}
+                      </td>
+                      
+                      {/* Status */}
+                      <td className="py-3 px-4 text-center">
+                        {getStatusBadge(user.is_active)}
+                      </td>
+                      
+                      {/* Actions */}
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-center space-x-1">
+                          <button 
+                            onClick={() => handleToggleUserStatus(user)}
+                            className={`p-1.5 rounded transition-colors ${
+                              user.is_active 
+                                ? 'text-slate-400 hover:text-orange-600 hover:bg-orange-50'
+                                : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                            }`}
+                            title={user.is_active ? 'Nonaktifkan User' : 'Aktifkan User'}
+                          >
+                            {user.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                          </button>
+                          <button 
+                            onClick={() => handleOpenPermissions(user)}
+                            className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" 
+                            title="Atur Permissions"
+                          >
+                            <Shield className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditUser(user)}
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" 
+                            title="Edit User"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteUser(user)}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" 
+                            title="Hapus User"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination */}
-          <div className="px-6 py-4 border-t border-slate-200">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
-                Menampilkan {filteredUsers.length} dari {users.length} pengguna
-              </p>
-              <div className="flex space-x-2">
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  Previous
-                </button>
-                <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md">
-                  1
-                </button>
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  2
-                </button>
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  Next
-                </button>
+          {!loading && users.length > 0 && (
+            <div className="px-6 py-4 border-t border-slate-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-600">
+                  Menampilkan {users.length} dari {pagination.total} pengguna (Halaman {pagination.current_page} dari {pagination.last_page})
+                </p>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                    disabled={pagination.current_page <= 1}
+                    className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button 
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          pagination.current_page === page
+                            ? 'bg-blue-600 text-white'
+                            : 'border border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                  
+                  <button 
+                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                    disabled={pagination.current_page >= pagination.last_page}
+                    className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Card>
 
         {/* Role Distribution */}
@@ -428,7 +555,7 @@ const ManajemenUserPage = () => {
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">{stats.admins}</h3>
+              <h3 className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.admins}</h3>
               <p className="text-sm text-slate-600">Administrator</p>
               <p className="text-xs text-slate-500 mt-1">Akses penuh sistem</p>
             </div>
@@ -437,7 +564,7 @@ const ManajemenUserPage = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserPlus className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">{stats.staff}</h3>
+              <h3 className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.staff}</h3>
               <p className="text-sm text-slate-600">Staff</p>
               <p className="text-xs text-slate-500 mt-1">Akses terbatas</p>
             </div>
@@ -446,7 +573,7 @@ const ManajemenUserPage = () => {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-gray-600" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">{stats.regularUsers}</h3>
+              <h3 className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.users}</h3>
               <p className="text-sm text-slate-600">Pengguna</p>
               <p className="text-xs text-slate-500 mt-1">Penerima bantuan</p>
             </div>
@@ -455,7 +582,10 @@ const ManajemenUserPage = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+          <div 
+            className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={handleCreateUser}
+          >
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-blue-100 mr-4">
                 <Plus className="w-6 h-6 text-blue-600" />
@@ -465,9 +595,18 @@ const ManajemenUserPage = () => {
                 <p className="text-sm text-slate-600">Daftarkan pengguna baru</p>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+          <div 
+            className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => {
+              if (users.length > 0) {
+                handleOpenPermissions(users[0]); // Open with first user as example
+              } else {
+                alert('Tidak ada user tersedia untuk mengatur permissions');
+              }
+            }}
+          >
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-green-100 mr-4">
                 <Shield className="w-6 h-6 text-green-600" />
@@ -477,9 +616,12 @@ const ManajemenUserPage = () => {
                 <p className="text-sm text-slate-600">Kelola hak akses user</p>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+          <div 
+            className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={handleOpenBulkActions}
+          >
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-purple-100 mr-4">
                 <Users className="w-6 h-6 text-purple-600" />
@@ -489,21 +631,72 @@ const ManajemenUserPage = () => {
                 <p className="text-sm text-slate-600">Aksi massal untuk users</p>
               </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Temporary Page Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-yellow-800">Halaman Sementara</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Ini adalah halaman sementara untuk menu Manajemen User. Fitur lengkap sedang dalam pengembangan.
-              </p>
-            </div>
           </div>
         </div>
+
+        {/* User Modal */}
+        <UserModal
+          isOpen={showUserModal}
+          onClose={() => setShowUserModal(false)}
+          onSave={handleSaveUser}
+          user={selectedUser}
+          title={selectedUser ? 'Edit User' : 'Tambah User'}
+        />
+        
+        {/* Permission Modal */}
+        <PermissionModal
+          isOpen={showPermissionModal}
+          onClose={() => {
+            setShowPermissionModal(false);
+            setPermissionUser(null);
+          }}
+          user={permissionUser}
+        />
+        
+        {/* Bulk Action Modal */}
+        <BulkActionModal
+          isOpen={showBulkActionModal}
+          onClose={() => setShowBulkActionModal(false)}
+          users={users}
+          onBulkAction={handleBulkAction}
+        />
+        
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-white/20">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Konfirmasi Hapus</h3>
+                  <p className="text-sm text-slate-600">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
+              </div>
+              
+              <p className="text-slate-700 mb-6">
+                Apakah Anda yakin ingin menghapus user <strong>{deleteConfirm.name}</strong>? 
+                Semua data terkait akan ikut terhapus.
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-200 font-medium"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+                >
+                  Hapus User
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedDashboardLayout>
   );
