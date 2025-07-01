@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Shield, Sparkles } from 'lucide-react';
-// Import authService jika sudah ada, atau buat mock function
+import authService from '../../services/authService';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,65 +37,67 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setErrors({});
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
 
-  // Basic validation
-  const newErrors = {};
-  if (!formData.email) newErrors.email = 'Email wajib diisi';
-  if (!formData.password) newErrors.password = 'Password wajib diisi';
-  
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    setIsLoading(false);
-    return;
-  }
+    // Basic validation
+    const newErrors = {};
+    if (!formData.email) newErrors.email = 'Email wajib diisi';
+    if (!formData.password) newErrors.password = 'Password wajib diisi';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
 
-  try {
-    // Simulate API call
-    console.log('Login attempt:', formData);
-    
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock successful login - SAVE TOKEN FIRST
-    const mockToken = 'mock-jwt-token-' + Date.now();
-    const mockUser = {
-      id: 1,
-      name: 'Admin User',
-      email: formData.email,
-      role: 'admin'
-    };
-    
-    // Save to localStorage
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    
-    console.log('Token saved:', mockToken);
-    console.log('User saved:', mockUser);
-    
-    // Show success message
-    alert('Login berhasil! Redirecting...');
-    
-    // Force navigation with replace
-    setTimeout(() => {
-      navigate('/dashboard', { replace: true });
-      // Backup force redirect jika navigate tidak bekerja
-      if (window.location.pathname !== '/dashboard') {
-        window.location.href = '/dashboard';
+    try {
+      console.log('Login attempt:', formData);
+      
+      // Call the actual API using authService
+      const response = await authService.login({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      console.log('Login successful:', response);
+      
+      // Check if user is admin
+      const user = authService.getCurrentUser();
+      if (user.role !== 'admin') {
+        setErrors({
+          general: 'Akses ditolak. Hanya admin yang dapat menggunakan panel ini.'
+        });
+        authService.logout();
+        return;
       }
-    }, 500);
-    
-  } catch (error) {
-    console.error('Login error:', error); // ✅ FIX: Gunakan error variable
-    setErrors({
-      general: 'Login gagal. Periksa email dan password Anda.'
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+      
+      // Navigate to dashboard
+      navigate('/dashboard', { replace: true });
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Handle different error types
+      if (typeof error === 'object' && error !== null) {
+        // Validation errors from backend
+        if (error.email || error.password) {
+          setErrors(error);
+        } else {
+          setErrors({
+            general: 'Login gagal. Periksa email dan password Anda.'
+          });
+        }
+      } else {
+        setErrors({
+          general: typeof error === 'string' ? error : 'Terjadi kesalahan jaringan.'
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Rest of component sama seperti sebelumnya...
   return (
