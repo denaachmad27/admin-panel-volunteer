@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Menu, 
   X, 
@@ -24,8 +24,40 @@ const DashboardLayout = ({ data }) => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
 
+  // Refs for click outside detection
+  const profileDropdownRef = useRef(null);
+  const notificationDropdownRef = useRef(null);
+
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target)) {
+        setNotificationDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Toggle functions that close other dropdowns
+  const toggleProfileDropdown = () => {
+    setProfileDropdownOpen(!profileDropdownOpen);
+    setNotificationDropdownOpen(false); // Close notification dropdown
+  };
+
+  const toggleNotificationDropdown = () => {
+    setNotificationDropdownOpen(!notificationDropdownOpen);
+    setProfileDropdownOpen(false); // Close profile dropdown
+  };
 
   // Menu items berdasarkan API Laravel yang sudah ada
   const menuItems = [
@@ -249,9 +281,9 @@ const DashboardLayout = ({ data }) => {
               </div>
 
               {/* Notifications */}
-              <div className="relative">
+              <div className="relative" ref={notificationDropdownRef}>
                 <button
-                  onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                  onClick={toggleNotificationDropdown}
                   className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <Bell className="w-5 h-5 text-slate-600" />
@@ -292,9 +324,9 @@ const DashboardLayout = ({ data }) => {
               </div>
 
               {/* Profile Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={profileDropdownRef}>
                 <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  onClick={toggleProfileDropdown}
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -304,7 +336,9 @@ const DashboardLayout = ({ data }) => {
                     <p className="text-sm font-medium text-slate-900">{userData.name || 'Admin User'}</p>
                     <p className="text-xs text-slate-500">{userData.role || 'Administrator'}</p>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    profileDropdownOpen ? 'rotate-180' : ''
+                  }`} />
                 </button>
 
                 {/* Profile Dropdown Menu */}
