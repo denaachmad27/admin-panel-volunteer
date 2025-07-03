@@ -1,56 +1,141 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Image, Save, Eye, Upload, Tag, Calendar, User, AlertCircle, Plus, X } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import { newsAPI } from '../services/api';
 
 const TambahBeritaPage = () => {
+  const navigate = useNavigate();
+  const { id } = useParams(); // Get ID from URL for edit mode
+  const isEditMode = Boolean(id);
+  
   const [formData, setFormData] = useState({
-    title: '',
+    judul: '',
     slug: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    tags: [],
-    status: 'draft',
-    publishDate: new Date().toISOString().split('T')[0],
-    featuredImage: null,
-    author: 'Admin User'
+    konten: '',
+    kategori: '',
+    is_published: false,
+    gambar_utama: null
   });
 
-  const [newTag, setNewTag] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
-  // Mock data untuk kategori
+  // Kategori sesuai dengan backend Laravel
   const categories = [
-    { id: 1, name: 'Program Bantuan', slug: 'program-bantuan' },
-    { id: 2, name: 'Kesehatan', slug: 'kesehatan' },
-    { id: 3, name: 'Pendidikan', slug: 'pendidikan' },
-    { id: 4, name: 'Pemberdayaan', slug: 'pemberdayaan' },
-    { id: 5, name: 'Laporan', slug: 'laporan' },
-    { id: 6, name: 'Pengumuman', slug: 'pengumuman' }
+    { id: 1, name: 'Pengumuman', value: 'Pengumuman' },
+    { id: 2, name: 'Kegiatan', value: 'Kegiatan' },
+    { id: 3, name: 'Bantuan', value: 'Bantuan' },
+    { id: 4, name: 'Umum', value: 'Umum' }
   ];
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Auto-generate slug from title
-    if (name === 'title') {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-      setFormData(prev => ({
-        ...prev,
-        slug: slug
-      }));
+  // Load existing news data for edit mode
+  useEffect(() => {
+    if (isEditMode && id) {
+      loadNewsData();
     }
+  }, [isEditMode, id]);
+
+  // Load news data for editing
+  const loadNewsData = async () => {
+    try {
+      setLoadingData(true);
+      console.log('Loading news data for ID:', id);
+      
+      const response = await newsAPI.getByIdForEdit(id);
+      
+      if (response.data.status === 'success') {
+        const newsData = response.data.data;
+        console.log('Loaded news data:', newsData);
+        
+        setFormData({
+          judul: newsData.judul || '',
+          slug: newsData.slug || '',
+          konten: newsData.konten || '',
+          kategori: newsData.kategori || '',
+          is_published: newsData.is_published || false,
+          gambar_utama: newsData.gambar_utama ? `http://127.0.0.1:8000/storage/${newsData.gambar_utama}` : null
+        });
+      } else {
+        alert('Gagal memuat data berita');
+        navigate('/berita-artikel');
+      }
+    } catch (err) {
+      console.error('Error loading news data:', err);
+      alert('Gagal memuat data berita: ' + (err.message || 'Unknown error'));
+      navigate('/berita-artikel');
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  // Debug authentication when component mounts
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    console.log('Token exists:', !!token);
+    console.log('Edit mode:', isEditMode, 'ID:', id);
+    
+    // Test API connection only if not in edit mode
+    if (!isEditMode) {
+      import('../services/api').then(({ default: api }) => {
+        api.get('/debug/user')
+          .then(response => {
+            console.log('Auth test successful:', response.data);
+          })
+          .catch(error => {
+            console.error('Auth test failed:', error.response?.status, error.response?.data);
+          });
+        
+        api.get('/debug/admin')
+          .then(response => {
+            console.log('Admin test successful:', response.data);
+          })
+          .catch(error => {
+            console.error('Admin test failed:', error.response?.status, error.response?.data);
+          });
+      });
+    }
+  }, [isEditMode]);
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
+    console.log('Input change:', { name, value, type, checked, newValue });
+    
+    // Handle form data update with slug generation in one go
+    setFormData(prev => {
+      console.log('Previous form data:', prev);
+      
+      const updatedData = {
+        ...prev,
+        [name]: newValue
+      };
+
+      // Auto-generate slug from title when judul changes (unless slug was manually edited)
+      if (name === 'judul' && !isSlugManuallyEdited) {
+        const slug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+        updatedData.slug = slug;
+      }
+
+      // Track if user manually edits slug
+      if (name === 'slug') {
+        setIsSlugManuallyEdited(true);
+      }
+
+      console.log('Updated form data:', updatedData);
+      return updatedData;
+    });
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -61,72 +146,167 @@ const TambahBeritaPage = () => {
     }
   };
 
-  const handleAddTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
-  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // In real app, you would upload to server
+      setImageFile(file);
       setFormData(prev => ({
         ...prev,
-        featuredImage: URL.createObjectURL(file)
+        gambar_utama: URL.createObjectURL(file)
       }));
     }
   };
 
   const validateForm = () => {
+    console.log('=== VALIDATION DEBUG ===');
+    console.log('Current form data during validation:', formData);
+    
     const newErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Judul artikel wajib diisi';
+    if (!formData.judul || !formData.judul.trim()) {
+      newErrors.judul = 'Judul artikel wajib diisi';
+      console.log('Judul validation failed:', formData.judul);
     }
 
-    if (!formData.excerpt.trim()) {
-      newErrors.excerpt = 'Ringkasan artikel wajib diisi';
+    if (!formData.konten || !formData.konten.trim()) {
+      newErrors.konten = 'Konten artikel wajib diisi';
+      console.log('Konten validation failed:', formData.konten);
     }
 
-    if (!formData.content.trim()) {
-      newErrors.content = 'Konten artikel wajib diisi';
+    if (!formData.kategori || !formData.kategori.trim()) {
+      newErrors.kategori = 'Kategori wajib dipilih';
+      console.log('Kategori validation failed:', formData.kategori);
     }
 
-    if (!formData.category) {
-      newErrors.category = 'Kategori wajib dipilih';
-    }
-
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (status) => {
+  const handleSave = async (shouldPublish = false) => {
+    console.log('=== SAVE DEBUG ===');
+    console.log('Form data before validation:', formData);
+    console.log('Should publish:', shouldPublish);
+    console.log('Is edit mode:', isEditMode);
+    console.log('ID:', id);
+    
     if (!validateForm()) {
+      console.log('Validation failed, form data:', formData);
+      console.log('Validation errors:', errors);
       return;
     }
 
-    const articleData = {
-      ...formData,
-      status,
-      updatedAt: new Date().toISOString()
-    };
-
-    console.log('Saving article:', articleData);
+    setLoading(true);
+    setErrors({});
     
-    // Simulate save success
-    alert(`Artikel berhasil ${status === 'published' ? 'dipublikasi' : 'disimpan sebagai draft'}!`);
+    try {
+      console.log(`${isEditMode ? 'Updating' : 'Creating'} article:`, {
+        judul: formData.judul,
+        slug: formData.slug,
+        konten: formData.konten,
+        kategori: formData.kategori,
+        is_published: shouldPublish,
+        hasImage: !!imageFile,
+        isEditMode,
+        id
+      });
+
+      // Ensure we have valid data before creating FormData
+      const judulValue = formData.judul?.trim() || '';
+      const kontenValue = formData.konten?.trim() || '';
+      const kategoriValue = formData.kategori?.trim() || '';
+      const slugValue = formData.slug?.trim() || '';
+
+      console.log('Pre-FormData values:', {
+        judul: judulValue,
+        konten: kontenValue.substring(0, 50) + '...',
+        kategori: kategoriValue,
+        slug: slugValue
+      });
+
+      // Double check data before sending
+      if (!judulValue) {
+        alert('Judul tidak boleh kosong!');
+        setLoading(false);
+        return;
+      }
+      if (!kontenValue) {
+        alert('Konten tidak boleh kosong!');
+        setLoading(false);
+        return;
+      }
+      if (!kategoriValue) {
+        alert('Kategori harus dipilih!');
+        setLoading(false);
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('judul', judulValue);
+      if (slugValue) {
+        formDataToSend.append('slug', slugValue);
+      }
+      formDataToSend.append('konten', kontenValue);
+      formDataToSend.append('kategori', kategoriValue);
+      formDataToSend.append('is_published', shouldPublish ? '1' : '0');
+      
+      // Only append image if new file is selected
+      if (imageFile) {
+        formDataToSend.append('gambar_utama', imageFile);
+      }
+
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, typeof value === 'string' ? value.substring(0, 50) + '...' : value);
+      }
+
+      let response;
+      if (isEditMode) {
+        response = await newsAPI.update(id, formDataToSend);
+      } else {
+        response = await newsAPI.create(formDataToSend);
+      }
+      
+      console.log('API Response:', response.data);
+      
+      if (response.data.status === 'success') {
+        const action = isEditMode ? 'diperbarui' : (shouldPublish ? 'dipublikasi' : 'disimpan sebagai draft');
+        alert(`Artikel berhasil ${action}!`);
+        navigate('/berita-artikel');
+      } else {
+        console.error('API returned error status:', response.data);
+        alert(`Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} artikel: ` + (response.data.message || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error(`Error ${isEditMode ? 'updating' : 'saving'} article:`, err);
+      console.error('Error response:', err.response);
+      
+      if (err.response?.status === 401) {
+        alert('Sesi login telah berakhir. Silakan login kembali.');
+        navigate('/login');
+      } else if (err.response?.status === 422) {
+        // Validation errors
+        const validationErrors = err.response.data.errors || {};
+        setErrors(validationErrors);
+        console.error('422 Validation errors:', validationErrors);
+        console.error('Full error response:', err.response.data);
+        
+        // Show detailed validation errors
+        const errorMessages = Object.entries(validationErrors)
+          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+          .join('\n');
+        
+        alert(`Terdapat kesalahan validasi:\n\n${errorMessages}`);
+      } else if (err.response?.status === 500) {
+        alert('Terjadi kesalahan server. Periksa log server untuk detail.');
+      } else {
+        alert(err.response?.data?.message || err.message || `Gagal ${isEditMode ? 'memperbarui' : 'menyimpan'} artikel`);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePreview = () => {
@@ -138,7 +318,7 @@ const TambahBeritaPage = () => {
       <ProtectedDashboardLayout
         currentPage="news"
         pageTitle="Preview Artikel"
-        breadcrumbs={['Berita & Artikel', 'Tambah Berita', 'Preview']}
+        breadcrumbs={['Berita & Artikel', isEditMode ? 'Edit Berita' : 'Tambah Berita', 'Preview']}
       >
         <div className="space-y-6">
           {/* Preview Header */}
@@ -157,11 +337,11 @@ const TambahBeritaPage = () => {
           <Card className="max-w-4xl mx-auto">
             <article className="p-8">
               {/* Featured Image */}
-              {formData.featuredImage && (
+              {formData.gambar_utama && (
                 <div className="mb-8">
                   <img 
-                    src={formData.featuredImage} 
-                    alt={formData.title}
+                    src={formData.gambar_utama} 
+                    alt={formData.judul}
                     className="w-full h-64 object-cover rounded-lg"
                   />
                 </div>
@@ -171,34 +351,21 @@ const TambahBeritaPage = () => {
               <header className="mb-8">
                 <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {categories.find(cat => cat.slug === formData.category)?.name || 'Uncategorized'}
+                    {categories.find(cat => cat.value === formData.kategori)?.name || 'Uncategorized'}
                   </span>
                   <span>•</span>
-                  <span>{new Date(formData.publishDate).toLocaleDateString('id-ID')}</span>
+                  <span>{new Date().toLocaleDateString('id-ID')}</span>
                   <span>•</span>
-                  <span>Oleh {formData.author}</span>
+                  <span>Admin</span>
                 </div>
                 
-                <h1 className="text-3xl font-bold text-slate-900 mb-4">{formData.title}</h1>
-                
-                <p className="text-lg text-slate-600 leading-relaxed">{formData.excerpt}</p>
-
-                {/* Tags */}
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {formData.tags.map((tag, index) => (
-                      <span key={index} className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-sm">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <h1 className="text-3xl font-bold text-slate-900 mb-4">{formData.judul}</h1>
               </header>
 
               {/* Article Content */}
               <div className="prose prose-lg max-w-none">
                 <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">
-                  {formData.content}
+                  {formData.konten}
                 </div>
               </div>
             </article>
@@ -211,26 +378,39 @@ const TambahBeritaPage = () => {
   return (
     <ProtectedDashboardLayout
       currentPage="news"
-      pageTitle="Tambah Berita"
-      breadcrumbs={['Berita & Artikel', 'Tambah Berita']}
+      pageTitle={isEditMode ? "Edit Berita" : "Tambah Berita"}
+      breadcrumbs={['Berita & Artikel', isEditMode ? 'Edit Berita' : 'Tambah Berita']}
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-6 text-white">
+        <div className={`bg-gradient-to-r ${isEditMode ? 'from-blue-500 to-indigo-600' : 'from-green-500 to-emerald-600'} rounded-lg p-6 text-white`}>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Tambah Berita & Artikel</h1>
-              <p className="text-green-100">Buat dan publikasikan artikel atau berita baru</p>
+              <h1 className="text-2xl font-bold mb-2">{isEditMode ? 'Edit Berita & Artikel' : 'Tambah Berita & Artikel'}</h1>
+              <p className={`${isEditMode ? 'text-blue-100' : 'text-green-100'}`}>
+                {isEditMode ? 'Perbarui konten artikel atau berita' : 'Buat dan publikasikan artikel atau berita baru'}
+              </p>
             </div>
             <div className="hidden md:block">
-              <FileText className="w-16 h-16 text-green-200" />
+              <FileText className={`w-16 h-16 ${isEditMode ? 'text-blue-200' : 'text-green-200'}`} />
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* Loading State */}
+        {loadingData && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-slate-600">Memuat data berita...</p>
+            </div>
+          </div>
+        )}
+
+        {!loadingData && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Form */}
+            <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
             <Card title="Informasi Dasar" subtitle="Isi detail artikel yang akan dipublikasi">
               <div className="space-y-4">
@@ -241,24 +421,44 @@ const TambahBeritaPage = () => {
                   </label>
                   <input
                     type="text"
-                    name="title"
-                    value={formData.title}
+                    name="judul"
+                    value={formData.judul}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                      errors.title ? 'border-red-300' : 'border-slate-300'
+                      errors.judul ? 'border-red-300' : 'border-slate-300'
                     }`}
                     placeholder="Masukkan judul artikel yang menarik..."
                   />
-                  {errors.title && (
-                    <p className="text-red-600 text-sm mt-1">{errors.title}</p>
+                  {errors.judul && (
+                    <p className="text-red-600 text-sm mt-1">{errors.judul}</p>
                   )}
                 </div>
 
                 {/* Slug */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    URL Slug
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-slate-700">
+                      URL Slug
+                    </label>
+                    {isSlugManuallyEdited && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSlugManuallyEdited(false);
+                          const slug = formData.judul
+                            .toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/-+/g, '-')
+                            .trim();
+                          setFormData(prev => ({ ...prev, slug }));
+                        }}
+                        className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+                      >
+                        Auto-generate
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="text"
                     name="slug"
@@ -267,30 +467,18 @@ const TambahBeritaPage = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="url-friendly-slug"
                   />
-                  <p className="text-slate-500 text-sm mt-1">
-                    URL: /news/{formData.slug || 'url-artikel'}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-slate-500 text-sm">
+                      URL: /news/{formData.slug || 'url-artikel'}
+                    </p>
+                    {!isSlugManuallyEdited && (
+                      <p className="text-green-600 text-xs">
+                        Auto-generated
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Excerpt */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Ringkasan Artikel *
-                  </label>
-                  <textarea
-                    name="excerpt"
-                    value={formData.excerpt}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                      errors.excerpt ? 'border-red-300' : 'border-slate-300'
-                    }`}
-                    placeholder="Tulis ringkasan singkat artikel ini..."
-                  />
-                  {errors.excerpt && (
-                    <p className="text-red-600 text-sm mt-1">{errors.excerpt}</p>
-                  )}
-                </div>
               </div>
             </Card>
 
@@ -298,12 +486,12 @@ const TambahBeritaPage = () => {
             <Card title="Konten Artikel" subtitle="Tulis konten lengkap artikel">
               <div>
                 <textarea
-                  name="content"
-                  value={formData.content}
+                  name="konten"
+                  value={formData.konten}
                   onChange={handleInputChange}
                   rows={15}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                    errors.content ? 'border-red-300' : 'border-slate-300'
+                    errors.konten ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Tulis konten artikel lengkap di sini...
 
@@ -322,11 +510,11 @@ Manfaat program ini antara lain:
 - Memberikan akses pendidikan yang lebih baik
 - Menciptakan lapangan kerja baru"
                 />
-                {errors.content && (
-                  <p className="text-red-600 text-sm mt-1">{errors.content}</p>
+                {errors.konten && (
+                  <p className="text-red-600 text-sm mt-1">{errors.konten}</p>
                 )}
                 <p className="text-slate-500 text-sm mt-2">
-                  {formData.content.length} karakter
+                  {formData.konten.length} karakter
                 </p>
               </div>
             </Card>
@@ -334,15 +522,18 @@ Manfaat program ini antara lain:
             {/* Featured Image */}
             <Card title="Gambar Utama" subtitle="Upload gambar untuk artikel">
               <div className="space-y-4">
-                {formData.featuredImage ? (
+                {formData.gambar_utama ? (
                   <div className="relative">
                     <img 
-                      src={formData.featuredImage} 
+                      src={formData.gambar_utama} 
                       alt="Preview"
                       className="w-full h-48 object-cover rounded-lg"
                     />
                     <button
-                      onClick={() => setFormData(prev => ({ ...prev, featuredImage: null }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, gambar_utama: null }));
+                        setImageFile(null);
+                      }}
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
                     >
                       <X className="w-4 h-4" />
@@ -371,51 +562,28 @@ Manfaat program ini antara lain:
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Publish Options */}
-            <Card title="Publikasi" subtitle="Atur status dan tanggal publikasi">
+            <Card title="Publikasi" subtitle="Atur status publikasi">
               <div className="space-y-4">
                 {/* Status */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Status
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="is_published"
+                      checked={formData.is_published}
+                      onChange={handleInputChange}
+                      className="rounded border-slate-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">
+                      Publikasikan langsung
+                    </span>
                   </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="scheduled">Scheduled</option>
-                  </select>
-                </div>
-
-                {/* Publish Date */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Tanggal Publikasi
-                  </label>
-                  <input
-                    type="date"
-                    name="publishDate"
-                    value={formData.publishDate}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-
-                {/* Author */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Penulis
-                  </label>
-                  <input
-                    type="text"
-                    name="author"
-                    value={formData.author}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {formData.is_published 
+                      ? 'Artikel akan langsung dipublikasikan'
+                      : 'Artikel disimpan sebagai draft'
+                    }
+                  </p>
                 </div>
               </div>
             </Card>
@@ -424,62 +592,22 @@ Manfaat program ini antara lain:
             <Card title="Kategori" subtitle="Pilih kategori artikel">
               <div>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="kategori"
+                  value={formData.kategori}
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                    errors.category ? 'border-red-300' : 'border-slate-300'
+                    errors.kategori ? 'border-red-300' : 'border-slate-300'
                   }`}
                 >
                   <option value="">Pilih Kategori</option>
                   {categories.map(category => (
-                    <option key={category.id} value={category.slug}>
+                    <option key={category.id} value={category.value}>
                       {category.name}
                     </option>
                   ))}
                 </select>
-                {errors.category && (
-                  <p className="text-red-600 text-sm mt-1">{errors.category}</p>
-                )}
-              </div>
-            </Card>
-
-            {/* Tags */}
-            <Card title="Tags" subtitle="Tambahkan tag untuk artikel">
-              <div className="space-y-3">
-                {/* Add Tag */}
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Tambah tag..."
-                  />
-                  <button
-                    onClick={handleAddTag}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Tags List */}
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm flex items-center">
-                        #{tag}
-                        <button
-                          onClick={() => handleRemoveTag(tag)}
-                          className="ml-1 text-green-600 hover:text-green-800"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+                {errors.kategori && (
+                  <p className="text-red-600 text-sm mt-1">{errors.kategori}</p>
                 )}
               </div>
             </Card>
@@ -495,32 +623,46 @@ Manfaat program ini antara lain:
               </button>
               
               <button
-                onClick={() => handleSave('draft')}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                onClick={() => {
+                  console.log('Save as draft clicked');
+                  handleSave(false);
+                }}
+                disabled={loading}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Simpan Draft
+                {loading ? 'Menyimpan...' : 'Simpan Draft'}
               </button>
               
               <button
-                onClick={() => handleSave('published')}
-                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                onClick={() => {
+                  console.log('Publish clicked');
+                  handleSave(true);
+                }}
+                disabled={loading}
+                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Publikasikan
+                {loading ? 'Menyimpan...' : 'Publikasikan'}
               </button>
             </div>
           </div>
         </div>
+        )}
 
-        {/* Temporary Page Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        {/* Status Notice */}
+        <div className={`${isEditMode ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'} border rounded-lg p-4`}>
           <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
+            <FileText className={`w-5 h-5 ${isEditMode ? 'text-blue-600' : 'text-green-600'} mr-3`} />
             <div>
-              <p className="text-sm font-medium text-yellow-800">Halaman Sementara</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Ini adalah halaman sementara untuk submenu Tambah Berita. Fitur lengkap sedang dalam pengembangan.
+              <p className={`text-sm font-medium ${isEditMode ? 'text-blue-800' : 'text-green-800'}`}>
+                {isEditMode ? 'Form Edit Berita Terintegrasi' : 'Form Tambah Berita Terintegrasi'}
+              </p>
+              <p className={`text-sm ${isEditMode ? 'text-blue-700' : 'text-green-700'} mt-1`}>
+                {isEditMode 
+                  ? 'Form ini sudah terintegrasi dengan API Laravel backend untuk mengedit berita dan artikel.'
+                  : 'Form ini sudah terintegrasi dengan API Laravel backend untuk menambah berita dan artikel baru.'
+                }
               </p>
             </div>
           </div>

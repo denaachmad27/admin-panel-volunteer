@@ -48,11 +48,11 @@ const PROTECTED_MENU_ITEMS = [
   {
     title: 'Berita & Artikel',
     icon: FileText,
-    path: '/news',
+    path: '/berita-artikel',
     id: 'news',
     submenu: [
-      { title: 'Daftar Berita', path: '/news' },
-      { title: 'Tambah Berita', path: '/news/create' },
+      { title: 'Daftar Berita', path: '/berita-artikel' },
+      { title: 'Tambah Berita', path: '/tambah-berita' },
       { title: 'Kategori', path: '/news/categories' }
     ]
   },

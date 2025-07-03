@@ -86,10 +86,10 @@ const DashboardLayout = ({ data }) => {
     {
       title: 'Berita & Artikel',
       icon: FileText,
-      path: '/news',
+      path: '/berita-artikel',
       submenu: [
-        { title: 'Daftar Berita', path: '/news' },
-        { title: 'Tambah Berita', path: '/news/create' },
+        { title: 'Daftar Berita', path: '/berita-artikel' },
+        { title: 'Tambah Berita', path: '/tambah-berita' },
         { title: 'Kategori', path: '/news/categories' }
       ]
     },

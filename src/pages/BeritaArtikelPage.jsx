@@ -1,101 +1,131 @@
-import React, { useState } from 'react';
-import { FileText, Plus, Edit3, Eye, Trash2, Calendar, User, Tag, Search, Filter, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Plus, Edit3, Eye, Trash2, Calendar, User, Tag, Search, Filter, AlertCircle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import { newsAPI } from '../services/api';
 
 const BeritaArtikelPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Mock data untuk berita
-  const articles = [
-    {
-      id: 1,
-      title: 'Program Bantuan Pangan Tahap 2 Dimulai',
-      excerpt: 'Pemerintah meluncurkan program bantuan pangan tahap 2 untuk membantu keluarga kurang mampu di masa pandemi...',
-      author: 'Admin Sosial',
-      publishDate: '2024-01-15',
-      status: 'published',
-      category: 'Program Bantuan',
-      views: 1248,
-      image: null
-    },
-    {
-      id: 2,
-      title: 'Tips Menjaga Kesehatan di Musim Hujan',
-      excerpt: 'Musim hujan telah tiba, berikut adalah tips untuk menjaga kesehatan keluarga agar terhindar dari penyakit...',
-      author: 'Dr. Siti Nurhaliza',
-      publishDate: '2024-01-12',
-      status: 'published',
-      category: 'Kesehatan',
-      views: 892,
-      image: null
-    },
-    {
-      id: 3,
-      title: 'Pendaftaran Beasiswa Pendidikan 2024',
-      excerpt: 'Program beasiswa pendidikan untuk siswa berprestasi dari keluarga kurang mampu kini telah dibuka...',
-      author: 'Admin Pendidikan',
-      publishDate: '2024-01-10',
-      status: 'draft',
-      category: 'Pendidikan',
-      views: 0,
-      image: null
-    },
-    {
-      id: 4,
-      title: 'Pelatihan Keterampilan untuk Ibu Rumah Tangga',
-      excerpt: 'Dinas Sosial mengadakan pelatihan keterampilan gratis untuk ibu rumah tangga dalam rangka pemberdayaan ekonomi...',
-      author: 'Tim Pemberdayaan',
-      publishDate: '2024-01-08',
-      status: 'published',
-      category: 'Pemberdayaan',
-      views: 567,
-      image: null
-    },
-    {
-      id: 5,
-      title: 'Laporan Penyaluran Bantuan Bulan Desember',
-      excerpt: 'Berikut adalah laporan lengkap penyaluran bantuan sosial yang telah dilaksanakan pada bulan Desember 2023...',
-      author: 'Admin Laporan',
-      publishDate: '2024-01-05',
-      status: 'published',
-      category: 'Laporan',
-      views: 334,
-      image: null
-    }
-  ];
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    published: 0,
+    draft: 0,
+    totalViews: 0
+  });
 
   const categories = [
-    'Program Bantuan',
-    'Kesehatan', 
-    'Pendidikan',
-    'Pemberdayaan',
-    'Laporan',
-    'Pengumuman'
+    'Pengumuman',
+    'Kegiatan', 
+    'Bantuan',
+    'Umum'
   ];
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      published: { bg: 'bg-green-100', text: 'text-green-800', label: 'Published' },
-      draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Draft' },
-      archived: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Archived' }
-    };
-    
-    const config = statusConfig[status] || statusConfig.draft;
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-        {config.label}
-      </span>
-    );
+  // Fetch news data
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const params = {};
+      if (activeTab !== 'all') {
+        params.is_published = activeTab === 'published';
+      }
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+      
+      const response = await newsAPI.getAll(params);
+      
+      if (response.data.status === 'success') {
+        const newsData = response.data.data.data || [];
+        setArticles(newsData);
+        
+        // Calculate stats
+        const total = newsData.length;
+        const published = newsData.filter(article => article.is_published).length;
+        const draft = total - published;
+        const totalViews = newsData.reduce((sum, article) => sum + (article.views || 0), 0);
+        
+        setStats({ total, published, draft, totalViews });
+      } else {
+        setError('Gagal mengambil data berita');
+      }
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      setError(err.response?.data?.message || 'Gagal mengambil data berita');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'all' || article.status === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  // Handle delete news
+  const handleDelete = async (id) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+      return;
+    }
+    
+    try {
+      await newsAPI.delete(id);
+      await fetchNews(); // Refresh data
+      alert('Berita berhasil dihapus');
+    } catch (err) {
+      console.error('Error deleting news:', err);
+      alert(err.response?.data?.message || 'Gagal menghapus berita');
+    }
+  };
+
+  // Handle toggle publish
+  const handleTogglePublish = async (id) => {
+    try {
+      await newsAPI.togglePublish(id);
+      await fetchNews(); // Refresh data
+      alert('Status publikasi berhasil diubah');
+    } catch (err) {
+      console.error('Error toggling publish:', err);
+      alert(err.response?.data?.message || 'Gagal mengubah status publikasi');
+    }
+  };
+
+  // Load data on component mount and when filters change
+  useEffect(() => {
+    fetchNews();
+  }, [activeTab, searchQuery]);
+
+  const getStatusBadge = (isPublished) => {
+    if (isPublished) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Published
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          Draft
+        </span>
+      );
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getExcerpt = (content) => {
+    if (!content) return '';
+    return content.length > 150 ? content.substring(0, 150) + '...' : content;
+  };
 
   return (
     <ProtectedDashboardLayout
@@ -125,7 +155,7 @@ const BeritaArtikelPage = () => {
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">156</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 <p className="text-sm text-slate-600">Total Artikel</p>
               </div>
             </div>
@@ -137,7 +167,7 @@ const BeritaArtikelPage = () => {
                 <Eye className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">12.4K</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.totalViews}</p>
                 <p className="text-sm text-slate-600">Total Views</p>
               </div>
             </div>
@@ -149,7 +179,7 @@ const BeritaArtikelPage = () => {
                 <Edit3 className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">8</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.draft}</p>
                 <p className="text-sm text-slate-600">Draft</p>
               </div>
             </div>
@@ -161,8 +191,8 @@ const BeritaArtikelPage = () => {
                 <Calendar className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">24</p>
-                <p className="text-sm text-slate-600">Bulan Ini</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.published}</p>
+                <p className="text-sm text-slate-600">Published</p>
               </div>
             </div>
           </Card>
@@ -176,10 +206,23 @@ const BeritaArtikelPage = () => {
               <h2 className="text-lg font-semibold text-slate-900">Daftar Artikel</h2>
               <p className="text-sm text-slate-600 mt-1">Kelola semua artikel dan berita</p>
             </div>
-            <button className="mt-4 sm:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Artikel
-            </button>
+            <div className="flex space-x-2 mt-4 sm:mt-0">
+              <button 
+                onClick={() => navigate('/tambah-berita')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Artikel
+              </button>
+              <button 
+                onClick={fetchNews}
+                disabled={loading}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Filters and Search */}
@@ -220,86 +263,115 @@ const BeritaArtikelPage = () => {
 
           {/* Articles List */}
           <div className="divide-y divide-slate-200">
-            {filteredArticles.map((article) => (
-              <div key={article.id} className="p-6 hover:bg-slate-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-medium text-slate-900 hover:text-blue-600 cursor-pointer">
-                        {article.title}
-                      </h3>
-                      {getStatusBadge(article.status)}
-                    </div>
-                    
-                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                      {article.excerpt}
-                    </p>
-                    
-                    <div className="flex items-center space-x-6 text-xs text-slate-500">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 mr-1" />
-                        {article.author}
+            {loading ? (
+              <div className="p-6 text-center">
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
+                <p className="text-slate-600">Memuat data berita...</p>
+              </div>
+            ) : error ? (
+              <div className="p-6 text-center">
+                <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+                <p className="text-red-600 mb-2">{error}</p>
+                <button 
+                  onClick={fetchNews}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Coba Lagi
+                </button>
+              </div>
+            ) : articles.length === 0 ? (
+              <div className="p-6 text-center">
+                <FileText className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-slate-600">Belum ada artikel</p>
+              </div>
+            ) : (
+              articles.map((article) => (
+                <div key={article.id} className="p-6 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-lg font-medium text-slate-900 hover:text-blue-600 cursor-pointer">
+                          {article.judul}
+                        </h3>
+                        {getStatusBadge(article.is_published)}
                       </div>
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {new Date(article.publishDate).toLocaleDateString('id-ID')}
-                      </div>
-                      <div className="flex items-center">
-                        <Tag className="w-4 h-4 mr-1" />
-                        {article.category}
-                      </div>
-                      {article.status === 'published' && (
+                      
+                      <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                        {getExcerpt(article.konten)}
+                      </p>
+                      
+                      <div className="flex items-center space-x-6 text-xs text-slate-500">
                         <div className="flex items-center">
-                          <Eye className="w-4 h-4 mr-1" />
-                          {article.views} views
+                          <User className="w-4 h-4 mr-1" />
+                          {article.author?.name || 'Admin'}
                         </div>
-                      )}
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {formatDate(article.published_at || article.created_at)}
+                        </div>
+                        <div className="flex items-center">
+                          <Tag className="w-4 h-4 mr-1" />
+                          {article.kategori}
+                        </div>
+                        {article.is_published && (
+                          <div className="flex items-center">
+                            <Eye className="w-4 h-4 mr-1" />
+                            {article.views || 0} views
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button 
+                        onClick={() => handleTogglePublish(article.id)}
+                        className={`p-2 hover:bg-blue-50 rounded-lg transition-colors ${
+                          article.is_published ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'
+                        }`}
+                        title={article.is_published ? 'Unpublish' : 'Publish'}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => navigate(`/edit-berita/${article.id}`)}
+                        className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(article.id)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Hapus"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Pagination */}
-          <div className="px-6 py-4 border-t border-slate-200">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
-                Menampilkan {filteredArticles.length} dari {articles.length} artikel
-              </p>
-              <div className="flex space-x-2">
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  Previous
-                </button>
-                <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md">
-                  1
-                </button>
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  2
-                </button>
-                <button className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50">
-                  Next
-                </button>
+          {!loading && !error && articles.length > 0 && (
+            <div className="px-6 py-4 border-t border-slate-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-600">
+                  Menampilkan {articles.length} artikel
+                </p>
+                {/* Pagination will be implemented when backend supports it */}
               </div>
             </div>
-          </div>
+          )}
         </Card>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+          <Card 
+            className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate('/tambah-berita')}
+          >
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-blue-100 mr-4">
                 <Plus className="w-6 h-6 text-blue-600" />
@@ -338,16 +410,14 @@ const BeritaArtikelPage = () => {
 
         {/* Categories Overview */}
         <Card title="Kategori Artikel" subtitle="Distribusi artikel berdasarkan kategori">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category, index) => {
-              const articleCount = articles.filter(article => article.category === category).length;
+              const articleCount = articles.filter(article => article.kategori === category).length;
               const colors = [
                 'bg-blue-100 text-blue-800',
                 'bg-green-100 text-green-800', 
                 'bg-purple-100 text-purple-800',
-                'bg-yellow-100 text-yellow-800',
-                'bg-red-100 text-red-800',
-                'bg-indigo-100 text-indigo-800'
+                'bg-yellow-100 text-yellow-800'
               ];
               
               return (
@@ -367,14 +437,14 @@ const BeritaArtikelPage = () => {
           </div>
         </Card>
 
-        {/* Temporary Page Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        {/* Status Notice */}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
+            <FileText className="w-5 h-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-yellow-800">Halaman Sementara</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Ini adalah halaman sementara untuk menu Berita & Artikel. Fitur lengkap sedang dalam pengembangan.
+              <p className="text-sm font-medium text-green-800">Berita & Artikel Terintegrasi</p>
+              <p className="text-sm text-green-700 mt-1">
+                Halaman ini sudah terintegrasi dengan API Laravel backend untuk manajemen berita dan artikel.
               </p>
             </div>
           </div>

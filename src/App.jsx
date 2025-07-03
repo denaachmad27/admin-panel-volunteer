@@ -84,7 +84,7 @@ function App() {
             
             {/* Berita & Artikel Route */}
             <Route 
-              path="/news" 
+              path="/berita-artikel" 
               element={
                 <ProtectedRoute>
                   <ErrorBoundary>
@@ -92,6 +92,12 @@ function App() {
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 
+            />
+            
+            {/* Alternative path */}
+            <Route 
+              path="/news" 
+              element={<Navigate to="/berita-artikel" replace />} 
             />
             
             {/* Pengaduan Route */}
@@ -144,7 +150,7 @@ function App() {
             
             {/* Tambah Berita Route */}
             <Route 
-              path="/news/create" 
+              path="/tambah-berita" 
               element={
                 <ProtectedRoute>
                   <ErrorBoundary>
@@ -152,6 +158,28 @@ function App() {
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 
+            />
+            
+            {/* Edit Berita Route */}
+            <Route 
+              path="/edit-berita/:id" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <TambahBeritaPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Alternative paths for consistency */}
+            <Route 
+              path="/news/create" 
+              element={<Navigate to="/tambah-berita" replace />} 
+            />
+            <Route 
+              path="/news/:id/edit" 
+              element={<Navigate to="/edit-berita/:id" replace />} 
             />
             
             {/* Kategori Route */}
