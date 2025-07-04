@@ -390,7 +390,7 @@ const AdminProfile = () => {
               <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden">
                 {photoPreview || adminData?.profile_photo ? (
                   <img
-                    src={photoPreview || `http://localhost:8000/storage/${adminData.profile_photo}`}
+                    src={photoPreview || `http://127.0.0.1:8000/storage/${adminData.profile_photo}`}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

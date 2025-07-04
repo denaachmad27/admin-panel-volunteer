@@ -32,7 +32,10 @@ const BeritaArtikelPage = () => {
       setLoading(true);
       setError(null);
       
-      const params = {};
+      const params = {
+        sort_by: 'created_at',
+        sort_order: 'desc'
+      };
       if (activeTab !== 'all') {
         params.is_published = activeTab === 'published';
       }
@@ -288,37 +291,62 @@ const BeritaArtikelPage = () => {
               articles.map((article) => (
                 <div key={article.id} className="p-6 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-medium text-slate-900 hover:text-blue-600 cursor-pointer">
-                          {article.judul}
-                        </h3>
-                        {getStatusBadge(article.is_published)}
+                    <div className="flex items-start space-x-4 flex-1 min-w-0">
+                      {/* Thumbnail Image */}
+                      <div className="flex-shrink-0">
+                        {article.gambar_utama ? (
+                          <img
+                            src={`http://127.0.0.1:8000/storage/${article.gambar_utama}`}
+                            alt={article.judul}
+                            className="w-20 h-20 object-cover rounded-lg border border-slate-200"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`w-20 h-20 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center ${
+                            article.gambar_utama ? 'hidden' : 'flex'
+                          }`}
+                        >
+                          <FileText className="w-8 h-8 text-slate-400" />
+                        </div>
                       </div>
                       
-                      <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                        {getExcerpt(article.konten)}
-                      </p>
-                      
-                      <div className="flex items-center space-x-6 text-xs text-slate-500">
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-1" />
-                          {article.author?.name || 'Admin'}
+                      {/* Article Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-medium text-slate-900 hover:text-blue-600 cursor-pointer">
+                            {article.judul}
+                          </h3>
+                          {getStatusBadge(article.is_published)}
                         </div>
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {formatDate(article.published_at || article.created_at)}
-                        </div>
-                        <div className="flex items-center">
-                          <Tag className="w-4 h-4 mr-1" />
-                          {article.kategori}
-                        </div>
-                        {article.is_published && (
+                        
+                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                          {getExcerpt(article.konten)}
+                        </p>
+                        
+                        <div className="flex items-center space-x-6 text-xs text-slate-500">
                           <div className="flex items-center">
-                            <Eye className="w-4 h-4 mr-1" />
-                            {article.views || 0} views
+                            <User className="w-4 h-4 mr-1" />
+                            {article.author?.name || 'Admin'}
                           </div>
-                        )}
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            {formatDate(article.published_at || article.created_at)}
+                          </div>
+                          <div className="flex items-center">
+                            <Tag className="w-4 h-4 mr-1" />
+                            {article.kategori}
+                          </div>
+                          {article.is_published && (
+                            <div className="flex items-center">
+                              <Eye className="w-4 h-4 mr-1" />
+                              {article.views || 0} views
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     
