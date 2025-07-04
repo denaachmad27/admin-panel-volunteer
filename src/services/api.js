@@ -111,4 +111,84 @@ export const newsAPI = {
   },
 }
 
+// Bantuan Sosial API Services
+export const bantuanSosialAPI = {
+  // Get all bantuan sosial for admin
+  getAll: (params = {}) => {
+    return api.get('/admin/bantuan-sosial', { params })
+  },
+
+  // Get single bantuan sosial by ID
+  getById: (id) => {
+    return api.get(`/admin/bantuan-sosial/${id}`)
+  },
+
+  // Create new bantuan sosial
+  create: (data) => {
+    return api.post('/admin/bantuan-sosial', data)
+  },
+
+  // Update bantuan sosial
+  update: (id, data) => {
+    return api.put(`/admin/bantuan-sosial/${id}`, data)
+  },
+
+  // Delete bantuan sosial
+  delete: (id) => {
+    return api.delete(`/admin/bantuan-sosial/${id}`)
+  },
+
+  // Get public bantuan sosial list
+  getPublic: (params = {}) => {
+    return api.get('/bantuan-sosial', { params })
+  },
+
+  // Get public bantuan sosial by ID
+  getPublicById: (id) => {
+    return api.get(`/bantuan-sosial/${id}`)
+  },
+}
+
+// Pendaftaran API Services
+export const pendaftaranAPI = {
+  // Get all pendaftaran for admin
+  getAll: (params = {}) => {
+    return api.get('/admin/pendaftaran', { params })
+  },
+
+  // Get single pendaftaran by ID
+  getById: (id) => {
+    return api.get(`/admin/pendaftaran/${id}`)
+  },
+
+  // Update pendaftaran status
+  updateStatus: (id, status, notes = '') => {
+    return api.put(`/admin/pendaftaran/${id}/status`, { 
+      status, 
+      catatan_admin: notes,
+      reviewed_at: new Date().toISOString() 
+    })
+  },
+
+  // Delete pendaftaran
+  delete: (id) => {
+    return api.delete(`/admin/pendaftaran/${id}`)
+  },
+
+  // Get pendaftaran statistics
+  getStatistics: () => {
+    return api.get('/admin/pendaftaran/statistics')
+  },
+
+  // Bulk update status
+  bulkUpdateStatus: (ids, status, notes = '') => {
+    return api.post('/admin/pendaftaran/bulk-status', {
+      ids,
+      status,
+      catatan_admin: notes,
+      reviewed_at: new Date().toISOString()
+    })
+  }
+}
+
 export default api

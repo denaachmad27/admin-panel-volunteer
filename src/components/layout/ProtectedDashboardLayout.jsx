@@ -37,10 +37,11 @@ const PROTECTED_MENU_ITEMS = [
   {
     title: 'Bantuan Sosial',
     icon: Heart,
-    path: '/bantuan-sosial',
+    path: '/daftar-bantuan',
     id: 'bantuan',
     submenu: [
-      { title: 'Daftar Program', path: '/bantuan-sosial' },
+      { title: 'Daftar Program', path: '/daftar-bantuan' },
+      { title: 'Tambah Program', path: '/tambah-bantuan' },
       { title: 'Pendaftaran', path: '/pendaftaran' },
       { title: 'Verifikasi', path: '/pendaftaran/verify' }
     ]

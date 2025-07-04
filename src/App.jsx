@@ -20,6 +20,10 @@ import ManajemenUserPage from './pages/ManajemenUserPage';
 import PendaftaranPage from './pages/PendaftaranPage';
 import VerifikasiPage from './pages/VerifikasiPage';
 import TambahBeritaPage from './pages/TambahBeritaPage';
+import TambahBantuanPage from './pages/TambahBantuanPage';
+import EditBantuanPage from './pages/EditBantuanPage';
+import DetailBantuanPage from './pages/DetailBantuanPage';
+import DetailPendaftaranPage from './pages/DetailPendaftaranPage';
 import KategoriPage from './pages/KategoriPage';
 import PengaturanPage from './pages/PengaturanPage';
 
@@ -70,13 +74,53 @@ function App() {
               } 
             />
             
-            {/* Bantuan Sosial Route */}
+            {/* Bantuan Sosial Routes */}
             <Route 
               path="/bantuan-sosial" 
               element={
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <BantuanSosialPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/daftar-bantuan" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <BantuanSosialPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/tambah-bantuan" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <TambahBantuanPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/edit-bantuan/:id" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <EditBantuanPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bantuan/:id" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <DetailBantuanPage />
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 
@@ -124,13 +168,23 @@ function App() {
               } 
             />
             
-            {/* Pendaftaran Route */}
+            {/* Pendaftaran Routes */}
             <Route 
               path="/pendaftaran" 
               element={
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <PendaftaranPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/pendaftaran/:id" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <DetailPendaftaranPage />
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 
