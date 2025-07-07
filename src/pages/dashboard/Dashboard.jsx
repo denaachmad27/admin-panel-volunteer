@@ -1,109 +1,110 @@
-import React from 'react';
-import { Users, Heart, MessageSquare, FileText, TrendingUp, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Heart, MessageSquare, FileText, TrendingUp, Calendar, RefreshCw, AlertCircle } from 'lucide-react';
 
 // 🔧 FIXED: Import ProtectedDashboardLayout (BUKAN DashboardLayout)
 import ProtectedDashboardLayout from '../../components/layout/ProtectedDashboardLayout';
 import { StatsCardTemplate } from '../../components/templates/PageTemplates';
 import { Card } from '../../components/ui/UIComponents';
+import { dashboardAPI } from '../../services/api';
 
 const Dashboard = () => {
-  // Langsung gunakan mock data tanpa loading untuk konsistensi dengan halaman lain
-  const dashboardData = {
-    total_users: 1248,
-    total_programs: 24,
-    total_complaints: 89,
-    total_news: 156,
-    pending_applications: 15,
-    active_programs: 18
+  const [dashboardData, setDashboardData] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardAPI.getStatistics();
+      console.log('Dashboard API Response:', response.data);
+      
+      if (response.data.status === 'success') {
+        setDashboardData(response.data.data.overview);
+        setRecentActivities(response.data.data.recent_activities || []);
+        setError(null);
+      } else {
+        throw new Error(response.data.message || 'Failed to load dashboard data');
+      }
+    } catch (err) {
+      console.error('Dashboard loading error:', err);
+      setError(err.message || 'Gagal memuat data dashboard');
+      // Fallback to mock data if API fails
+      setDashboardData({
+        total_users: 0,
+        total_programs: 0,
+        total_complaints: 0,
+        published_news: 0,
+        pending_applications: 0,
+        active_programs: 0
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Prepare stats data for StatsCardTemplate
-  const statsData = [
+  const statsData = dashboardData ? [
     {
       label: 'Total Users',
-      value: dashboardData?.total_users || 0,
+      value: dashboardData.total_users || 0,
       icon: Users,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
       change: {
         type: 'increase',
-        value: '+12% dari bulan lalu'
+        value: `${dashboardData.new_users_this_month || 0} user baru bulan ini`
       }
     },
     {
       label: 'Program Bantuan',
-      value: dashboardData?.total_programs || 0,
+      value: dashboardData.total_programs || 0,
       icon: Heart,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       change: {
         type: 'increase',
-        value: '+3 program baru'
+        value: `${dashboardData.active_programs || 0} program aktif`
       }
     },
     {
       label: 'Pengaduan',
-      value: dashboardData?.total_complaints || 0,
+      value: dashboardData.total_complaints || 0,
       icon: MessageSquare,
       iconBg: 'bg-yellow-100',
       iconColor: 'text-yellow-600',
       change: {
-        type: 'decrease',
-        value: '5 menunggu review'
+        type: dashboardData.pending_complaints > 0 ? 'warning' : 'success',
+        value: `${dashboardData.pending_complaints || 0} menunggu review`
       }
     },
     {
       label: 'Berita Published',
-      value: dashboardData?.total_news || 0,
+      value: dashboardData.published_news || 0,
       icon: FileText,
       iconBg: 'bg-purple-100',
       iconColor: 'text-purple-600',
       change: {
         type: 'increase',
-        value: '12 artikel minggu ini'
+        value: `${dashboardData.total_news || 0} total artikel`
       }
     }
-  ];
+  ] : [];
 
-  // Recent activities data
-  const recentActivities = [
-    {
-      id: 1,
-      action: 'User baru mendaftar',
-      details: 'Ahmad Wijaya mendaftar ke sistem',
-      time: '5 menit lalu',
-      type: 'user',
-      icon: Users,
-      iconColor: 'text-blue-600'
-    },
-    {
-      id: 2,
-      action: 'Bantuan sosial disetujui',
-      details: 'Program bantuan pangan untuk RT 05',
-      time: '1 jam lalu',
-      type: 'bantuan',
-      icon: Heart,
-      iconColor: 'text-green-600'
-    },
-    {
-      id: 3,
-      action: 'Pengaduan baru',
-      details: 'Laporan infrastruktur jalan rusak',
-      time: '2 jam lalu',
-      type: 'complaint',
-      icon: MessageSquare,
-      iconColor: 'text-yellow-600'
-    },
-    {
-      id: 4,
-      action: 'Berita dipublikasi',
-      details: 'Artikel: Tips menjaga kesehatan di musim hujan',
-      time: '3 jam lalu',
-      type: 'news',
-      icon: FileText,
-      iconColor: 'text-purple-600'
-    }
-  ];
+  // Icon mapping for activity types
+  const getActivityIcon = (type) => {
+    const iconMap = {
+      'user': { icon: Users, color: 'text-blue-600' },
+      'complaint': { icon: MessageSquare, color: 'text-yellow-600' },
+      'news': { icon: FileText, color: 'text-purple-600' },
+      'application': { icon: Heart, color: 'text-green-600' },
+    };
+    return iconMap[type] || { icon: AlertCircle, color: 'text-gray-600' };
+  };
 
   // Quick actions data
   const quickActions = [
@@ -158,30 +159,89 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <StatsCardTemplate stats={statsData} />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+              <div>
+                <p className="text-red-800 font-medium">Error loading dashboard data</p>
+                <p className="text-red-600 text-sm">{error}</p>
+                <button 
+                  onClick={loadDashboardData}
+                  className="mt-2 text-red-600 hover:text-red-700 underline text-sm"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <StatsCardTemplate stats={statsData} />
+        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Activities */}
           <div className="lg:col-span-2">
-            <Card title="Aktivitas Terbaru" subtitle="Pantau aktivitas sistem secara real-time">
-              <div className="space-y-4">
-                {recentActivities.map((activity) => {
-                  const Icon = activity.icon;
-                  return (
-                    <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-slate-50 transition-colors">
-                      <div className={`p-2 rounded-lg bg-slate-100`}>
-                        <Icon className={`w-4 h-4 ${activity.iconColor}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900">{activity.action}</p>
-                        <p className="text-sm text-slate-600 mt-1">{activity.details}</p>
-                        <p className="text-xs text-slate-400 mt-1">{activity.time}</p>
+            <Card 
+              title="Aktivitas Terbaru" 
+              subtitle="Pantau aktivitas sistem secara real-time"
+              action={
+                <button 
+                  onClick={loadDashboardData}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
+                  title="Refresh"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              }
+            >
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex items-start space-x-4 p-4 animate-pulse">
+                      <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : recentActivities.length === 0 ? (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                  <p className="text-slate-600">Tidak ada aktivitas terbaru</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentActivities.map((activity, index) => {
+                    const iconConfig = getActivityIcon(activity.type);
+                    const Icon = iconConfig.icon;
+                    return (
+                      <div key={index} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-slate-50 transition-colors">
+                        <div className="p-2 rounded-lg bg-slate-100">
+                          <Icon className={`w-4 h-4 ${iconConfig.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-slate-900">{activity.action}</p>
+                          <p className="text-sm text-slate-600 mt-1">{activity.details}</p>
+                          <p className="text-xs text-slate-400 mt-1">{activity.time}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               
               <div className="mt-6 pt-4 border-t border-slate-200">
                 <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">

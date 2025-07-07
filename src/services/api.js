@@ -191,6 +191,14 @@ export const pendaftaranAPI = {
   }
 }
 
+// Dashboard API Services
+export const dashboardAPI = {
+  // Get dashboard statistics
+  getStatistics: () => {
+    return api.get('/admin/dashboard/statistics')
+  }
+}
+
 // Complaint API Services
 export const complaintAPI = {
   // Get all complaints for admin
