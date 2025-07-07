@@ -246,6 +246,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                       className="w-full h-auto max-h-64 object-cover hover:opacity-90 transition-opacity"
                       onClick={() => setShowImageModal(true)}
                       onError={(e) => {
+                        console.log('Image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
                         e.target.parentNode.innerHTML = '<div class="p-4 text-center text-slate-500">Gambar tidak dapat dimuat</div>';
                       }}
                     />
@@ -506,6 +507,9 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
               src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
               alt="Complaint Full Size"
               className={`max-w-none rounded-lg transition-transform ${imageZoom > 1 ? 'cursor-move' : 'cursor-default'}`}
+              onError={(e) => {
+                console.log('Fullscreen image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
+              }}
               style={{
                 transform: `translate(${imagePosition.x}px, ${imagePosition.y}px) scale(${imageZoom})`,
                 transformOrigin: 'center center'

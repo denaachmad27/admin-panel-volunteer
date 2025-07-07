@@ -309,6 +309,7 @@ const PengaduanPage = () => {
                             alt="Complaint"
                             className="w-16 h-16 object-cover rounded-lg border border-slate-200"
                             onError={(e) => {
+                              console.log('Image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
                               e.target.style.display = 'none';
                             }}
                           />
