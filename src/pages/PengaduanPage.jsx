@@ -1,158 +1,99 @@
-import React, { useState } from 'react';
-import { MessageSquare, Clock, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Phone, Mail, Eye, MessageCircle, Filter, Search, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MessageSquare, Clock, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Phone, Mail, Eye, MessageCircle, Filter, Search, AlertCircle, RefreshCw } from 'lucide-react';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import { complaintAPI } from '../services/api';
+import ComplaintDetailModal from '../components/modals/ComplaintDetailModal';
 
 const PengaduanPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [complaints, setComplaints] = useState([]);
+  const [statistics, setStatistics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data untuk pengaduan
-  const complaints = [
-    {
-      id: 1,
-      title: 'Jalan Rusak di RT 05 RW 02',
-      description: 'Jalan di depan rumah saya sudah rusak parah dengan banyak lubang. Mohon segera diperbaiki karena sangat berbahaya untuk kendaraan.',
-      complainant: {
-        name: 'Ahmad Santoso',
-        phone: '081234567890',
-        email: 'ahmad.santoso@email.com',
-        address: 'Jl. Merdeka No. 15, RT 05/RW 02'
-      },
-      category: 'Infrastruktur',
-      priority: 'high',
-      status: 'pending',
-      submitDate: '2024-01-15',
-      responseDate: null,
-      assignedTo: null,
-      location: 'RT 05/RW 02, Kelurahan Merdeka',
-      attachments: ['foto_jalan_rusak.jpg']
-    },
-    {
-      id: 2,
-      title: 'Lampu Jalan Mati Sejak Seminggu',
-      description: 'Lampu jalan di area perumahan sudah mati sejak seminggu yang lalu. Kondisi sangat gelap di malam hari dan rawan kejahatan.',
-      complainant: {
-        name: 'Siti Nurhaliza',
-        phone: '081234567891',
-        email: 'siti.nur@email.com',
-        address: 'Jl. Kenanga No. 23, RT 03/RW 01'
-      },
-      category: 'Penerangan',
-      priority: 'medium',
-      status: 'in_progress',
-      submitDate: '2024-01-12',
-      responseDate: '2024-01-13',
-      assignedTo: 'Tim Teknis Listrik',
-      location: 'RT 03/RW 01, Kelurahan Kenanga',
-      attachments: []
-    },
-    {
-      id: 3,
-      title: 'Saluran Air Tersumbat',
-      description: 'Saluran air di depan rumah tersumbat sampah sehingga air menggenang. Kondisi ini sudah berlangsung 3 hari.',
-      complainant: {
-        name: 'Budi Hermawan',
-        phone: '081234567892',
-        email: 'budi.h@email.com',
-        address: 'Jl. Melati No. 8, RT 02/RW 03'
-      },
-      category: 'Sanitasi',
-      priority: 'medium',
-      status: 'resolved',
-      submitDate: '2024-01-10',
-      responseDate: '2024-01-11',
-      assignedTo: 'Tim Kebersihan',
-      location: 'RT 02/RW 03, Kelurahan Melati',
-      attachments: ['foto_saluran.jpg', 'foto_after.jpg']
-    },
-    {
-      id: 4,
-      title: 'Pohon Tumbang Menghalangi Jalan',
-      description: 'Ada pohon besar yang tumbang akibat angin kencang kemarin malam. Pohon ini menghalangi akses jalan utama.',
-      complainant: {
-        name: 'Dewi Sartika',
-        phone: '081234567893',
-        email: 'dewi.sartika@email.com',
-        address: 'Jl. Raya Utama No. 45, RT 01/RW 04'
-      },
-      category: 'Infrastruktur',
-      priority: 'high',
-      status: 'pending',
-      submitDate: '2024-01-14',
-      responseDate: null,
-      assignedTo: null,
-      location: 'RT 01/RW 04, Jalan Raya Utama',
-      attachments: ['pohon_tumbang.jpg']
-    },
-    {
-      id: 5,
-      title: 'Kebisingan dari Pabrik',
-      description: 'Pabrik di dekat rumah mengeluarkan suara bising yang mengganggu, terutama pada malam hari. Sudah berlangsung selama 2 minggu.',
-      complainant: {
-        name: 'Rini Marlina',
-        phone: '081234567894',
-        email: 'rini.marlina@email.com',
-        address: 'Jl. Industri No. 12, RT 06/RW 02'
-      },
-      category: 'Lingkungan',
-      priority: 'medium',
-      status: 'in_progress',
-      submitDate: '2024-01-08',
-      responseDate: '2024-01-09',
-      assignedTo: 'Tim Lingkungan Hidup',
-      location: 'RT 06/RW 02, Kawasan Industri',
-      attachments: []
+  // Load data from API
+  useEffect(() => {
+    loadComplaints();
+    loadStatistics();
+  }, []);
+
+  const loadComplaints = async () => {
+    try {
+      setLoading(true);
+      const response = await complaintAPI.getAll();
+      setComplaints(response.data.data?.data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error loading complaints:', err);
+      setError('Gagal memuat data pengaduan');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const loadStatistics = async () => {
+    try {
+      const response = await complaintAPI.getStatistics();
+      setStatistics(response.data.data);
+    } catch (err) {
+      console.error('Error loading statistics:', err);
+    }
+  };
+
+  const handleRefresh = () => {
+    loadComplaints();
+    loadStatistics();
+  };
 
   const categories = [
-    'Infrastruktur',
-    'Penerangan',
-    'Sanitasi',
-    'Lingkungan',
-    'Keamanan',
-    'Sosial'
+    'Teknis',
+    'Pelayanan', 
+    'Bantuan',
+    'Saran',
+    'Lainnya'
   ];
 
   const getStatusConfig = (status) => {
     const configs = {
-      pending: { 
-        bg: 'bg-yellow-100', 
-        text: 'text-yellow-800', 
-        label: 'Menunggu', 
-        icon: Clock 
+      'Baru': { 
+        bg: 'bg-red-100', 
+        text: 'text-red-800', 
+        label: 'Baru', 
+        icon: AlertTriangle 
       },
-      in_progress: { 
+      'Diproses': { 
         bg: 'bg-blue-100', 
         text: 'text-blue-800', 
         label: 'Diproses', 
         icon: MessageCircle 
       },
-      resolved: { 
+      'Selesai': { 
         bg: 'bg-green-100', 
         text: 'text-green-800', 
         label: 'Selesai', 
         icon: CheckCircle 
       },
-      rejected: { 
-        bg: 'bg-red-100', 
-        text: 'text-red-800', 
-        label: 'Ditolak', 
+      'Ditutup': { 
+        bg: 'bg-gray-100', 
+        text: 'text-gray-800', 
+        label: 'Ditutup', 
         icon: XCircle 
       }
     };
-    return configs[status] || configs.pending;
+    return configs[status] || configs['Baru'];
   };
 
   const getPriorityConfig = (priority) => {
     const configs = {
-      high: { bg: 'bg-red-100', text: 'text-red-800', label: 'Tinggi' },
-      medium: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Sedang' },
-      low: { bg: 'bg-green-100', text: 'text-green-800', label: 'Rendah' }
+      'Urgent': { bg: 'bg-red-100', text: 'text-red-800', label: 'Urgent' },
+      'Tinggi': { bg: 'bg-red-100', text: 'text-red-800', label: 'Tinggi' },
+      'Sedang': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Sedang' },
+      'Rendah': { bg: 'bg-green-100', text: 'text-green-800', label: 'Rendah' }
     };
-    return configs[priority] || configs.medium;
+    return configs[priority] || configs['Sedang'];
   };
 
   const getStatusBadge = (status) => {
@@ -176,18 +117,32 @@ const PengaduanPage = () => {
   };
 
   const filteredComplaints = complaints.filter(complaint => {
-    const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         complaint.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         complaint.complainant.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'all' || complaint.status === activeTab;
+    const matchesSearch = complaint.judul?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         complaint.deskripsi?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         complaint.user?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    let matchesTab = true;
+    if (activeTab === 'pending') {
+      matchesTab = complaint.status === 'Baru';
+    } else if (activeTab === 'in_progress') {
+      matchesTab = complaint.status === 'Diproses';
+    } else if (activeTab === 'resolved') {
+      matchesTab = complaint.status === 'Selesai';
+    }
+    
     return matchesSearch && matchesTab;
   });
 
-  const stats = {
-    total: complaints.length,
-    pending: complaints.filter(c => c.status === 'pending').length,
-    in_progress: complaints.filter(c => c.status === 'in_progress').length,
-    resolved: complaints.filter(c => c.status === 'resolved').length
+  const stats = statistics ? {
+    total: statistics.overview?.total_complaint || 0,
+    pending: statistics.overview?.baru || 0,
+    in_progress: statistics.overview?.diproses || 0,
+    resolved: statistics.overview?.selesai || 0
+  } : {
+    total: 0,
+    pending: 0,
+    in_progress: 0,
+    resolved: 0
   };
 
   return (
@@ -270,6 +225,14 @@ const PengaduanPage = () => {
                 <h2 className="text-lg font-semibold text-slate-900">Daftar Pengaduan</h2>
                 <p className="text-sm text-slate-600 mt-1">Kelola semua pengaduan masyarakat</p>
               </div>
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="mt-2 sm:mt-0 inline-flex items-center px-3 py-2 border border-slate-300 shadow-sm text-sm leading-4 font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
             </div>
           </div>
 
@@ -291,7 +254,7 @@ const PengaduanPage = () => {
             <div className="flex space-x-1 bg-slate-100 rounded-lg p-1">
               {[
                 { id: 'all', label: 'Semua' },
-                { id: 'pending', label: 'Menunggu' },
+                { id: 'pending', label: 'Baru' },
                 { id: 'in_progress', label: 'Diproses' },
                 { id: 'resolved', label: 'Selesai' }
               ].map((tab) => (
@@ -312,70 +275,118 @@ const PengaduanPage = () => {
 
           {/* Complaints List */}
           <div className="divide-y divide-slate-200">
-            {filteredComplaints.map((complaint) => (
-              <div key={complaint.id} className="p-6 hover:bg-slate-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-medium text-slate-900 hover:text-orange-600 cursor-pointer">
-                        {complaint.title}
-                      </h3>
-                      {getStatusBadge(complaint.status)}
-                      {getPriorityBadge(complaint.priority)}
-                    </div>
-                    
-                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                      {complaint.description}
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-500">
-                      <div className="space-y-1">
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-1" />
-                          {complaint.complainant.name}
+            {loading ? (
+              <div className="p-6 text-center">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
+                <p className="text-slate-600">Memuat data pengaduan...</p>
+              </div>
+            ) : error ? (
+              <div className="p-6 text-center">
+                <AlertCircle className="w-6 h-6 mx-auto mb-2 text-red-400" />
+                <p className="text-red-600 mb-2">{error}</p>
+                <button
+                  onClick={handleRefresh}
+                  className="text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Coba Lagi
+                </button>
+              </div>
+            ) : filteredComplaints.length === 0 ? (
+              <div className="p-6 text-center">
+                <MessageSquare className="w-6 h-6 mx-auto mb-2 text-slate-400" />
+                <p className="text-slate-600">Tidak ada pengaduan yang ditemukan</p>
+              </div>
+            ) : (
+              filteredComplaints.map((complaint) => (
+                <div key={complaint.id} className="p-6 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1 min-w-0">
+                      {/* Image thumbnail */}
+                      {complaint.image_path && (
+                        <div className="flex-shrink-0">
+                          <img
+                            src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
+                            alt="Complaint"
+                            className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center">
-                          <Phone className="w-4 h-4 mr-1" />
-                          {complaint.complainant.phone}
+                      )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 
+                            className="text-lg font-medium text-slate-900 hover:text-orange-600 cursor-pointer"
+                            onClick={() => setSelectedComplaint(complaint)}
+                          >
+                            {complaint.judul}
+                          </h3>
+                          {getStatusBadge(complaint.status)}
+                          {getPriorityBadge(complaint.prioritas)}
                         </div>
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 mr-1" />
-                          {complaint.location}
+                        
+                        <div className="mb-2">
+                          <span className="text-xs text-slate-500 font-medium">
+                            Tiket: {complaint.no_tiket}
+                          </span>
                         </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(complaint.submitDate).toLocaleDateString('id-ID')}
-                        </div>
-                        <div className="flex items-center">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          {complaint.category}
-                        </div>
-                        {complaint.assignedTo && (
-                          <div className="flex items-center">
-                            <User className="w-4 h-4 mr-1" />
-                            Ditangani: {complaint.assignedTo}
+                        
+                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                          {complaint.deskripsi}
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-500">
+                          <div className="space-y-1">
+                            <div className="flex items-center">
+                              <User className="w-4 h-4 mr-1" />
+                              {complaint.user?.name || 'N/A'}
+                            </div>
+                            <div className="flex items-center">
+                              <Mail className="w-4 h-4 mr-1" />
+                              {complaint.user?.email || 'N/A'}
+                            </div>
+                            <div className="flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-1" />
+                              {complaint.kategori}
+                            </div>
                           </div>
-                        )}
+                          <div className="space-y-1">
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 mr-1" />
+                              {new Date(complaint.created_at).toLocaleDateString('id-ID')}
+                            </div>
+                            {complaint.tanggal_respon && (
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-1" />
+                                Direspon: {new Date(complaint.tanggal_respon).toLocaleDateString('id-ID')}
+                              </div>
+                            )}
+                            {complaint.respon_admin && (
+                              <div className="flex items-center">
+                                <MessageCircle className="w-4 h-4 mr-1" />
+                                Ada Respon Admin
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button 
-                      onClick={() => setSelectedComplaint(complaint)}
-                      className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <MessageCircle className="w-4 h-4" />
-                    </button>
+                    
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button 
+                        onClick={() => setSelectedComplaint(complaint)}
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        title="Lihat Detail & Tanggapi"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Pagination */}
@@ -406,7 +417,7 @@ const PengaduanPage = () => {
         <Card title="Kategori Pengaduan" subtitle="Distribusi pengaduan berdasarkan kategori">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {categories.map((category, index) => {
-              const complaintCount = complaints.filter(complaint => complaint.category === category).length;
+              const complaintCount = statistics?.by_category?.[category] || 0;
               const colors = [
                 'bg-orange-100 text-orange-800',
                 'bg-blue-100 text-blue-800', 
@@ -472,18 +483,17 @@ const PengaduanPage = () => {
           </Card>
         </div>
 
-        {/* Temporary Page Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-yellow-800">Halaman Sementara</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Ini adalah halaman sementara untuk menu Pengaduan. Fitur lengkap sedang dalam pengembangan.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Complaint Detail Modal */}
+        <ComplaintDetailModal
+          complaint={selectedComplaint}
+          isOpen={!!selectedComplaint}
+          onClose={() => setSelectedComplaint(null)}
+          onStatusUpdate={() => {
+            console.log('Status updated, refreshing data...');
+            handleRefresh();
+            // Don't close the modal immediately, let the modal handle it
+          }}
+        />
       </div>
     </ProtectedDashboardLayout>
   );

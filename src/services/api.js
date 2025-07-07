@@ -191,4 +191,38 @@ export const pendaftaranAPI = {
   }
 }
 
+// Complaint API Services
+export const complaintAPI = {
+  // Get all complaints for admin
+  getAll: (params = {}) => {
+    return api.get('/admin/complaint', { params })
+  },
+
+  // Get complaint statistics
+  getStatistics: () => {
+    return api.get('/admin/complaint/statistics')
+  },
+
+  // Update complaint status
+  updateStatus: (id, status, respon_admin = '') => {
+    return api.put(`/admin/complaint/${id}/status`, { 
+      status,
+      respon_admin 
+    })
+  },
+
+  // Get single complaint by ID (from admin list)
+  getById: (id) => {
+    return api.get('/admin/complaint').then(response => {
+      const complaintsList = response.data.data?.data || [];
+      const complaint = complaintsList.find(item => item.id === parseInt(id));
+      if (complaint) {
+        return { data: { status: 'success', data: complaint } };
+      } else {
+        throw new Error('Complaint not found');
+      }
+    });
+  }
+}
+
 export default api
