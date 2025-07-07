@@ -113,7 +113,7 @@ const Dashboard = () => {
       description: 'Buat program bantuan sosial baru',
       icon: Heart,
       color: 'bg-green-500',
-      href: '/bantuan-sosial/create'
+      href: '/tambah-bantuan'
     },
     {
       title: 'Tulis Berita Baru',
