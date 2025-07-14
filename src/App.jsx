@@ -26,6 +26,8 @@ import DetailBantuanPage from './pages/DetailBantuanPage';
 import DetailPendaftaranPage from './pages/DetailPendaftaranPage';
 import KategoriPage from './pages/KategoriPage';
 import PengaturanPage from './pages/PengaturanPage';
+import WhatsappSettingsPage from './pages/WhatsappSettingsPage';
+import DaftarDinasPage from './pages/DaftarDinasPage';
 
 function App() {
   console.log('App component rendering...');
@@ -255,6 +257,30 @@ function App() {
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <PengaturanPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* WhatsApp Settings Route */}
+            <Route 
+              path="/settings/whatsapp" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WhatsappSettingsPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Daftar Dinas Route */}
+            <Route 
+              path="/settings/daftar-dinas" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <DaftarDinasPage />
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 

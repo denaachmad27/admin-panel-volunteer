@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2 } from 'lucide-react';
+import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2, ExternalLink, Smartphone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import complaintForwardingService from '../services/complaintForwardingService';
 import DepartmentModal from '../components/modals/DepartmentModal';
 
 const PengaturanPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general');
   const [showPassword, setShowPassword] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
@@ -692,6 +694,61 @@ const PengaturanPage = () => {
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Test WhatsApp Admin
                         </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* WhatsApp Integration Settings */}
+                  <div>
+                    <h3 className="text-lg font-medium text-slate-900 mb-4">Integrasi WhatsApp</h3>
+                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center">
+                          <div className="p-3 rounded-full bg-green-100 mr-4">
+                            <Smartphone className="w-6 h-6 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-green-900">WhatsApp Settings</h4>
+                            <p className="text-sm text-green-700">
+                              Konfigurasi koneksi WhatsApp untuk forward pengaduan
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => navigate('/settings/whatsapp')}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                        >
+                          <Settings className="w-4 h-4 mr-2" />
+                          Konfigurasi WhatsApp
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                          <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium text-slate-900">Connection Status</p>
+                          <p className="text-xs text-slate-600">Check WhatsApp connection</p>
+                        </div>
+                        
+                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                          <Phone className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium text-slate-900">Department Mapping</p>
+                          <p className="text-xs text-slate-600">Configure department contacts</p>
+                        </div>
+                        
+                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                          <Mail className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <p className="text-sm font-medium text-slate-900">Message Templates</p>
+                          <p className="text-xs text-slate-600">Customize message formats</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                        <p className="text-xs text-green-700">
+                          💡 <strong>Tips:</strong> Pastikan WhatsApp sudah terhubung sebelum mengaktifkan forward via WhatsApp. 
+                          Buka halaman konfigurasi untuk scan QR code dan mengatur mapping departemen.
+                        </p>
                       </div>
                     </div>
                   </div>

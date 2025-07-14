@@ -289,4 +289,85 @@ export const forwardingAPI = {
   }
 }
 
+// Department API Services
+export const departmentAPI = {
+  // Get all departments
+  getAll: (params = {}) => {
+    return api.get('/admin/departments', { params })
+  },
+
+  // Create new department
+  create: (data) => {
+    return api.post('/admin/departments', data)
+  },
+
+  // Get single department
+  getById: (id) => {
+    return api.get(`/admin/departments/${id}`)
+  },
+
+  // Update department
+  update: (id, data) => {
+    return api.put(`/admin/departments/${id}`, data)
+  },
+
+  // Delete department
+  delete: (id) => {
+    return api.delete(`/admin/departments/${id}`)
+  },
+
+  // Toggle department status
+  toggleStatus: (id) => {
+    return api.patch(`/admin/departments/${id}/toggle-status`)
+  },
+
+  // Get department by category
+  getByCategory: (category) => {
+    return api.get(`/admin/departments/category/${category}`)
+  },
+
+  // Get active departments with categories
+  getActiveWithCategories: () => {
+    return api.get('/admin/departments/active-with-categories')
+  }
+}
+
+// WhatsApp API Services
+export const whatsappAPI = {
+  // Get WhatsApp settings
+  getSettings: () => {
+    return api.get('/admin/whatsapp/settings')
+  },
+
+  // Update WhatsApp settings
+  updateSettings: (data) => {
+    return api.put('/admin/whatsapp/settings', data)
+  },
+
+  // Get QR Code for WhatsApp login
+  getQRCode: () => {
+    return api.get('/admin/whatsapp/qr-code')
+  },
+
+  // Initialize WhatsApp session
+  initializeSession: () => {
+    return api.post('/admin/whatsapp/initialize')
+  },
+
+  // Disconnect WhatsApp session
+  disconnect: () => {
+    return api.post('/admin/whatsapp/disconnect')
+  },
+
+  // Test WhatsApp connection
+  testConnection: () => {
+    return api.post('/admin/whatsapp/test-connection')
+  },
+
+  // Send message to department
+  sendToDepartment: (complaintId, data) => {
+    return api.post(`/admin/whatsapp/send/${complaintId}`, data)
+  }
+}
+
 export default api

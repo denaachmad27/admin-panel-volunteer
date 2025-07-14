@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Building, Mail, Phone, Save, AlertCircle, Tag, Shield } from 'lucide-react';
+import { departmentAPI } from '../../services/api';
 
 const DepartmentModal = ({ 
   isOpen, 
@@ -21,7 +22,7 @@ const DepartmentModal = ({
   // Reset form when modal opens/closes or department changes
   useEffect(() => {
     if (isOpen) {
-      if (mode === 'edit' && department) {
+      if ((mode === 'edit' || mode === 'view') && department) {
         setFormData({
           name: department.name || '',
           email: department.email || '',
@@ -105,6 +106,12 @@ const DepartmentModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // If view mode, just close modal
+    if (mode === 'view') {
+      onClose();
+      return;
+    }
+    
     if (!validateForm()) {
       return;
     }
@@ -112,7 +119,14 @@ const DepartmentModal = ({
     setIsSubmitting(true);
     
     try {
-      await onSave(formData);
+      if (mode === 'edit' && department) {
+        await departmentAPI.update(department.id, formData);
+      } else if (mode === 'create') {
+        await departmentAPI.create(formData);
+      }
+      
+      // Wait for parent to reload data
+      await onSave();
       onClose();
     } catch (error) {
       console.error('Error saving department:', error);
@@ -146,44 +160,51 @@ const DepartmentModal = ({
       />
 
       {/* Modal panel */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="btn-primary rounded-t-lg p-4">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-lg px-6 py-5 border-b border-blue-500">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
-                <Building className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white bg-opacity-30 rounded-lg flex items-center justify-center mr-4">
+                <Building className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white">
-                {mode === 'add' ? 'Tambah Dinas Baru' : 'Edit Dinas'}
-              </h3>
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {mode === 'create' ? 'Tambah Dinas Baru' : mode === 'edit' ? 'Edit Dinas' : 'Detail Dinas'}
+                </h3>
+                <p className="text-blue-100 text-sm mt-1">
+                  {mode === 'create' ? 'Lengkapi informasi dinas yang akan ditambahkan' : mode === 'edit' ? 'Perbarui informasi dinas' : 'Lihat detail informasi dinas'}
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 p-1 rounded-lg hover:bg-white hover:bg-opacity-20"
+              className="text-white hover:text-blue-100 p-2 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all duration-200 group"
+              title="Tutup"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
             </button>
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Nama Dinas */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Nama Dinas <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                 <Building className="w-4 h-4 text-gray-400" />
               </div>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`input-field pl-10 ${errors.name ? 'border-red-500' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.name ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Contoh: Dinas Sosial"
+                disabled={mode === 'view'}
                 required
               />
             </div>
@@ -201,15 +222,16 @@ const DepartmentModal = ({
               Email Dinas
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                 <Mail className="w-4 h-4 text-gray-400" />
               </div>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`input-field pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="email@dinas.gov.id"
+                disabled={mode === 'view'}
               />
             </div>
             {errors.email && (
@@ -226,15 +248,16 @@ const DepartmentModal = ({
               Nomor WhatsApp
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
                 <Phone className="w-4 h-4 text-gray-400" />
               </div>
               <input
                 type="tel"
                 value={formData.whatsapp}
                 onChange={(e) => handleInputChange('whatsapp', e.target.value)}
-                className={`input-field pl-10 ${errors.whatsapp ? 'border-red-500' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.whatsapp ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="+62 812 3456 7890"
+                disabled={mode === 'view'}
               />
             </div>
             {errors.whatsapp && (
@@ -252,7 +275,7 @@ const DepartmentModal = ({
               Kategori Pengaduan yang Ditangani
             </label>
             <div className="bg-gray-50 p-4 rounded-lg border">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {availableCategories.map(category => (
                   <label key={category} className="flex items-center space-x-2 cursor-pointer hover:bg-white p-2 rounded">
                     <input
@@ -260,6 +283,7 @@ const DepartmentModal = ({
                       checked={formData.categories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
                       className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded"
+                      disabled={mode === 'view'}
                     />
                     <span className="text-sm text-gray-700 font-medium">{category}</span>
                   </label>
@@ -280,6 +304,7 @@ const DepartmentModal = ({
                   checked={formData.is_active}
                   onChange={(e) => handleInputChange('is_active', e.target.checked)}
                   className="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded"
+                  disabled={mode === 'view'}
                 />
                 <div className="flex items-center space-x-2">
                   <Shield className="w-4 h-4 text-blue-600" />
@@ -308,31 +333,43 @@ const DepartmentModal = ({
           )}
 
           {/* Footer */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {mode === 'add' ? 'Tambah Dinas' : 'Simpan Perubahan'}
-                </>
-              )}
-            </button>
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t">
+            {mode === 'view' ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm font-medium rounded-lg transition-colors"
+              >
+                Tutup
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {mode === 'create' ? 'Menambahkan...' : 'Menyimpan...'}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      {mode === 'create' ? 'Tambah Dinas' : 'Simpan Perubahan'}
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>

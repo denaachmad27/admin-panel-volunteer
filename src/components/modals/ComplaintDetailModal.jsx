@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Calendar, MessageSquare, AlertTriangle, Clock, Mail, Star, Edit3, Save, XCircle, ZoomIn, ZoomOut, Maximize, Phone, Send, Building } from 'lucide-react';
 import { complaintAPI } from '../../services/api';
 import complaintForwardingService from '../../services/complaintForwardingService';
@@ -42,7 +42,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
   };
 
   // Reset form when complaint changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (complaint) {
       setStatus(complaint.status || 'Baru');
       setResponAdmin(complaint.respon_admin || '');
@@ -51,12 +51,12 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
   }, [complaint]);
 
   // Debug log
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('Modal props:', { complaint, isOpen });
   }, [complaint, isOpen]);
 
   // Reset image zoom when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (showImageModal) {
       setImageZoom(1);
       setImagePosition({ x: 0, y: 0 });
@@ -102,7 +102,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
   };
 
   // Keyboard shortcuts for zoom
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyPress = (e) => {
       if (showImageModal) {
         if (e.key === '+' || e.key === '=') {

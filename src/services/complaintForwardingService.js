@@ -1,7 +1,7 @@
 // Complaint Forwarding Service
 // Centralized service for handling complaint forwarding functionality
 
-import { emailAPI, forwardingAPI } from './api';
+import { emailAPI, forwardingAPI, whatsappAPI } from './api';
 
 class ComplaintForwardingService {
   constructor() {
@@ -270,29 +270,50 @@ class ComplaintForwardingService {
     }
   }
 
-  // Send WhatsApp
+  // Send WhatsApp (REAL IMPLEMENTATION)
   async sendWhatsApp(complaint, department, customMessage) {
     try {
-      // Simulate WhatsApp sending
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('📱 Mengirim WhatsApp real ke:', department.whatsapp || department.phone_number);
       
-      const message = customMessage || this.generateDefaultMessage(complaint);
-      
-      // Log untuk debugging
-      console.log('📱 SIMULASI WHATSAPP BERHASIL');
-      console.log('📱 Tujuan:', department.whatsapp);
-      console.log('📱 Message:', message);
-      console.log('📱 CATATAN: Ini adalah simulasi. Untuk WhatsApp sungguhan, integrasikan dengan WhatsApp API.');
-      
-      return {
-        success: true,
-        message: `✅ SIMULASI: WhatsApp berhasil dikirim ke ${department.whatsapp}\n\n⚠️ CATATAN: Ini adalah simulasi. Pesan tidak benar-benar dikirim.\n\nUntuk implementasi nyata, perlu konfigurasi:\n- WhatsApp Business API\n- WhatsApp Cloud API\n- Twilio WhatsApp API\n- API dari penyedia layanan lainnya`
+      const whatsappData = {
+        department_category: complaint.kategori,
+        custom_message: customMessage
       };
+      
+      // Send real WhatsApp via API
+      const response = await whatsappAPI.sendToDepartment(complaint.id, whatsappData);
+      
+      if (response.data.status === 'success') {
+        console.log('📱 WhatsApp berhasil dikirim:', response.data);
+        
+        return {
+          success: true,
+          message: `✅ WhatsApp berhasil dikirim ke ${department.whatsapp || department.phone_number}`,
+          data: response.data
+        };
+      } else {
+        throw new Error(response.data.message || 'Failed to send WhatsApp');
+      }
     } catch (error) {
-      return {
-        success: false,
-        message: `Gagal mengirim WhatsApp: ${error.message}`
-      };
+      console.error('❌ Error mengirim WhatsApp:', error);
+      
+      // Handle different error types
+      if (error.response?.status === 400) {
+        return {
+          success: false,
+          message: `❌ WhatsApp tidak terhubung:\n\n${error.response?.data?.message || 'WhatsApp service error'}\n\n💡 Langkah-langkah:\n1. Buka Settings → WhatsApp\n2. Klik "Connect WhatsApp"\n3. Scan QR code dengan WhatsApp Anda\n4. Tunggu hingga status "Connected"`
+        };
+      } else if (error.response?.status === 500) {
+        return {
+          success: false,
+          message: `❌ Gagal mengirim WhatsApp ke ${department.whatsapp || department.phone_number}:\n\n${error.response?.data?.message || 'Server error'}\n\n💡 Kemungkinan penyebab:\n- WhatsApp service tidak berjalan\n- Nomor tujuan tidak valid\n- Koneksi internet bermasalah`
+        };
+      } else {
+        return {
+          success: false,
+          message: `❌ Gagal mengirim WhatsApp: ${error.message}`
+        };
+      }
     }
   }
 

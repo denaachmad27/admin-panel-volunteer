@@ -17,7 +17,8 @@ import {
   Shield,
   BarChart3,
   Calendar,
-  HelpCircle
+  HelpCircle,
+  Building
 } from 'lucide-react';
 
 // 🔒 PROTECTED: Menu items yang sudah fix, jangan diubah
@@ -68,6 +69,17 @@ const PROTECTED_MENU_ITEMS = [
     icon: BarChart3,
     path: '/statistics',
     id: 'statistics'
+  },
+  {
+    title: 'Pengaturan',
+    icon: Settings,
+    path: '/settings',
+    id: 'settings',
+    submenu: [
+      { title: 'Pengaturan Umum', path: '/settings' },
+      { title: 'Daftar Dinas', path: '/settings/daftar-dinas' },
+      { title: 'WhatsApp', path: '/settings/whatsapp' }
+    ]
   }
 ];
 
@@ -313,17 +325,6 @@ const ProtectedDashboardLayout = ({
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {allMenuItems.map(renderMenuItem)}
-          
-          {/* Settings - Always at bottom */}
-          <div className="pt-4 mt-4 border-t border-slate-200">
-            <a
-              href="/settings"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-            >
-              <Settings className="w-5 h-5 text-slate-400" />
-              <span className="font-medium">Pengaturan</span>
-            </a>
-          </div>
         </nav>
       </div>
 
