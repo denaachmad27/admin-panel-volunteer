@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Clock, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Phone, Mail, Eye, MessageCircle, Filter, Search, AlertCircle, RefreshCw } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Phone, Mail, Eye, MessageCircle, Filter, Search, AlertCircle, RefreshCw, Send } from 'lucide-react';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { complaintAPI } from '../services/api';
 import ComplaintDetailModal from '../components/modals/ComplaintDetailModal';
+import complaintForwardingService from '../services/complaintForwardingService';
 
 const PengaduanPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -13,6 +14,7 @@ const PengaduanPage = () => {
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quickForwardComplaint, setQuickForwardComplaint] = useState(null);
 
   // Load data from API
   useEffect(() => {
@@ -94,6 +96,36 @@ const PengaduanPage = () => {
       'Rendah': { bg: 'bg-green-100', text: 'text-green-800', label: 'Rendah' }
     };
     return configs[priority] || configs['Sedang'];
+  };
+
+  const handleQuickForward = async (complaint) => {
+    try {
+      const department = await complaintForwardingService.getDepartmentByCategory(complaint.kategori);
+      
+      if (!department) {
+        alert(`Tidak ada dinas yang terkonfigurasi untuk kategori "${complaint.kategori}". Silakan gunakan forward manual.`);
+        return;
+      }
+
+      const confirmed = window.confirm(`Forward pengaduan "${complaint.judul}" ke ${department.name}?`);
+      if (confirmed) {
+        const result = await complaintForwardingService.forwardComplaint(complaint);
+        
+        if (result.success) {
+          alert(`✅ ${result.message}\n\nDetail:\n${result.results.map(r => `• ${r.type}: ${r.message}`).join('\n')}`);
+          
+          // Notify admin if high priority
+          if (complaint.prioritas === 'Tinggi') {
+            await complaintForwardingService.notifyAdmin(complaint, 'high');
+          }
+        } else {
+          alert(`❌ ${result.message}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error in quick forward:', error);
+      alert('Gagal meneruskan pengaduan. Silakan coba lagi.');
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -376,6 +408,13 @@ const PengaduanPage = () => {
                     </div>
                     
                     <div className="flex items-center space-x-2 ml-4">
+                      <button 
+                        onClick={() => handleQuickForward(complaint)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Quick Forward ke Dinas"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
                       <button 
                         onClick={() => setSelectedComplaint(complaint)}
                         className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"

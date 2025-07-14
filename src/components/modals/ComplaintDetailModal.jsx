@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, User, Calendar, MessageSquare, AlertTriangle, Clock, Mail, Star, Edit3, Save, XCircle, ZoomIn, ZoomOut, Maximize, Phone } from 'lucide-react';
+import { X, User, Calendar, MessageSquare, AlertTriangle, Clock, Mail, Star, Edit3, Save, XCircle, ZoomIn, ZoomOut, Maximize, Phone, Send, Building } from 'lucide-react';
 import { complaintAPI } from '../../services/api';
+import complaintForwardingService from '../../services/complaintForwardingService';
 
 const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -12,6 +13,33 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showForwardingModal, setShowForwardingModal] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [forwardingMessage, setForwardingMessage] = useState('');
+  const [isForwarding, setIsForwarding] = useState(false);
+
+  // Department options for forwarding
+  const [departments, setDepartments] = useState([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(true);
+
+  // Load departments on component mount
+  useEffect(() => {
+    if (isOpen) {
+      loadDepartments();
+    }
+  }, [isOpen]);
+
+  const loadDepartments = async () => {
+    try {
+      setDepartmentsLoading(true);
+      const depts = await complaintForwardingService.getDepartments();
+      setDepartments(depts);
+    } catch (error) {
+      console.error('Error loading departments:', error);
+    } finally {
+      setDepartmentsLoading(false);
+    }
+  };
 
   // Reset form when complaint changes
   React.useEffect(() => {
@@ -140,6 +168,46 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
       alert(`Gagal memperbarui status pengaduan: ${error.message || error}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleForwardComplaint = async (method) => {
+    if (!selectedDepartment) {
+      alert('Silakan pilih dinas tujuan terlebih dahulu');
+      return;
+    }
+
+    try {
+      setIsForwarding(true);
+      
+      const options = {
+        departmentId: selectedDepartment,
+        customMessage: forwardingMessage,
+        forceEmail: method === 'email',
+        forceWhatsapp: method === 'whatsapp'
+      };
+      
+      const result = await complaintForwardingService.forwardComplaint(complaint, options);
+      
+      if (result.success) {
+        alert(`✅ ${result.message}\n\nDetail:\n${result.results.map(r => `• ${r.type}: ${r.message}`).join('\n')}`);
+        
+        // Notify admin if high priority
+        if (complaint.prioritas === 'Tinggi') {
+          await complaintForwardingService.notifyAdmin(complaint, 'high');
+        }
+        
+        setShowForwardingModal(false);
+        setForwardingMessage('');
+        setSelectedDepartment('');
+      } else {
+        alert(`❌ ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error forwarding complaint:', error);
+      alert(`Gagal meneruskan pengaduan: ${error.message || error}`);
+    } finally {
+      setIsForwarding(false);
     }
   };
 
@@ -426,10 +494,110 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                   </div>
                 )}
               </div>
+
+              {/* Manual Forwarding Section */}
+              <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h5 className="text-lg font-semibold text-blue-900">Forward Pengaduan</h5>
+                  <Building className="w-5 h-5 text-blue-600" />
+                </div>
+                <p className="text-sm text-blue-700 mb-4">
+                  Teruskan pengaduan ini ke dinas terkait untuk penanganan lebih lanjut.
+                </p>
+                <button
+                  onClick={() => setShowForwardingModal(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Forward ke Dinas
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Forwarding Modal */}
+      {showForwardingModal && (
+        <div className="fixed inset-0 z-60 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity bg-slate-500 bg-opacity-75" onClick={() => setShowForwardingModal(false)}></div>
+            
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl relative">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Forward Pengaduan</h3>
+                <button
+                  onClick={() => setShowForwardingModal(false)}
+                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Pilih Dinas Tujuan
+                  </label>
+                  <select
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">-- Pilih Dinas --</option>
+                    {departments.map(dept => (
+                      <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedDepartment && (
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <div className="text-sm text-slate-700">
+                      <p><strong>Dinas:</strong> {departments.find(d => d.id === selectedDepartment)?.name}</p>
+                      <p><strong>Email:</strong> {departments.find(d => d.id === selectedDepartment)?.email}</p>
+                      <p><strong>WhatsApp:</strong> {departments.find(d => d.id === selectedDepartment)?.whatsapp}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Pesan Tambahan (Opsional)
+                  </label>
+                  <textarea
+                    value={forwardingMessage}
+                    onChange={(e) => setForwardingMessage(e.target.value)}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Tambahkan pesan untuk dinas tujuan..."
+                  />
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleForwardComplaint('email')}
+                    disabled={!selectedDepartment || isForwarding}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    {isForwarding ? 'Mengirim...' : 'Kirim Email'}
+                  </button>
+                  <button
+                    onClick={() => handleForwardComplaint('whatsapp')}
+                    disabled={!selectedDepartment || isForwarding}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    {isForwarding ? 'Mengirim...' : 'Kirim WhatsApp'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Fullscreen Modal */}
       {showImageModal && complaint.image_path && (

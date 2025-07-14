@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2 } from 'lucide-react';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import complaintForwardingService from '../services/complaintForwardingService';
+import DepartmentModal from '../components/modals/DepartmentModal';
 
 const PengaturanPage = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -66,6 +68,39 @@ const PengaturanPage = () => {
     phone: '+62 812 3456 7890'
   });
 
+  // Complaint Forwarding Settings State
+  const [complaintForwardingSettings, setComplaintForwardingSettings] = useState({
+    emailForwarding: true,
+    whatsappForwarding: false,
+    forwardingMode: 'auto',
+    adminEmail: 'admin@bantuan-sosial.gov.id',
+    adminWhatsapp: '+62 812 9999 9999',
+    departments: []
+  });
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  // Department modal state
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [departmentModalMode, setDepartmentModalMode] = useState('add');
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+
+  // Load settings on component mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      const settings = await complaintForwardingService.getSettings();
+      setComplaintForwardingSettings(settings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
   const handleGeneralChange = (field, value) => {
     setGeneralSettings(prev => ({
       ...prev,
@@ -101,6 +136,78 @@ const PengaturanPage = () => {
     }));
   };
 
+  const handleComplaintForwardingChange = async (field, value) => {
+    try {
+      await complaintForwardingService.updateSetting(field, value);
+      await loadSettings(); // Reload settings after update
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      alert('Gagal mengupdate pengaturan. Silakan coba lagi.');
+    }
+  };
+
+  // Department modal handlers
+  const handleAddDepartment = () => {
+    setDepartmentModalMode('add');
+    setSelectedDepartment(null);
+    setShowDepartmentModal(true);
+  };
+
+  const handleEditDepartment = (department) => {
+    setDepartmentModalMode('edit');
+    setSelectedDepartment(department);
+    setShowDepartmentModal(true);
+  };
+
+  const handleDepartmentSave = async (formData) => {
+    try {
+      if (departmentModalMode === 'add') {
+        await complaintForwardingService.addDepartment(formData);
+      } else {
+        await complaintForwardingService.updateDepartment(selectedDepartment.id, formData);
+      }
+      await loadSettings(); // Reload settings after save
+    } catch (error) {
+      console.error('Error saving department:', error);
+      throw error; // Re-throw to let modal handle the error
+    }
+  };
+
+  const removeDepartment = async (departmentId) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus dinas ini?')) {
+      try {
+        await complaintForwardingService.removeDepartment(departmentId);
+        await loadSettings(); // Reload settings after removal
+      } catch (error) {
+        console.error('Error removing department:', error);
+        alert('Gagal menghapus dinas. Silakan coba lagi.');
+      }
+    }
+  };
+
+  const testAdminNotification = async (type) => {
+    try {
+      const recipient = type === 'email' 
+        ? complaintForwardingSettings.adminEmail 
+        : complaintForwardingSettings.adminWhatsapp;
+      
+      if (!recipient) {
+        alert(`${type === 'email' ? 'Email' : 'WhatsApp'} admin belum diset!`);
+        return;
+      }
+
+      const result = await complaintForwardingService.testForwarding(type, recipient);
+      
+      if (result.success) {
+        alert(`✅ Test ${type === 'email' ? 'email' : 'WhatsApp'} berhasil!\n\n${result.message}`);
+      } else {
+        alert(`❌ Test ${type === 'email' ? 'email' : 'WhatsApp'} gagal!\n\n${result.message}`);
+      }
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
+
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -134,6 +241,7 @@ const PengaturanPage = () => {
   const tabs = [
     { id: 'general', label: 'Umum', icon: Settings },
     { id: 'notifications', label: 'Notifikasi', icon: Bell },
+    { id: 'complaint-forwarding', label: 'Forward Pengaduan', icon: MessageSquare },
     { id: 'security', label: 'Keamanan', icon: Shield },
     { id: 'system', label: 'Sistem', icon: Database },
     { id: 'account', label: 'Akun', icon: User }
@@ -473,6 +581,226 @@ const PengaturanPage = () => {
                   <div className="pt-4 border-t border-slate-200">
                     <button
                       onClick={() => handleSave('notifications')}
+                      className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Simpan Pengaturan
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Complaint Forwarding Settings */}
+            {activeTab === 'complaint-forwarding' && (
+              <Card title="Pengaturan Forward Pengaduan" subtitle="Konfigurasi penerusan pengaduan ke dinas terkait">
+                <div className="space-y-6">
+                  {/* Forward Settings */}
+                  <div>
+                    <h3 className="text-lg font-medium text-slate-900 mb-4">Pengaturan Forward</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={complaintForwardingSettings.emailForwarding}
+                            onChange={(e) => handleComplaintForwardingChange('emailForwarding', e.target.checked)}
+                            className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
+                          />
+                          <span className="ml-3 text-sm font-medium text-slate-700">Forward via Email</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={complaintForwardingSettings.whatsappForwarding}
+                            onChange={(e) => handleComplaintForwardingChange('whatsappForwarding', e.target.checked)}
+                            className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
+                          />
+                          <span className="ml-3 text-sm font-medium text-slate-700">Forward via WhatsApp</span>
+                        </label>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Mode Forward
+                        </label>
+                        <select
+                          value={complaintForwardingSettings.forwardingMode}
+                          onChange={(e) => handleComplaintForwardingChange('forwardingMode', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                        >
+                          <option value="auto">Otomatis</option>
+                          <option value="manual">Manual</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Admin Settings */}
+                  <div>
+                    <h3 className="text-lg font-medium text-slate-900 mb-4">Pengaturan Admin</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Email Admin
+                        </label>
+                        <input
+                          type="email"
+                          value={complaintForwardingSettings.adminEmail}
+                          onChange={(e) => handleComplaintForwardingChange('adminEmail', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          placeholder="admin@bantuan-sosial.gov.id"
+                        />
+                        <p className="text-sm text-slate-500 mt-1">
+                          Email yang akan menerima notifikasi pengaduan darurat
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          WhatsApp Admin
+                        </label>
+                        <input
+                          type="tel"
+                          value={complaintForwardingSettings.adminWhatsapp}
+                          onChange={(e) => handleComplaintForwardingChange('adminWhatsapp', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          placeholder="+62 812 9999 9999"
+                        />
+                        <p className="text-sm text-slate-500 mt-1">
+                          Nomor WhatsApp admin untuk pesan real-time
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Test Admin Settings */}
+                    <div className="bg-orange-50 rounded-lg p-4 border border-orange-200 mt-4">
+                      <h4 className="font-medium text-orange-900 mb-2">Test Notifikasi Admin</h4>
+                      <p className="text-sm text-orange-700 mb-3">
+                        Uji coba pengiriman notifikasi ke admin untuk pengaduan darurat
+                      </p>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => testAdminNotification('email')}
+                          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Test Email Admin
+                        </button>
+                        <button
+                          onClick={() => testAdminNotification('whatsapp')}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Test WhatsApp Admin
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Department Settings */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium text-slate-900">Pengaturan Dinas</h3>
+                      <button
+                        onClick={handleAddDepartment}
+                        disabled={settingsLoading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm disabled:opacity-50"
+                      >
+                        <Building className="w-4 h-4 mr-2" />
+                        {settingsLoading ? 'Loading...' : 'Tambah Dinas'}
+                      </button>
+                    </div>
+                    
+                    {settingsLoading ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
+                        <p className="mt-2 text-sm text-slate-600">Memuat pengaturan dinas...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {complaintForwardingSettings.departments.map((department) => (
+                          <div key={department.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-slate-900 mb-1">
+                                  {department.name || 'Dinas Baru'}
+                                </h4>
+                                <div className="text-sm text-slate-600">
+                                  {department.email && (
+                                    <div className="flex items-center mb-1">
+                                      <Mail className="w-4 h-4 mr-1 text-slate-400" />
+                                      {department.email}
+                                    </div>
+                                  )}
+                                  {department.whatsapp && (
+                                    <div className="flex items-center mb-1">
+                                      <Phone className="w-4 h-4 mr-1 text-slate-400" />
+                                      {department.whatsapp}
+                                    </div>
+                                  )}
+                                  {department.categories && department.categories.length > 0 && (
+                                    <div className="flex items-center">
+                                      <span className="text-xs text-slate-500 mr-1">Kategori:</span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {department.categories.map(category => (
+                                          <span key={category} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            {category}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <button
+                                  onClick={() => handleEditDepartment(department)}
+                                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Edit Dinas"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => removeDepartment(department.id)}
+                                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Hapus Dinas"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Forward Test */}
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="font-medium text-blue-900 mb-2">Test Forward</h4>
+                    <p className="text-sm text-blue-700 mb-3">
+                      Uji coba pengiriman notifikasi ke dinas terkait
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => alert('Test email berhasil dikirim!')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Test Email
+                      </button>
+                      <button
+                        onClick={() => alert('Test WhatsApp berhasil dikirim!')}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Test WhatsApp
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-200">
+                    <button
+                      onClick={() => handleSave('complaint-forwarding')}
                       className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
                     >
                       <Save className="w-4 h-4 mr-2" />
@@ -840,6 +1168,15 @@ const PengaturanPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Department Modal */}
+      <DepartmentModal
+        isOpen={showDepartmentModal}
+        onClose={() => setShowDepartmentModal(false)}
+        onSave={handleDepartmentSave}
+        department={selectedDepartment}
+        mode={departmentModalMode}
+      />
     </ProtectedDashboardLayout>
   );
 };

@@ -233,4 +233,60 @@ export const complaintAPI = {
   }
 }
 
+// Email API Services
+export const emailAPI = {
+  // Send complaint forwarding email
+  sendComplaintEmail: (data) => {
+    return api.post('/admin/email/send-complaint', data)
+  },
+
+  // Send test email
+  sendTestEmail: (data) => {
+    return api.post('/admin/email/send-test', data)
+  },
+
+  // Get email configuration status
+  getEmailStatus: () => {
+    return api.get('/admin/email/status')
+  }
+}
+
+// Forwarding Settings API Services
+export const forwardingAPI = {
+  // Get all forwarding settings
+  getSettings: () => {
+    return api.get('/admin/forwarding/settings')
+  },
+
+  // Update forwarding settings
+  updateSettings: (data) => {
+    return api.put('/admin/forwarding/settings', data)
+  },
+
+  // Get all departments
+  getDepartments: () => {
+    return api.get('/admin/forwarding/departments')
+  },
+
+  // Create new department
+  createDepartment: (data) => {
+    return api.post('/admin/forwarding/departments', data)
+  },
+
+  // Update department
+  updateDepartment: (id, data) => {
+    return api.put(`/admin/forwarding/departments/${id}`, data)
+  },
+
+  // Delete department
+  deleteDepartment: (id) => {
+    return api.delete(`/admin/forwarding/departments/${id}`)
+  },
+
+  // Get department by category
+  getDepartmentByCategory: (category) => {
+    return api.get(`/admin/forwarding/departments/category/${category}`)
+  }
+}
+
 export default api
