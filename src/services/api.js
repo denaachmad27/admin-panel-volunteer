@@ -370,4 +370,61 @@ export const whatsappAPI = {
   }
 }
 
+// General Settings API Services
+export const generalSettingsAPI = {
+  // Get general settings
+  getSettings: () => {
+    return api.get('/admin/general/settings')
+  },
+
+  // Update general settings
+  updateSettings: (data) => {
+    // If data is FormData, send as multipart
+    if (data instanceof FormData) {
+      return api.put('/admin/general/settings', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    } else {
+      // If data is regular object, send as JSON
+      return api.put('/admin/general/settings', data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    }
+  },
+
+  // Upload logo only
+  uploadLogo: (logoFile) => {
+    const formData = new FormData()
+    formData.append('logo', logoFile)
+    return api.post('/admin/general/logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  // Delete logo
+  deleteLogo: () => {
+    return api.delete('/admin/general/logo')
+  },
+
+  // Get available options for dropdowns
+  getOptions: () => {
+    return api.get('/admin/general/options')
+  },
+
+  // Debug endpoint to test what data is received
+  debugSettings: (data) => {
+    return api.post('/admin/general/debug', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  }
+}
+
 export default api

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2, ExternalLink, Smartphone } from 'lucide-react';
+import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2, ExternalLink, Smartphone, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import complaintForwardingService from '../services/complaintForwardingService';
+import { generalSettingsAPI } from '../services/api';
 import DepartmentModal from '../components/modals/DepartmentModal';
+import { useGeneralSettings } from '../contexts/GeneralSettingsContext';
 
 const PengaturanPage = () => {
   const navigate = useNavigate();
@@ -12,18 +14,43 @@ const PengaturanPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
 
-  // General Settings State
-  const [generalSettings, setGeneralSettings] = useState({
-    siteName: 'Admin Panel Bantuan Sosial',
-    siteDescription: 'Sistem administrasi bantuan sosial untuk pengelolaan program bantuan masyarakat',
-    siteUrl: 'https://bantuan-sosial.gov.id',
-    adminEmail: 'admin@bantuan-sosial.gov.id',
-    contactPhone: '+62 21 1234 5678',
-    address: 'Jl. Raya Bantuan Sosial No. 123, Jakarta Pusat',
-    organization: 'Dinas Sosial DKI Jakarta',
-    logo: null,
-    timezone: 'Asia/Jakarta',
-    language: 'id'
+  // Use General Settings Context
+  const { 
+    settings: generalSettings, 
+    loading: generalSettingsLoading, 
+    updateSettings: updateGeneralSettingsContext,
+    refreshSettings 
+  } = useGeneralSettings();
+  
+  // Local state for editing
+  const [localGeneralSettings, setLocalGeneralSettings] = useState({});
+  
+  // Logo preview state
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  
+  // Sync local state when context settings change
+  useEffect(() => {
+    setLocalGeneralSettings(generalSettings);
+    // Clear preview when general settings change
+    if (logoPreview) {
+      URL.revokeObjectURL(logoPreview);
+    }
+    setLogoPreview(null);
+    setLogoFile(null);
+  }, [generalSettings]);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (logoPreview) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [logoPreview]);
+  const [availableOptions, setAvailableOptions] = useState({
+    timezones: {},
+    languages: {}
   });
 
   // Notification Settings State
@@ -89,6 +116,7 @@ const PengaturanPage = () => {
   // Load settings on component mount
   useEffect(() => {
     loadSettings();
+    loadAvailableOptions();
   }, []);
 
   const loadSettings = async () => {
@@ -97,14 +125,38 @@ const PengaturanPage = () => {
       const settings = await complaintForwardingService.getSettings();
       setComplaintForwardingSettings(settings);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('Error loading complaint forwarding settings:', error);
     } finally {
       setSettingsLoading(false);
     }
   };
 
+
+  const loadAvailableOptions = async () => {
+    try {
+      const response = await generalSettingsAPI.getOptions();
+      if (response.data.status === 'success') {
+        setAvailableOptions(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error loading available options:', error);
+      // Set default options if API fails
+      setAvailableOptions({
+        timezones: {
+          'Asia/Jakarta': 'Asia/Jakarta (WIB)',
+          'Asia/Makassar': 'Asia/Makassar (WITA)',
+          'Asia/Jayapura': 'Asia/Jayapura (WIT)'
+        },
+        languages: {
+          'id': 'Bahasa Indonesia',
+          'en': 'English'
+        }
+      });
+    }
+  };
+
   const handleGeneralChange = (field, value) => {
-    setGeneralSettings(prev => ({
+    setLocalGeneralSettings(prev => ({
       ...prev,
       [field]: value
     }));
@@ -210,24 +262,270 @@ const PengaturanPage = () => {
     }
   };
 
-  const handleLogoUpload = (e) => {
+  const handleLogoSelect = (e) => {
+    console.log('handleLogoSelect called');
     const file = e.target.files[0];
+    console.log('Selected file:', file);
+    
     if (file) {
-      setGeneralSettings(prev => ({
-        ...prev,
-        logo: URL.createObjectURL(file)
-      }));
+      console.log('File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      });
+
+      // Validate file size (2MB max)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Ukuran file terlalu besar. Maksimal 2MB.');
+        e.target.value = ''; // Clear input
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('File harus berupa gambar.');
+        e.target.value = ''; // Clear input
+        return;
+      }
+
+      // Clean up previous preview
+      if (logoPreview) {
+        console.log('Cleaning up previous preview:', logoPreview);
+        URL.revokeObjectURL(logoPreview);
+      }
+
+      // Store file for later upload
+      setLogoFile(file);
+      console.log('Logo file stored:', file.name);
+      
+      // Create preview URL
+      try {
+        const previewUrl = URL.createObjectURL(file);
+        console.log('Preview URL created:', previewUrl);
+        
+        // Test if URL is valid by creating a test image
+        const testImg = new Image();
+        testImg.onload = () => {
+          console.log('Preview URL is valid and image can load');
+        };
+        testImg.onerror = () => {
+          console.error('Preview URL is invalid or image cannot load');
+        };
+        testImg.src = previewUrl;
+        
+        setLogoPreview(previewUrl);
+      } catch (error) {
+        console.error('Error creating preview URL:', error);
+      }
+      
+      console.log('Logo preview state updated');
+    } else {
+      console.log('No file selected');
     }
   };
 
-  const handleSave = (section) => {
+  const handleSave = async (section) => {
+    console.log('handleSave called for section:', section);
+    console.log('Current logoFile:', logoFile?.name);
+    console.log('Current logoPreview:', logoPreview);
+    
     setSaveStatus('saving');
     
-    // Simulate API call
-    setTimeout(() => {
-      setSaveStatus('success');
+    try {
+      if (section === 'general') {
+        // First, upload logo if a new file is selected
+        if (logoFile) {
+          try {
+            console.log('Starting logo upload for file:', logoFile.name);
+            console.log('Logo file details:', {
+              name: logoFile.name,
+              size: logoFile.size,
+              type: logoFile.type
+            });
+            
+            const logoResponse = await generalSettingsAPI.uploadLogo(logoFile);
+            console.log('Logo upload response:', JSON.stringify(logoResponse.data, null, 2));
+            
+            if (logoResponse.data.status === 'success') {
+              console.log('Logo upload successful, updating local settings');
+              
+              const newLogoData = {
+                logo_path: logoResponse.data.data.logo_path,
+                logo_url: logoResponse.data.data.logo_url
+              };
+              console.log('New logo data:', newLogoData);
+              
+              // Update local settings with new logo data
+              setLocalGeneralSettings(prev => {
+                const updated = {
+                  ...prev,
+                  ...newLogoData
+                };
+                console.log('Updated local general settings:', updated);
+                return updated;
+              });
+              
+              // Update context immediately
+              console.log('Updating context with new logo data');
+              updateGeneralSettingsContext(newLogoData);
+              
+              // Clear preview and file since it's now uploaded
+              if (logoPreview) {
+                URL.revokeObjectURL(logoPreview);
+              }
+              setLogoPreview(null);
+              setLogoFile(null);
+              
+              console.log('Logo upload completed successfully');
+            } else {
+              console.error('Logo upload failed with status:', logoResponse.data.status);
+            }
+          } catch (logoError) {
+            console.error('Error uploading logo:', logoError);
+            alert('Gagal upload logo: ' + (logoError.response?.data?.message || logoError.message));
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus(null), 3000);
+            return; // Don't continue with other settings if logo upload fails
+          }
+        }
+        
+        // Prepare data object for JSON request
+        const updateData = {};
+        
+        // Only send fields that are allowed by backend validation
+        const allowedFields = [
+          'site_name', 'site_description', 'site_url', 'admin_email',
+          'contact_phone', 'address', 'organization', 'timezone', 'language'
+        ];
+        
+        allowedFields.forEach(key => {
+          const value = localGeneralSettings[key];
+          console.log(`Processing ${key}:`, JSON.stringify(value), typeof value, 'empty check:', !value);
+          
+          // Always include required fields with default values if empty
+          if (key === 'site_name') {
+            const finalValue = (value && value.trim()) || 'Admin Panel Bantuan Sosial';
+            updateData[key] = finalValue;
+            console.log(`Adding required ${key}:`, JSON.stringify(finalValue));
+          } else if (key === 'timezone') {
+            const finalValue = value || 'Asia/Jakarta';
+            updateData[key] = finalValue;
+            console.log(`Adding required ${key}:`, JSON.stringify(finalValue));
+          } else if (key === 'language') {
+            const finalValue = value || 'id';
+            updateData[key] = finalValue;
+            console.log(`Adding required ${key}:`, JSON.stringify(finalValue));
+          } else {
+            // For optional fields, only send if they have actual values
+            if (value !== null && value !== undefined && value !== '') {
+              updateData[key] = value;
+              console.log(`Adding optional ${key}:`, JSON.stringify(value));
+            } else {
+              console.log(`Skipping empty optional ${key}`);
+            }
+          }
+        });
+
+        // Debug data before sending
+        console.log('=== SENDING REQUEST ===');
+        console.log('JSON data to send:', updateData);
+
+        const response = await generalSettingsAPI.updateSettings(updateData);
+        
+        if (response.data.status === 'success') {
+          console.log('General settings update successful:', response.data.data);
+          
+          // Update local state
+          setLocalGeneralSettings(response.data.data);
+          
+          // Update context to reflect changes in other components
+          updateGeneralSettingsContext(response.data.data);
+          
+          // Refresh from server to ensure consistency (especially for logo)
+          console.log('Refreshing settings from server...');
+          await refreshSettings();
+          
+          setSaveStatus('success');
+          console.log('All settings saved successfully');
+        } else {
+          console.error('Settings update failed:', response.data);
+          throw new Error(response.data.message || 'Failed to save settings');
+        }
+      } else {
+        // Handle other sections (notifications, security, etc.) - keep existing logic
+        setSaveStatus('success');
+      }
+      
       setTimeout(() => setSaveStatus(null), 3000);
-    }, 1000);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      setSaveStatus('error');
+      
+      // More detailed error handling
+      let errorMessage = 'Gagal menyimpan pengaturan';
+      
+      if (error.response?.data?.errors) {
+        // Validation errors
+        const validationErrors = error.response.data.errors;
+        const errorList = Object.entries(validationErrors)
+          .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+          .join('\n');
+        errorMessage += ':\n\n' + errorList;
+      } else if (error.response?.data?.message) {
+        errorMessage += ': ' + error.response.data.message;
+      } else {
+        errorMessage += ': ' + error.message;
+      }
+      
+      console.log('=== ERROR DEBUGGING ===');
+      console.log('Full error object:', error);
+      console.log('Error response:', error.response);
+      console.log('Error response data:', error.response?.data);
+      console.log('Error response status:', error.response?.status);
+      
+      console.log('Current localGeneralSettings state:');
+      console.log(localGeneralSettings);
+      
+      if (section === 'general') {
+        console.log('Data processing for general settings:');
+        const allowedFields = [
+          'site_name', 'site_description', 'site_url', 'admin_email',
+          'contact_phone', 'address', 'organization', 'timezone', 'language'
+        ];
+        
+        const debugData = {};
+        allowedFields.forEach(key => {
+          const value = localGeneralSettings[key];
+          console.log(`${key}:`, JSON.stringify(value), typeof value, 'length:', value?.length);
+          
+          // Show what would be sent
+          if (key === 'site_name') {
+            const finalValue = (value && value.trim()) || 'Admin Panel Bantuan Sosial';
+            debugData[key] = finalValue;
+            console.log(`  → Will send ${key}:`, JSON.stringify(finalValue));
+          } else if (key === 'timezone') {
+            const finalValue = value || 'Asia/Jakarta';
+            debugData[key] = finalValue;
+            console.log(`  → Will send ${key}:`, JSON.stringify(finalValue));
+          } else if (key === 'language') {
+            const finalValue = value || 'id';
+            debugData[key] = finalValue;
+            console.log(`  → Will send ${key}:`, JSON.stringify(finalValue));
+          } else if (value !== null && value !== undefined && value !== '') {
+            debugData[key] = value;
+            console.log(`  → Will send ${key}:`, JSON.stringify(value));
+          } else {
+            console.log(`  → Will skip ${key} (empty)`);
+          }
+        });
+        
+        console.log('Final data to send:', debugData);
+      }
+      
+      alert(errorMessage);
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
   };
 
   const handleBackup = () => {
@@ -323,154 +621,293 @@ const PengaturanPage = () => {
             {/* General Settings */}
             {activeTab === 'general' && (
               <Card title="Pengaturan Umum" subtitle="Konfigurasi dasar sistem">
-                <div className="space-y-6">
-                  {/* Site Information */}
-                  <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Informasi Situs</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Nama Situs
-                        </label>
-                        <input
-                          type="text"
-                          value={generalSettings.siteName}
-                          onChange={(e) => handleGeneralChange('siteName', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        />
+                {generalSettingsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mr-3"></div>
+                    <p className="text-slate-600">Memuat pengaturan...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Site Information */}
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Informasi Situs</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nama Situs <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={localGeneralSettings.site_name || ''}
+                            onChange={(e) => handleGeneralChange('site_name', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                            placeholder="Admin Panel Bantuan Sosial"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            URL Situs
+                          </label>
+                          <input
+                            type="url"
+                            value={localGeneralSettings.site_url || ''}
+                            onChange={(e) => handleGeneralChange('site_url', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                            placeholder="https://bantuan-sosial.gov.id"
+                          />
+                        </div>
                       </div>
-                      <div>
+                      
+                      <div className="mt-4">
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          URL Situs
+                          Deskripsi Situs
                         </label>
-                        <input
-                          type="url"
-                          value={generalSettings.siteUrl}
-                          onChange={(e) => handleGeneralChange('siteUrl', e.target.value)}
+                        <textarea
+                          rows={3}
+                          value={localGeneralSettings.site_description || ''}
+                          onChange={(e) => handleGeneralChange('site_description', e.target.value)}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          placeholder="Deskripsi singkat tentang sistem"
                         />
                       </div>
                     </div>
-                    
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Deskripsi Situs
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={generalSettings.siteDescription}
-                        onChange={(e) => handleGeneralChange('siteDescription', e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                      />
+
+                    {/* Contact Information */}
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Informasi Kontak</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Email Admin
+                          </label>
+                          <input
+                            type="email"
+                            value={localGeneralSettings.admin_email || ''}
+                            onChange={(e) => handleGeneralChange('admin_email', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                            placeholder="admin@bantuan-sosial.gov.id"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Telepon
+                          </label>
+                          <input
+                            type="tel"
+                            value={localGeneralSettings.contact_phone || ''}
+                            onChange={(e) => handleGeneralChange('contact_phone', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                            placeholder="+62 21 1234 5678"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Organisasi
+                          </label>
+                          <input
+                            type="text"
+                            value={localGeneralSettings.organization || ''}
+                            onChange={(e) => handleGeneralChange('organization', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                            placeholder="Dinas Sosial DKI Jakarta"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Zona Waktu
+                          </label>
+                          <select
+                            value={localGeneralSettings.timezone || 'Asia/Jakarta'}
+                            onChange={(e) => handleGeneralChange('timezone', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          >
+                            {Object.entries(availableOptions.timezones).map(([value, label]) => (
+                              <option key={value} value={value}>{label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Alamat
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={localGeneralSettings.address || ''}
+                          onChange={(e) => handleGeneralChange('address', e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          placeholder="Alamat lengkap organisasi"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Language Setting */}
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Preferensi Sistem</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Bahasa
+                          </label>
+                          <select
+                            value={localGeneralSettings.language || 'id'}
+                            onChange={(e) => handleGeneralChange('language', e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                          >
+                            {Object.entries(availableOptions.languages).map(([value, label]) => (
+                              <option key={value} value={value}>{label}</option>
+                            ))}
+                          </select>
+                        </div>
                     </div>
                   </div>
 
-                  {/* Contact Information */}
-                  <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Informasi Kontak</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Email Admin
-                        </label>
-                        <input
-                          type="email"
-                          value={generalSettings.adminEmail}
-                          onChange={(e) => handleGeneralChange('adminEmail', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Telepon
-                        </label>
-                        <input
-                          type="tel"
-                          value={generalSettings.contactPhone}
-                          onChange={(e) => handleGeneralChange('contactPhone', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Organisasi
-                        </label>
-                        <input
-                          type="text"
-                          value={generalSettings.organization}
-                          onChange={(e) => handleGeneralChange('organization', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Zona Waktu
-                        </label>
-                        <select
-                          value={generalSettings.timezone}
-                          onChange={(e) => handleGeneralChange('timezone', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        >
-                          <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-                          <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
-                          <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
-                        </select>
+                    {/* Logo */}
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Logo Sistem</h3>
+                      <div className="flex items-start space-x-6">
+                        <div className="flex-shrink-0">
+                          {/* Show preview if available, otherwise show current logo */}
+                          {(() => {
+                            console.log('Rendering logo section:', { logoPreview, logoFile: logoFile?.name, localGeneralSettings: localGeneralSettings.logo_url });
+                            return logoPreview ? (
+                              <div className="w-20 h-20 border-2 border-blue-300 rounded-lg overflow-hidden relative">
+                                <img 
+                                  src={logoPreview} 
+                                  alt="Preview Logo" 
+                                  className="w-full h-full object-cover" 
+                                  onLoad={() => console.log('Preview image loaded successfully')}
+                                  onError={(e) => console.error('Preview image failed to load:', e)}
+                                />
+                                <div className="absolute inset-0 bg-blue-500/10 border border-blue-500/30"></div>
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white text-xs">●</span>
+                                </div>
+                              </div>
+                            ) : localGeneralSettings.logo_url ? (
+                            <div className="w-20 h-20 border border-slate-200 rounded-lg overflow-hidden">
+                              <img 
+                                src={localGeneralSettings.logo_url} 
+                                alt="Logo Sistem" 
+                                className="w-full h-full object-cover" 
+                                onLoad={() => console.log('Logo loaded successfully:', localGeneralSettings.logo_url)}
+                                onError={(e) => {
+                                  console.error('Logo failed to load:', localGeneralSettings.logo_url);
+                                  console.error('Image error event:', e);
+                                  // Only try alternate URL once to avoid infinite loop
+                                  if (!e.target.dataset.retried) {
+                                    e.target.dataset.retried = 'true';
+                                    let fullUrl;
+                                    if (localGeneralSettings.logo_url.startsWith('http')) {
+                                      // Replace localhost with 127.0.0.1:8000 if needed
+                                      fullUrl = localGeneralSettings.logo_url.replace('localhost', '127.0.0.1:8000');
+                                    } else {
+                                      fullUrl = `http://127.0.0.1:8000${localGeneralSettings.logo_url}`;
+                                    }
+                                    console.log('Trying corrected URL:', fullUrl);
+                                    e.target.src = fullUrl;
+                                  } else {
+                                    console.error('Failed to load logo even with full URL');
+                                    // Hide broken image
+                                    e.target.style.display = 'none';
+                                  }
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+                              <Building className="w-10 h-10 text-slate-400" />
+                            </div>
+                          );
+                          })()}
+                          {/* Debug info and status */}
+                          <div className="mt-2 text-xs text-slate-500">
+                            {logoPreview && (
+                              <div className="text-blue-600 font-medium">
+                                <p>● Preview: {logoFile?.name}</p>
+                                <p className="text-orange-600">Belum disimpan - klik "Simpan Pengaturan"</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="space-y-3">
+                            <div className="flex space-x-3">
+                              <label className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center transition-colors">
+                                <Upload className="w-4 h-4 mr-2" />
+                                {logoPreview ? 'Pilih Logo Lain' : (localGeneralSettings.logo_url ? 'Ganti Logo' : 'Pilih Logo')}
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
+                                  onChange={handleLogoSelect}
+                                  className="hidden"
+                                />
+                              </label>
+                              {logoPreview && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLogoPreview(null);
+                                    setLogoFile(null);
+                                  }}
+                                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg inline-flex items-center transition-colors"
+                                >
+                                  <X className="w-4 h-4 mr-2" />
+                                  Batal
+                                </button>
+                              )}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              <p>Format: PNG, JPG, GIF, SVG</p>
+                              <p>Ukuran maksimal: 2MB</p>
+                              <p>Rekomendasi: 200x200 pixel</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Alamat
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={generalSettings.address}
-                        onChange={(e) => handleGeneralChange('address', e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Logo */}
-                  <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Logo Sistem</h3>
-                    <div className="flex items-center space-x-4">
-                      {generalSettings.logo ? (
-                        <img src={generalSettings.logo} alt="Logo" className="w-16 h-16 object-cover rounded-lg" />
-                      ) : (
-                        <div className="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center">
-                          <Building className="w-8 h-8 text-slate-400" />
+                    <div className="pt-6 border-t border-slate-200">
+                      {logoPreview && (
+                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center text-blue-800">
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            <span className="text-sm font-medium">
+                              Logo baru akan diupload: {logoFile?.name}
+                            </span>
+                          </div>
                         </div>
                       )}
-                      <div>
-                        <label className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center transition-colors">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload Logo
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleLogoUpload}
-                            className="hidden"
-                          />
-                        </label>
-                        <p className="text-sm text-slate-500 mt-1">Format: PNG, JPG. Maksimal 2MB</p>
-                      </div>
+                      <button
+                        onClick={() => handleSave('general')}
+                        disabled={saveStatus === 'saving'}
+                        className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center ${
+                          logoPreview 
+                            ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400' 
+                            : 'bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400'
+                        } disabled:opacity-50 disabled:cursor-not-allowed text-white`}
+                      >
+                        {saveStatus === 'saving' ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            {logoFile ? 'Mengupload logo...' : 'Menyimpan...'}
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            {logoFile ? 'Simpan & Upload Logo' : 'Simpan Pengaturan'}
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  <div className="pt-4 border-t border-slate-200">
-                    <button
-                      onClick={() => handleSave('general')}
-                      className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Simpan Pengaturan
-                    </button>
-                  </div>
-                </div>
               </Card>
             )}
 
@@ -597,126 +1034,48 @@ const PengaturanPage = () => {
             {activeTab === 'complaint-forwarding' && (
               <Card title="Pengaturan Forward Pengaduan" subtitle="Konfigurasi penerusan pengaduan ke dinas terkait">
                 <div className="space-y-6">
-                  {/* Forward Settings */}
+                  {/* Integration Overview */}
                   <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Pengaturan Forward</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={complaintForwardingSettings.emailForwarding}
-                            onChange={(e) => handleComplaintForwardingChange('emailForwarding', e.target.checked)}
-                            className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
-                          />
-                          <span className="ml-3 text-sm font-medium text-slate-700">Forward via Email</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={complaintForwardingSettings.whatsappForwarding}
-                            onChange={(e) => handleComplaintForwardingChange('whatsappForwarding', e.target.checked)}
-                            className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
-                          />
-                          <span className="ml-3 text-sm font-medium text-slate-700">Forward via WhatsApp</span>
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Mode Forward
-                        </label>
-                        <select
-                          value={complaintForwardingSettings.forwardingMode}
-                          onChange={(e) => handleComplaintForwardingChange('forwardingMode', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        >
-                          <option value="auto">Otomatis</option>
-                          <option value="manual">Manual</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Admin Settings */}
-                  <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Pengaturan Admin</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Email Admin
-                        </label>
-                        <input
-                          type="email"
-                          value={complaintForwardingSettings.adminEmail}
-                          onChange={(e) => handleComplaintForwardingChange('adminEmail', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                          placeholder="admin@bantuan-sosial.gov.id"
-                        />
-                        <p className="text-sm text-slate-500 mt-1">
-                          Email yang akan menerima notifikasi pengaduan darurat
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          WhatsApp Admin
-                        </label>
-                        <input
-                          type="tel"
-                          value={complaintForwardingSettings.adminWhatsapp}
-                          onChange={(e) => handleComplaintForwardingChange('adminWhatsapp', e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                          placeholder="+62 812 9999 9999"
-                        />
-                        <p className="text-sm text-slate-500 mt-1">
-                          Nomor WhatsApp admin untuk pesan real-time
-                        </p>
-                      </div>
-                    </div>
+                    <h3 className="text-lg font-medium text-slate-900 mb-4">Integrasi Sistem</h3>
+                    <p className="text-sm text-slate-600 mb-6">
+                      Sistem forward pengaduan terintegrasi dengan WhatsApp dan Email untuk meneruskan pengaduan secara otomatis ke dinas terkait berdasarkan kategori.
+                    </p>
                     
-                    {/* Test Admin Settings */}
-                    <div className="bg-orange-50 rounded-lg p-4 border border-orange-200 mt-4">
-                      <h4 className="font-medium text-orange-900 mb-2">Test Notifikasi Admin</h4>
-                      <p className="text-sm text-orange-700 mb-3">
-                        Uji coba pengiriman notifikasi ke admin untuk pengaduan darurat
-                      </p>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => testAdminNotification('email')}
-                          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
-                        >
-                          <Mail className="w-4 h-4 mr-2" />
-                          Test Email Admin
-                        </button>
-                        <button
-                          onClick={() => testAdminNotification('whatsapp')}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
-                        >
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Test WhatsApp Admin
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WhatsApp Integration Settings */}
-                  <div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4">Integrasi WhatsApp</h3>
-                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center">
-                          <div className="p-3 rounded-full bg-green-100 mr-4">
-                            <Smartphone className="w-6 h-6 text-green-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-green-900">WhatsApp Settings</h4>
-                            <p className="text-sm text-green-700">
-                              Konfigurasi koneksi WhatsApp untuk forward pengaduan
-                            </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* WhatsApp Integration Card */}
+                      <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center">
+                            <div className="p-3 rounded-full bg-green-100 mr-4">
+                              <Smartphone className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-green-900">WhatsApp Integration</h4>
+                              <p className="text-sm text-green-700">
+                                Forward pengaduan via WhatsApp ke departemen
+                              </p>
+                            </div>
                           </div>
                         </div>
+                        
+                        <div className="space-y-3 mb-4">
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                            <span className="text-green-700">Real-time message forwarding</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                            <span className="text-green-700">Department-based routing</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                            <span className="text-green-700">Customizable templates</span>
+                          </div>
+                        </div>
+                        
                         <button
                           onClick={() => navigate('/settings/whatsapp')}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                          className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center text-sm"
                         >
                           <Settings className="w-4 h-4 mr-2" />
                           Konfigurasi WhatsApp
@@ -724,145 +1083,124 @@ const PengaturanPage = () => {
                         </button>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
-                          <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-slate-900">Connection Status</p>
-                          <p className="text-xs text-slate-600">Check WhatsApp connection</p>
+                      {/* Email Integration Card */}
+                      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center">
+                            <div className="p-3 rounded-full bg-blue-100 mr-4">
+                              <Mail className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-blue-900">Email Integration</h4>
+                              <p className="text-sm text-blue-700">
+                                Forward pengaduan via email ke departemen
+                              </p>
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
-                          <Phone className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-slate-900">Department Mapping</p>
-                          <p className="text-xs text-slate-600">Configure department contacts</p>
+                        <div className="space-y-3 mb-4">
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <span className="text-blue-700">SMTP configuration</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <span className="text-blue-700">Email templates</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <span className="text-blue-700">Department mapping</span>
+                          </div>
                         </div>
                         
-                        <div className="text-center p-4 bg-white rounded-lg border border-green-200">
-                          <Mail className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-slate-900">Message Templates</p>
-                          <p className="text-xs text-slate-600">Customize message formats</p>
+                        <button
+                          onClick={() => navigate('/settings/email')}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center text-sm"
+                        >
+                          <Settings className="w-4 h-4 mr-2" />
+                          Konfigurasi Email
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  {/* Department Management */}
+                  <div>
+                    <div className="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center">
+                          <div className="p-3 rounded-full bg-purple-100 mr-4">
+                            <Building className="w-6 h-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-purple-900">Manajemen Dinas</h4>
+                            <p className="text-sm text-purple-700">
+                              Kelola daftar dinas dan mapping kategori pengaduan
+                            </p>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="mt-4 p-3 bg-green-100 rounded-lg">
-                        <p className="text-xs text-green-700">
-                          💡 <strong>Tips:</strong> Pastikan WhatsApp sudah terhubung sebelum mengaktifkan forward via WhatsApp. 
-                          Buka halaman konfigurasi untuk scan QR code dan mengatur mapping departemen.
-                        </p>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center text-sm">
+                          <CheckCircle className="w-4 h-4 text-purple-600 mr-2" />
+                          <span className="text-purple-700">Department contact management</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <CheckCircle className="w-4 h-4 text-purple-600 mr-2" />
+                          <span className="text-purple-700">Category-based routing</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <CheckCircle className="w-4 h-4 text-purple-600 mr-2" />
+                          <span className="text-purple-700">WhatsApp & Email integration</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Department Settings */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-slate-900">Pengaturan Dinas</h3>
+                      
                       <button
-                        onClick={handleAddDepartment}
-                        disabled={settingsLoading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm disabled:opacity-50"
+                        onClick={() => navigate('/settings/daftar-dinas')}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center text-sm"
                       >
-                        <Building className="w-4 h-4 mr-2" />
-                        {settingsLoading ? 'Loading...' : 'Tambah Dinas'}
-                      </button>
-                    </div>
-                    
-                    {settingsLoading ? (
-                      <div className="text-center py-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
-                        <p className="mt-2 text-sm text-slate-600">Memuat pengaturan dinas...</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {complaintForwardingSettings.departments.map((department) => (
-                          <div key={department.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-slate-900 mb-1">
-                                  {department.name || 'Dinas Baru'}
-                                </h4>
-                                <div className="text-sm text-slate-600">
-                                  {department.email && (
-                                    <div className="flex items-center mb-1">
-                                      <Mail className="w-4 h-4 mr-1 text-slate-400" />
-                                      {department.email}
-                                    </div>
-                                  )}
-                                  {department.whatsapp && (
-                                    <div className="flex items-center mb-1">
-                                      <Phone className="w-4 h-4 mr-1 text-slate-400" />
-                                      {department.whatsapp}
-                                    </div>
-                                  )}
-                                  {department.categories && department.categories.length > 0 && (
-                                    <div className="flex items-center">
-                                      <span className="text-xs text-slate-500 mr-1">Kategori:</span>
-                                      <div className="flex flex-wrap gap-1">
-                                        {department.categories.map(category => (
-                                          <span key={category} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                            {category}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2 ml-4">
-                                <button
-                                  onClick={() => handleEditDepartment(department)}
-                                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                  title="Edit Dinas"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => removeDepartment(department.id)}
-                                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                  title="Hapus Dinas"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Forward Test */}
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-2">Test Forward</h4>
-                    <p className="text-sm text-blue-700 mb-3">
-                      Uji coba pengiriman notifikasi ke dinas terkait
-                    </p>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => alert('Test email berhasil dikirim!')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Test Email
-                      </button>
-                      <button
-                        onClick={() => alert('Test WhatsApp berhasil dikirim!')}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        Test WhatsApp
+                        <Settings className="w-4 h-4 mr-2" />
+                        Kelola Daftar Dinas
+                        <ExternalLink className="w-4 h-4 ml-2" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-200">
-                    <button
-                      onClick={() => handleSave('complaint-forwarding')}
-                      className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Simpan Pengaturan
-                    </button>
+                  {/* Quick Links */}
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <h4 className="font-medium text-slate-900 mb-3">Quick Links</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <button
+                        onClick={() => navigate('/settings/whatsapp')}
+                        className="p-3 bg-white border border-slate-200 rounded-lg hover:bg-green-50 hover:border-green-200 transition-colors text-left"
+                      >
+                        <Smartphone className="w-5 h-5 text-green-600 mb-1" />
+                        <p className="text-sm font-medium text-slate-900">WhatsApp Settings</p>
+                        <p className="text-xs text-slate-600">Configure WhatsApp integration</p>
+                      </button>
+                      
+                      <button
+                        onClick={() => navigate('/settings/email')}
+                        className="p-3 bg-white border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors text-left"
+                      >
+                        <Mail className="w-5 h-5 text-blue-600 mb-1" />
+                        <p className="text-sm font-medium text-slate-900">Email Settings</p>
+                        <p className="text-xs text-slate-600">Configure email integration</p>
+                      </button>
+                      
+                      <button
+                        onClick={() => navigate('/settings/daftar-dinas')}
+                        className="p-3 bg-white border border-slate-200 rounded-lg hover:bg-purple-50 hover:border-purple-200 transition-colors text-left"
+                      >
+                        <Building className="w-5 h-5 text-purple-600 mb-1" />
+                        <p className="text-sm font-medium text-slate-900">Manage Departments</p>
+                        <p className="text-xs text-slate-600">Department contact management</p>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </Card>

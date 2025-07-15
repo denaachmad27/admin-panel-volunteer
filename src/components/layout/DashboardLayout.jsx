@@ -18,6 +18,8 @@ import {
   Calendar,
   HelpCircle
 } from 'lucide-react';
+import LogoDisplay from '../ui/LogoDisplay';
+import { useGeneralSettings } from '../../contexts/GeneralSettingsContext';
 
 const DashboardLayout = ({ data }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +32,9 @@ const DashboardLayout = ({ data }) => {
 
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Get general settings for logo and site name
+  const { settings: generalSettings } = useGeneralSettings();
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -147,15 +152,14 @@ const DashboardLayout = ({ data }) => {
     <div className="h-full flex flex-col bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700/50">
       {/* Logo Section */}
       <div className="p-6 border-b border-slate-700/50">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <Shield className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-white font-bold text-lg">Admin Portal</h1>
-            <p className="text-slate-400 text-xs">Bantuan Sosial v1.0</p>
-          </div>
-        </div>
+        <LogoDisplay
+          logoUrl={generalSettings.logo_url}
+          siteName={generalSettings.site_name || 'Admin Portal'}
+          organization={generalSettings.organization || 'Bantuan Sosial'}
+          size="md"
+          textColor="text-white"
+          showText={true}
+        />
       </div>
 
       {/* Navigation Menu */}

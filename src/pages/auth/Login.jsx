@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Shield, Sparkles } from 'lucide-react';
 import authService from '../../services/authService';
+import LogoDisplay from '../../components/ui/LogoDisplay';
+import { useGeneralSettings } from '../../contexts/GeneralSettingsContext';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +14,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Get general settings for logo and site name
+  const { settings: generalSettings } = useGeneralSettings();
 
   // Check if already authenticated
   useEffect(() => {
@@ -136,18 +141,21 @@ const Login = () => {
           <div className="relative z-10 text-center mb-8">
             <div className="flex justify-center mb-4">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                  <Shield className="w-8 h-8 text-white relative z-10" />
-                  <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
-                </div>
+                <LogoDisplay
+                  logoUrl={generalSettings.logo_url}
+                  siteName=""
+                  size="lg"
+                  showText={false}
+                  fallbackIcon={Shield}
+                />
                 <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-yellow-400 animate-pulse" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              Admin Portal
+              {generalSettings.site_name || 'Admin Portal'}
             </h1>
             <p className="text-gray-300 text-sm">
-              Sistem Bantuan Sosial Digital
+              {generalSettings.site_description || 'Sistem Bantuan Sosial Digital'}
             </p>
           </div>
 
@@ -252,7 +260,7 @@ const Login = () => {
           {/* Footer Info */}
           <div className="relative z-10 mt-8 pt-6 border-t border-white/10">
             <p className="text-center text-xs text-gray-400">
-              Sistem Admin Bantuan Sosial v1.0
+              {generalSettings.organization || 'Sistem Admin Bantuan Sosial'} v1.0
             </p>
           </div>
         </div>

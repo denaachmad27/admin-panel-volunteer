@@ -20,6 +20,8 @@ import {
   HelpCircle,
   Building
 } from 'lucide-react';
+import LogoDisplay from '../ui/LogoDisplay';
+import { useGeneralSettings } from '../../contexts/GeneralSettingsContext';
 
 // 🔒 PROTECTED: Menu items yang sudah fix, jangan diubah
 const PROTECTED_MENU_ITEMS = [
@@ -78,7 +80,8 @@ const PROTECTED_MENU_ITEMS = [
     submenu: [
       { title: 'Pengaturan Umum', path: '/settings' },
       { title: 'Daftar Dinas', path: '/settings/daftar-dinas' },
-      { title: 'WhatsApp', path: '/settings/whatsapp' }
+      { title: 'WhatsApp', path: '/settings/whatsapp' },
+      { title: 'Email', path: '/settings/email' }
     ]
   }
 ];
@@ -94,6 +97,9 @@ const ProtectedDashboardLayout = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({});
+
+  // Get general settings for logo and site name
+  const { settings: generalSettings } = useGeneralSettings();
 
   // Refs for click outside detection
   const profileDropdownRef = useRef(null);
@@ -308,12 +314,14 @@ const ProtectedDashboardLayout = ({
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-800">Admin Panel</h2>
-          </div>
+          <LogoDisplay
+            logoUrl={generalSettings.logo_url}
+            siteName={generalSettings.site_name || 'Admin Panel'}
+            organization={generalSettings.organization}
+            size="sm"
+            textColor="text-slate-800"
+            showText={true}
+          />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded-lg hover:bg-slate-100"

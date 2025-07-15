@@ -5,6 +5,7 @@ import './index.css';
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import { GeneralSettingsProvider } from './contexts/GeneralSettingsContext';
 
 // Existing Pages (sesuai dengan struktur project asli)
 import Login from './pages/auth/Login';
@@ -27,6 +28,7 @@ import DetailPendaftaranPage from './pages/DetailPendaftaranPage';
 import KategoriPage from './pages/KategoriPage';
 import PengaturanPage from './pages/PengaturanPage';
 import WhatsappSettingsPage from './pages/WhatsappSettingsPage';
+import EmailSettingsPage from './pages/EmailSettingsPage';
 import DaftarDinasPage from './pages/DaftarDinasPage';
 
 function App() {
@@ -34,8 +36,9 @@ function App() {
   
   return (
     <ErrorBoundary>
-      <Router>
-        <div className="min-h-screen">
+      <GeneralSettingsProvider>
+        <Router>
+          <div className="min-h-screen">
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -274,6 +277,18 @@ function App() {
               } 
             />
             
+            {/* Email Settings Route */}
+            <Route 
+              path="/settings/email" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <EmailSettingsPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
             {/* Daftar Dinas Route */}
             <Route 
               path="/settings/daftar-dinas" 
@@ -298,8 +313,9 @@ function App() {
             {/* 404 fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
-        </div>
-      </Router>
+          </div>
+        </Router>
+      </GeneralSettingsProvider>
     </ErrorBoundary>
   );
 }
