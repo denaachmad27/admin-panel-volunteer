@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Clock, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Phone, Mail, Eye, MessageCircle, Filter, Search, AlertCircle, RefreshCw, Send } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { complaintAPI } from '../services/api';
 import ComplaintDetailModal from '../components/modals/ComplaintDetailModal';
@@ -178,7 +178,7 @@ const PengaduanPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="complaints"
       pageTitle="Pengaduan"
       breadcrumbs={['Pengaduan']}
@@ -535,7 +535,7 @@ const PengaduanPage = () => {
           }}
         />
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

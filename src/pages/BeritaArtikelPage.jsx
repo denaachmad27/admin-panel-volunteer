@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Edit3, Eye, Trash2, Calendar, User, Tag, Search, Filter, AlertCircle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { newsAPI } from '../services/api';
 
@@ -131,7 +131,7 @@ const BeritaArtikelPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="news"
       pageTitle="Berita & Artikel"
       breadcrumbs={['Berita & Artikel']}
@@ -478,7 +478,7 @@ const BeritaArtikelPage = () => {
           </div>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

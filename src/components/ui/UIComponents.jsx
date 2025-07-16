@@ -314,7 +314,7 @@ export const Button = ({
       {loading && (
         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
       )}
-      {icon && !loading && <icon className="w-4 h-4 mr-2" />}
+      {icon && !loading && React.createElement(icon, { className: "w-4 h-4 mr-2" })}
       {children}
     </button>
   );

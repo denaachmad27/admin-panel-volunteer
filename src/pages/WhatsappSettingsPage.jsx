@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Settings, Users, Send, QrCode, Wifi, WifiOff, CheckCircle, AlertTriangle, Smartphone, Globe } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { whatsappAPI, departmentAPI } from '../services/api';
 
@@ -380,7 +380,7 @@ const WhatsappSettingsPage = () => {
 
   if (loading) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="whatsapp-settings"
         pageTitle="WhatsApp Settings"
         breadcrumbs={['Settings', 'WhatsApp']}
@@ -391,12 +391,12 @@ const WhatsappSettingsPage = () => {
             <p className="text-slate-600">Loading WhatsApp settings...</p>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="whatsapp-settings"
       pageTitle="WhatsApp Settings"
       breadcrumbs={['Settings', 'WhatsApp']}
@@ -902,7 +902,7 @@ const WhatsappSettingsPage = () => {
           </button>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

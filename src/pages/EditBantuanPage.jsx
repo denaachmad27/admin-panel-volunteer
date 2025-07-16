@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, RefreshCw, AlertCircle, CheckCircle, Info, Loader } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { bantuanSosialAPI } from '../services/api';
 
@@ -209,7 +209,7 @@ const EditBantuanPage = () => {
 
   if (loadingData) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="bantuan"
         pageTitle="Edit Program Bantuan"
         breadcrumbs={['Bantuan Sosial', 'Edit Program']}
@@ -220,12 +220,12 @@ const EditBantuanPage = () => {
             <p className="text-slate-600">Memuat data program bantuan...</p>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Edit Program Bantuan"
       breadcrumbs={['Bantuan Sosial', 'Edit Program']}
@@ -528,7 +528,7 @@ const EditBantuanPage = () => {
           </form>
         </Card>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

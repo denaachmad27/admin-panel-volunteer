@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, Upload, Bell, Shield, Database, Globe, Mail, Phone, MapPin, Building, User, Key, Eye, EyeOff, RefreshCw, Download, AlertCircle, CheckCircle, MessageSquare, Send, Edit, Trash2, ExternalLink, Smartphone, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import complaintForwardingService from '../services/complaintForwardingService';
 import { generalSettingsAPI } from '../services/api';
@@ -548,7 +548,7 @@ const PengaturanPage = () => {
   ];
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="settings"
       pageTitle="Pengaturan"
       breadcrumbs={['Pengaturan']}
@@ -1572,7 +1572,7 @@ const PengaturanPage = () => {
         department={selectedDepartment}
         mode={departmentModalMode}
       />
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

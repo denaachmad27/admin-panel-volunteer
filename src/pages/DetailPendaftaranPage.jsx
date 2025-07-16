@@ -5,7 +5,7 @@ import {
   MessageSquare, Download, Edit3, Award, Heart, RefreshCw
 } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { pendaftaranAPI } from '../services/api';
 
@@ -173,7 +173,7 @@ const DetailPendaftaranPage = () => {
 
   if (loading) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="bantuan"
         pageTitle="Detail Pendaftaran"
         breadcrumbs={['Bantuan Sosial', 'Pendaftaran', 'Detail']}
@@ -184,13 +184,13 @@ const DetailPendaftaranPage = () => {
             <p className="text-slate-600">Memuat detail pendaftaran...</p>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   if (error || !pendaftaran) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="bantuan"
         pageTitle="Detail Pendaftaran"
         breadcrumbs={['Bantuan Sosial', 'Pendaftaran', 'Detail']}
@@ -208,12 +208,12 @@ const DetailPendaftaranPage = () => {
             </button>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Detail Pendaftaran"
       breadcrumbs={['Bantuan Sosial', 'Pendaftaran', pendaftaran.user?.name || 'Detail']}
@@ -582,7 +582,7 @@ const DetailPendaftaranPage = () => {
           </div>
         </Card>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Heart, MessageSquare, FileText, TrendingUp, Calendar, RefreshCw, AlertCircle } from 'lucide-react';
 
-// 🔧 FIXED: Import ProtectedDashboardLayout (BUKAN DashboardLayout)
-import ProtectedDashboardLayout from '../../components/layout/ProtectedDashboardLayout';
+// 🔧 FIXED: Import DashboardLayout (BUKAN DashboardLayout)
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { StatsCardTemplate } from '../../components/templates/PageTemplates';
 import { Card } from '../../components/ui/UIComponents';
 import { dashboardAPI } from '../../services/api';
@@ -139,7 +139,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="dashboard"
       pageTitle="Dashboard Overview"
       breadcrumbs={['Overview']}
@@ -312,7 +312,7 @@ const Dashboard = () => {
         </div>
 
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

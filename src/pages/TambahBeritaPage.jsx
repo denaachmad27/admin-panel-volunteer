@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Image, Save, Eye, Upload, Tag, Calendar, User, AlertCircle, Plus, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { newsAPI } from '../services/api';
 
@@ -315,7 +315,7 @@ const TambahBeritaPage = () => {
 
   if (previewMode) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="news"
         pageTitle="Preview Artikel"
         breadcrumbs={['Berita & Artikel', isEditMode ? 'Edit Berita' : 'Tambah Berita', 'Preview']}
@@ -371,12 +371,12 @@ const TambahBeritaPage = () => {
             </article>
           </Card>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="news"
       pageTitle={isEditMode ? "Edit Berita" : "Tambah Berita"}
       breadcrumbs={['Berita & Artikel', isEditMode ? 'Edit Berita' : 'Tambah Berita']}
@@ -668,7 +668,7 @@ Manfaat program ini antara lain:
           </div>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

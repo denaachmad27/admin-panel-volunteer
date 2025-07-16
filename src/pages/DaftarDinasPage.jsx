@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Building, Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, Search, Filter, RefreshCw, Mail, Phone, AlertTriangle, CheckCircle } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { departmentAPI } from '../services/api';
 import DepartmentModal from '../components/modals/DepartmentModal';
@@ -128,7 +128,7 @@ const DaftarDinasPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="settings"
       pageTitle="Daftar Dinas"
       breadcrumbs={['Pengaturan', 'Daftar Dinas']}
@@ -417,7 +417,7 @@ const DaftarDinasPage = () => {
           mode={modalMode}
         />
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

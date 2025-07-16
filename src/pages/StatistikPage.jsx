@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart3, TrendingUp, TrendingDown, Users, Heart, MessageSquare, FileText, Calendar, Download, Filter, RefreshCw, AlertCircle } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 
 const StatistikPage = () => {
@@ -79,7 +79,7 @@ const StatistikPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="statistics"
       pageTitle="Statistik"
       breadcrumbs={['Statistik']}
@@ -387,7 +387,7 @@ const StatistikPage = () => {
           </div>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

@@ -5,7 +5,7 @@ import {
   Users, Award, Loader, MessageSquare, AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { pendaftaranAPI, bantuanSosialAPI } from '../services/api';
 
@@ -227,7 +227,7 @@ const PendaftaranPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Pendaftaran Bantuan"
       breadcrumbs={['Bantuan Sosial', 'Pendaftaran']}
@@ -587,7 +587,7 @@ const PendaftaranPage = () => {
           </Card>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

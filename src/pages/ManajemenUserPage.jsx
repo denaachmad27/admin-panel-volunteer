@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Edit3, Trash2, Eye, Search, Filter, UserPlus, Shield, Clock, CheckCircle, XCircle, Mail, Phone, MapPin, Calendar, AlertCircle, RefreshCw } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import userService from '../services/userService';
 import UserModal from '../components/modals/UserModal';
@@ -230,7 +230,7 @@ const ManajemenUserPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="users"
       pageTitle="Manajemen User"
       breadcrumbs={['Manajemen User']}
@@ -698,7 +698,7 @@ const ManajemenUserPage = () => {
           </div>
         )}
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

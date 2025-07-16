@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Settings, Send, CheckCircle, AlertTriangle, Server, Key, Shield, MessageSquare, FileText } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { emailAPI, departmentAPI } from '../services/api';
 
@@ -131,7 +131,7 @@ Terima kasih.`
 
   if (loading) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="settings"
         pageTitle="Email Integration"
         breadcrumbs={['Pengaturan', 'Email']}
@@ -142,12 +142,12 @@ Terima kasih.`
             <p className="text-slate-600">Loading email settings...</p>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="settings"
       pageTitle="Email Integration"
       breadcrumbs={['Pengaturan', 'Email']}
@@ -497,7 +497,7 @@ Terima kasih.`
           </button>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

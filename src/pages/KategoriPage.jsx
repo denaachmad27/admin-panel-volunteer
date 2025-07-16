@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tag, Plus, Edit3, Trash2, Eye, Search, AlertCircle, Save, X, FileText } from 'lucide-react';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 
 const KategoriPage = () => {
@@ -227,7 +227,7 @@ const KategoriPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="news"
       pageTitle="Kategori Artikel"
       breadcrumbs={['Berita & Artikel', 'Kategori']}
@@ -535,7 +535,7 @@ const KategoriPage = () => {
           </div>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

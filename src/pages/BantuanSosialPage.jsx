@@ -4,7 +4,7 @@ import {
   Search, Filter, RefreshCw, Eye, Clock, CheckCircle, XCircle 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { bantuanSosialAPI } from '../services/api';
 
@@ -151,7 +151,7 @@ const BantuanSosialPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Bantuan Sosial"
       breadcrumbs={['Bantuan Sosial']}
@@ -484,7 +484,7 @@ const BantuanSosialPage = () => {
           </div>
         </Card>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

@@ -30,6 +30,8 @@ import PengaturanPage from './pages/PengaturanPage';
 import WhatsappSettingsPage from './pages/WhatsappSettingsPage';
 import EmailSettingsPage from './pages/EmailSettingsPage';
 import DaftarDinasPage from './pages/DaftarDinasPage';
+import ManajemenKeluargaPage from './pages/ManajemenKeluargaPage';
+import ManajemenRelawan from './pages/ManajemenRelawan';
 
 function App() {
   console.log('App component rendering...');
@@ -62,6 +64,30 @@ function App() {
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <ManajemenUserPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Manajemen Keluarga Route */}
+            <Route 
+              path="/families" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ManajemenKeluargaPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Manajemen Relawan Route */}
+            <Route 
+              path="/volunteers" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ManajemenRelawan />
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 

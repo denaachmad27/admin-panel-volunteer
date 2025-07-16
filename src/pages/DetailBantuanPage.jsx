@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Edit3, Trash2, Users, Calendar, CheckCircle, Clock, AlertCircle, Loader, FileText, Heart } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { bantuanSosialAPI } from '../services/api';
 
@@ -107,7 +107,7 @@ const DetailBantuanPage = () => {
 
   if (loading) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="bantuan"
         pageTitle="Detail Program Bantuan"
         breadcrumbs={['Bantuan Sosial', 'Detail Program']}
@@ -118,13 +118,13 @@ const DetailBantuanPage = () => {
             <p className="text-slate-600">Memuat detail program bantuan...</p>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   if (error || !bantuan) {
     return (
-      <ProtectedDashboardLayout
+      <DashboardLayout
         currentPage="bantuan"
         pageTitle="Detail Program Bantuan"
         breadcrumbs={['Bantuan Sosial', 'Detail Program']}
@@ -142,12 +142,12 @@ const DetailBantuanPage = () => {
             </button>
           </div>
         </div>
-      </ProtectedDashboardLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Detail Program Bantuan"
       breadcrumbs={['Bantuan Sosial', bantuan.nama_bantuan]}
@@ -375,7 +375,7 @@ const DetailBantuanPage = () => {
           </div>
         </Card>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

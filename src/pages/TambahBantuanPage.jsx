@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Save, RefreshCw, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { bantuanSosialAPI } from '../services/api';
 
@@ -159,7 +159,7 @@ const TambahBantuanPage = () => {
   };
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Tambah Program Bantuan"
       breadcrumbs={['Bantuan Sosial', 'Tambah Program']}
@@ -440,7 +440,7 @@ const TambahBantuanPage = () => {
           </form>
         </Card>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

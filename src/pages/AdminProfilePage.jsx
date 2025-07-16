@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Camera, Save, Lock } from 'lucide-react';
 
 // Import Protected Layout dan Templates - GUNAKAN INI UNTUK KONSISTENSI
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { 
   InputField, 
   TextareaField, 
@@ -179,7 +179,7 @@ const AdminProfilePage = () => {
   ];
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="profile"
       pageTitle="Profil Admin"
       breadcrumbs={['Admin', 'Profil']}
@@ -400,7 +400,7 @@ const AdminProfilePage = () => {
         )}
 
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 

@@ -6,7 +6,7 @@ import {
   Heart, Info, ChevronRight, ChevronDown, Plus, Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ProtectedDashboardLayout from '../components/layout/ProtectedDashboardLayout';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { pendaftaranAPI } from '../services/api';
 
@@ -318,7 +318,7 @@ const VerifikasiPage = () => {
   const filteredApplications = applyFilters();
 
   return (
-    <ProtectedDashboardLayout
+    <DashboardLayout
       currentPage="bantuan"
       pageTitle="Verifikasi Bantuan"
       breadcrumbs={['Bantuan Sosial', 'Verifikasi']}
@@ -825,7 +825,7 @@ const VerifikasiPage = () => {
           </div>
         </div>
       </div>
-    </ProtectedDashboardLayout>
+    </DashboardLayout>
   );
 };
 
