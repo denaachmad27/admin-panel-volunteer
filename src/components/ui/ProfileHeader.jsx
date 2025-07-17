@@ -37,14 +37,17 @@ const ProfileHeader = ({
           {volunteer.profile?.foto_profil ? (
             <img 
               className={`${sizes[size].avatar} rounded-full object-cover border-4 border-white shadow-md`}
-              src={volunteer.profile.foto_profil} 
+              src={`http://127.0.0.1:8000/storage/${volunteer.profile.foto_profil}`} 
               alt={volunteer.name}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div className={`${sizes[size].avatar} rounded-full bg-slate-300 flex items-center justify-center border-4 border-white shadow-md`}>
-              <User className="h-8 w-8 text-slate-600" />
-            </div>
-          )}
+          ) : null}
+          <div className={`${sizes[size].avatar} rounded-full bg-slate-300 flex items-center justify-center border-4 border-white shadow-md`} style={{ display: volunteer.profile?.foto_profil ? 'none' : 'flex' }}>
+            <User className="h-8 w-8 text-slate-600" />
+          </div>
         </div>
 
         {/* Info */}

@@ -343,14 +343,17 @@ const ManajemenRelawan = () => {
                           {volunteer.profile?.foto_profil ? (
                             <img 
                               className="h-10 w-10 rounded-full object-cover" 
-                              src={volunteer.profile.foto_profil} 
+                              src={`http://127.0.0.1:8000/storage/${volunteer.profile.foto_profil}`} 
                               alt={volunteer.name}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
                             />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-slate-300 flex items-center justify-center">
-                              <User className="h-6 w-6 text-slate-600" />
-                            </div>
-                          )}
+                          ) : null}
+                          <div className="h-10 w-10 rounded-full bg-slate-300 flex items-center justify-center" style={{ display: volunteer.profile?.foto_profil ? 'none' : 'flex' }}>
+                            <User className="h-6 w-6 text-slate-600" />
+                          </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-slate-900">
