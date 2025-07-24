@@ -179,8 +179,8 @@ const PermissionModal = ({ isOpen, onClose, user = null }) => {
                 <div key={module.key} className="border border-slate-200 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <Icon className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <Icon className="w-5 h-5 text-orange-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-slate-900">{module.name}</h3>
@@ -195,7 +195,7 @@ const PermissionModal = ({ isOpen, onClose, user = null }) => {
                           if (input) input.indeterminate = someSelected && !allSelected;
                         }}
                         onChange={(e) => handleSelectAll(module.key, e.target.checked)}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                       />
                       <span className="ml-2 text-sm font-medium text-slate-700">
                         Pilih Semua
@@ -215,7 +215,7 @@ const PermissionModal = ({ isOpen, onClose, user = null }) => {
                             type="checkbox"
                             checked={modulePermissions[action.key]}
                             onChange={(e) => handlePermissionChange(module.key, action.key, e.target.checked)}
-                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                           />
                           <ActionIcon className="w-4 h-4 ml-2 mr-1 text-slate-500" />
                           <span className="text-sm font-medium text-slate-700">
@@ -243,7 +243,7 @@ const PermissionModal = ({ isOpen, onClose, user = null }) => {
           <button
             onClick={handleSave}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
+            className="px-4 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <>

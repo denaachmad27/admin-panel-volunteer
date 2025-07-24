@@ -403,14 +403,14 @@ const WhatsappSettingsPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">WhatsApp Integration</h1>
-              <p className="text-green-100">Configure WhatsApp for forwarding complaints to departments</p>
+              <p className="text-orange-100">Configure WhatsApp for forwarding complaints to departments</p>
             </div>
             <div className="hidden md:block">
-              <MessageSquare className="w-16 h-16 text-green-200" />
+              <MessageSquare className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -448,10 +448,10 @@ const WhatsappSettingsPage = () => {
               
               <div className="text-center">
                 <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                  serviceStatus?.hasProcess ? 'bg-blue-100' : 'bg-gray-100'
+                  serviceStatus?.hasProcess ? 'bg-orange-100' : 'bg-gray-100'
                 }`}>
                   <Settings className={`w-6 h-6 ${
-                    serviceStatus?.hasProcess ? 'text-blue-600' : 'text-gray-600'
+                    serviceStatus?.hasProcess ? 'text-orange-600' : 'text-gray-600'
                   }`} />
                 </div>
                 <p className="text-sm font-medium text-slate-900">Service Status</p>
@@ -528,7 +528,7 @@ const WhatsappSettingsPage = () => {
                       type="text"
                       value={formData.session_name}
                       onChange={(e) => handleInputChange('session_name', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="admin-session"
                     />
                   </div>
@@ -539,7 +539,7 @@ const WhatsappSettingsPage = () => {
                       id="is_active"
                       checked={formData.is_active}
                       onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                      className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                     />
                     <label htmlFor="is_active" className="ml-2 text-sm text-slate-700">
                       Enable WhatsApp forwarding
@@ -551,7 +551,7 @@ const WhatsappSettingsPage = () => {
                       <button
                         onClick={initializeWhatsApp}
                         disabled={connecting}
-                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center"
+                        className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center justify-center"
                       >
                         {connecting ? (
                           <>
@@ -569,7 +569,7 @@ const WhatsappSettingsPage = () => {
                       <div className="space-y-2">
                         <button
                           onClick={testConnection}
-                          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                          className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center justify-center"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Test Connection
@@ -578,7 +578,7 @@ const WhatsappSettingsPage = () => {
                         {currentMode === 'mock' && (
                           <button
                             onClick={simulateQRScan}
-                            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center"
+                            className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center justify-center"
                           >
                             <Smartphone className="w-4 h-4 mr-2" />
                             Simulate QR Scan (Mock Mode)
@@ -719,7 +719,7 @@ const WhatsappSettingsPage = () => {
                   <button
                     onClick={fetchConsoleLogs}
                     disabled={logsLoading}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                    className="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700 disabled:opacity-50"
                   >
                     {logsLoading ? 'Refreshing...' : 'Refresh'}
                   </button>
@@ -812,35 +812,35 @@ const WhatsappSettingsPage = () => {
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Message Template</h3>
               <p className="text-sm text-slate-600 mb-4">
                 Customize the default message template sent to departments. 
-                <a href="/settings/daftar-dinas" className="text-blue-600 hover:text-blue-700 font-medium ml-1">
+                <a href="/settings/daftar-dinas" className="text-orange-600 hover:text-orange-700 font-medium ml-1">
                   Manage departments here →
                 </a>
               </p>
               
               {/* Department Status */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-blue-900">Department Integration</h4>
-                    <p className="text-xs text-blue-700 mt-1">
+                    <h4 className="text-sm font-medium text-orange-900">Department Integration</h4>
+                    <p className="text-xs text-orange-700 mt-1">
                       WhatsApp forwards complaints to departments based on categories configured in Daftar Dinas
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-blue-900">{departments.filter(d => d.is_active).length}</p>
-                    <p className="text-xs text-blue-700">Active Departments</p>
+                    <p className="text-lg font-bold text-orange-900">{departments.filter(d => d.is_active).length}</p>
+                    <p className="text-xs text-orange-700">Active Departments</p>
                   </div>
                 </div>
                 
                 {departments.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-blue-200">
-                    <p className="text-xs text-blue-700 mb-2">Active departments:</p>
+                  <div className="mt-3 pt-3 border-t border-orange-200">
+                    <p className="text-xs text-orange-700 mb-2">Active departments:</p>
                     <div className="flex flex-wrap gap-2">
                       {departments.filter(d => d.is_active).map((dept, index) => (
-                        <span key={dept.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span key={dept.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                           {dept.name}
                           {dept.categories && dept.categories.length > 0 && (
-                            <span className="ml-1 text-blue-600">({dept.categories.join(', ')})</span>
+                            <span className="ml-1 text-orange-600">({dept.categories.join(', ')})</span>
                           )}
                         </span>
                       ))}
@@ -858,7 +858,7 @@ const WhatsappSettingsPage = () => {
                     value={formData.default_message_template}
                     onChange={(e) => handleInputChange('default_message_template', e.target.value)}
                     rows={8}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Enter your message template..."
                   />
                 </div>
@@ -886,7 +886,7 @@ const WhatsappSettingsPage = () => {
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center"
+            className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center"
           >
             {saving ? (
               <>

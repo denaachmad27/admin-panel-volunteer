@@ -216,7 +216,7 @@ const EditBantuanPage = () => {
       >
         <div className="flex items-center justify-center min-h-64">
           <div className="text-center">
-            <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-green-600" />
+            <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-orange-600" />
             <p className="text-slate-600">Memuat data program bantuan...</p>
           </div>
         </div>
@@ -280,7 +280,7 @@ const EditBantuanPage = () => {
                     name="nama_bantuan"
                     value={formData.nama_bantuan}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.nama_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Program Bantuan Sembako Ramadan 2024"
@@ -299,7 +299,7 @@ const EditBantuanPage = () => {
                     name="jenis_bantuan"
                     value={formData.jenis_bantuan}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.jenis_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   >
@@ -322,7 +322,7 @@ const EditBantuanPage = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.status ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   >
@@ -347,7 +347,7 @@ const EditBantuanPage = () => {
                     onChange={handleChange}
                     min="0"
                     step="1000"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.nominal ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: 500000"
@@ -369,7 +369,7 @@ const EditBantuanPage = () => {
                     value={formData.kuota}
                     onChange={handleChange}
                     min="1"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.kuota ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: 100"
@@ -389,7 +389,7 @@ const EditBantuanPage = () => {
                     name="tanggal_mulai"
                     value={formData.tanggal_mulai}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.tanggal_mulai ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   />
@@ -408,7 +408,7 @@ const EditBantuanPage = () => {
                     name="tanggal_selesai"
                     value={formData.tanggal_selesai}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.tanggal_selesai ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   />
@@ -429,7 +429,7 @@ const EditBantuanPage = () => {
                 value={formData.deskripsi}
                 onChange={handleChange}
                 rows={4}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.deskripsi ? 'border-red-500 bg-red-50' : 'border-slate-300'
                 }`}
                 placeholder="Jelaskan tujuan, manfaat, dan detail program bantuan..."
@@ -453,7 +453,7 @@ const EditBantuanPage = () => {
                     value={formData.syarat_bantuan}
                     onChange={handleChange}
                     rows={4}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.syarat_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Warga miskin dengan pendapatan di bawah UMR, memiliki KTP aktif, tidak sedang menerima bantuan lain..."
@@ -473,7 +473,7 @@ const EditBantuanPage = () => {
                     value={formData.dokumen_diperlukan}
                     onChange={handleChange}
                     rows={3}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.dokumen_diperlukan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Fotokopi KTP, Surat Keterangan Tidak Mampu, Kartu Keluarga..."
@@ -509,7 +509,7 @@ const EditBantuanPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center"
+                  className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-400 transition-colors flex items-center"
                 >
                   {loading ? (
                     <>

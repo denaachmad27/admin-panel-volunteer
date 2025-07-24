@@ -7,41 +7,119 @@ import { StatsCardTemplate } from '../../components/templates/PageTemplates';
 import { Card } from '../../components/ui/UIComponents';
 import { dashboardAPI } from '../../services/api';
 
+// Cache configuration
+const CACHE_KEY = 'dashboard_stats_cache';
+const CACHE_TIMESTAMP_KEY = 'dashboard_stats_timestamp';
+const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes for dashboard stats
+
+// Cache utilities
+const getCachedData = () => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+    
+    if (cached && timestamp) {
+      const age = Date.now() - parseInt(timestamp);
+      if (age < CACHE_DURATION) {
+        console.log('Dashboard: Using cached data');
+        return JSON.parse(cached);
+      }
+    }
+  } catch (error) {
+    console.error('Dashboard: Error reading cache:', error);
+  }
+  return null;
+};
+
+const setCachedData = (data) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    console.log('Dashboard: Data cached');
+  } catch (error) {
+    console.error('Dashboard: Error caching data:', error);
+  }
+};
+
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Initialize dengan cached data jika ada
+  const [dashboardData, setDashboardData] = useState(() => {
+    const cached = getCachedData();
+    return cached?.dashboardData || null;
+  });
+  const [recentActivities, setRecentActivities] = useState(() => {
+    const cached = getCachedData();
+    return cached?.recentActivities || [];
+  });
+  const [loading, setLoading] = useState(false); // Mulai false jika ada cache
   const [error, setError] = useState(null);
+  const [lastLoadTime, setLastLoadTime] = useState(null);
 
   useEffect(() => {
-    loadDashboardData();
+    // Hanya load jika tidak ada cached data
+    const cached = getCachedData();
+    if (!cached) {
+      loadDashboardData();
+    }
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (forceRefresh = false) => {
     try {
+      // Check if we need to refresh
+      const now = Date.now();
+      if (!forceRefresh && lastLoadTime && (now - lastLoadTime) < CACHE_DURATION) {
+        console.log('Dashboard: Skipping load (recently loaded)');
+        return;
+      }
+
+      // Check cache first if not forcing refresh
+      if (!forceRefresh) {
+        const cachedData = getCachedData();
+        if (cachedData) {
+          console.log('Dashboard: Using cached data');
+          setDashboardData(cachedData.dashboardData);
+          setRecentActivities(cachedData.recentActivities);
+          setLastLoadTime(now);
+          return;
+        }
+      }
+
+      console.log('Dashboard: Loading fresh data from API');
       setLoading(true);
       const response = await dashboardAPI.getStatistics();
       console.log('Dashboard API Response:', response.data);
       
       if (response.data.status === 'success') {
-        setDashboardData(response.data.data.overview);
-        setRecentActivities(response.data.data.recent_activities || []);
+        const newDashboardData = response.data.data.overview;
+        const newRecentActivities = response.data.data.recent_activities || [];
+        
+        setDashboardData(newDashboardData);
+        setRecentActivities(newRecentActivities);
         setError(null);
+        setLastLoadTime(now);
+        
+        // Cache the new data
+        setCachedData({
+          dashboardData: newDashboardData,
+          recentActivities: newRecentActivities
+        });
       } else {
         throw new Error(response.data.message || 'Failed to load dashboard data');
       }
     } catch (err) {
       console.error('Dashboard loading error:', err);
       setError(err.message || 'Gagal memuat data dashboard');
-      // Fallback to mock data if API fails
-      setDashboardData({
-        total_users: 0,
-        total_programs: 0,
-        total_complaints: 0,
-        published_news: 0,
-        pending_applications: 0,
-        active_programs: 0
-      });
+      // Fallback to mock data if API fails and no cache available
+      if (!dashboardData) {
+        setDashboardData({
+          total_users: 0,
+          total_programs: 0,
+          total_complaints: 0,
+          published_news: 0,
+          pending_applications: 0,
+          active_programs: 0
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -53,8 +131,8 @@ const Dashboard = () => {
       label: 'Total Users',
       value: dashboardData.total_users || 0,
       icon: Users,
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
       change: {
         type: 'increase',
         value: `${dashboardData.new_users_this_month || 0} user baru bulan ini`
@@ -64,8 +142,8 @@ const Dashboard = () => {
       label: 'Program Bantuan',
       value: dashboardData.total_programs || 0,
       icon: Heart,
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
       change: {
         type: 'increase',
         value: `${dashboardData.active_programs || 0} program aktif`
@@ -75,8 +153,8 @@ const Dashboard = () => {
       label: 'Pengaduan',
       value: dashboardData.total_complaints || 0,
       icon: MessageSquare,
-      iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
       change: {
         type: dashboardData.pending_complaints > 0 ? 'warning' : 'success',
         value: `${dashboardData.pending_complaints || 0} menunggu review`
@@ -86,8 +164,8 @@ const Dashboard = () => {
       label: 'Berita Published',
       value: dashboardData.published_news || 0,
       icon: FileText,
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
       change: {
         type: 'increase',
         value: `${dashboardData.total_news || 0} total artikel`
@@ -98,10 +176,10 @@ const Dashboard = () => {
   // Icon mapping for activity types
   const getActivityIcon = (type) => {
     const iconMap = {
-      'user': { icon: Users, color: 'text-blue-600' },
-      'complaint': { icon: MessageSquare, color: 'text-yellow-600' },
-      'news': { icon: FileText, color: 'text-purple-600' },
-      'application': { icon: Heart, color: 'text-green-600' },
+      'user': { icon: Users, color: 'text-orange-600' },
+      'complaint': { icon: MessageSquare, color: 'text-orange-600' },
+      'news': { icon: FileText, color: 'text-orange-600' },
+      'application': { icon: Heart, color: 'text-orange-600' },
     };
     return iconMap[type] || { icon: AlertCircle, color: 'text-gray-600' };
   };
@@ -112,21 +190,21 @@ const Dashboard = () => {
       title: 'Tambah Program Bantuan',
       description: 'Buat program bantuan sosial baru',
       icon: Heart,
-      color: 'bg-green-500',
+      color: 'bg-orange-500',
       href: '/tambah-bantuan'
     },
     {
       title: 'Tulis Berita Baru',
       description: 'Publikasikan artikel atau berita',
       icon: FileText,
-      color: 'bg-blue-500',
+      color: 'bg-orange-500',
       href: '/news/create'
     },
     {
       title: 'Kelola Pengguna',
       description: 'Manajemen user dan permissions',
       icon: Users,
-      color: 'bg-purple-500',
+      color: 'bg-orange-500',
       href: '/users'
     },
     {
@@ -146,14 +224,14 @@ const Dashboard = () => {
     >
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Selamat Datang, Admin!</h1>
-              <p className="text-blue-100">Berikut adalah ringkasan aktivitas sistem bantuan sosial hari ini.</p>
+              <p className="text-orange-100">Berikut adalah ringkasan aktivitas sistem bantuan sosial hari ini.</p>
             </div>
             <div className="hidden md:block">
-              <Calendar className="w-16 h-16 text-blue-200" />
+              <Calendar className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -244,7 +322,7 @@ const Dashboard = () => {
               )}
               
               <div className="mt-6 pt-4 border-t border-slate-200">
-                <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                <button className="w-full text-center text-sm text-orange-600 hover:text-orange-700 font-medium">
                   Lihat Semua Aktivitas →
                 </button>
               </div>

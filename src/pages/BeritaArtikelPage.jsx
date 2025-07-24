@@ -103,7 +103,7 @@ const BeritaArtikelPage = () => {
   const getStatusBadge = (isPublished) => {
     if (isPublished) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
           Published
         </span>
       );
@@ -138,14 +138,14 @@ const BeritaArtikelPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Berita & Artikel</h1>
-              <p className="text-blue-100">Kelola konten berita dan artikel untuk publikasi</p>
+              <p className="text-orange-100">Kelola konten berita dan artikel untuk publikasi</p>
             </div>
             <div className="hidden md:block">
-              <FileText className="w-16 h-16 text-blue-200" />
+              <FileText className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -154,8 +154,8 @@ const BeritaArtikelPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <FileText className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <FileText className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
@@ -166,8 +166,8 @@ const BeritaArtikelPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Eye className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Eye className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{stats.totalViews}</p>
@@ -212,7 +212,7 @@ const BeritaArtikelPage = () => {
             <div className="flex space-x-2 mt-4 sm:mt-0">
               <button 
                 onClick={() => navigate('/tambah-berita')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Tambah Artikel
@@ -277,7 +277,7 @@ const BeritaArtikelPage = () => {
                 <p className="text-red-600 mb-2">{error}</p>
                 <button 
                   onClick={fetchNews}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Coba Lagi
                 </button>
@@ -317,7 +317,7 @@ const BeritaArtikelPage = () => {
                       {/* Article Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-medium text-slate-900 hover:text-blue-600 cursor-pointer">
+                          <h3 className="text-lg font-medium text-slate-900 hover:text-orange-600 cursor-pointer">
                             {article.judul}
                           </h3>
                           {getStatusBadge(article.is_published)}
@@ -354,7 +354,7 @@ const BeritaArtikelPage = () => {
                       <button 
                         onClick={() => handleTogglePublish(article.id)}
                         className={`p-2 hover:bg-blue-50 rounded-lg transition-colors ${
-                          article.is_published ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'
+                          article.is_published ? 'text-orange-600 hover:text-orange-700' : 'text-orange-600 hover:text-orange-700'
                         }`}
                         title={article.is_published ? 'Unpublish' : 'Publish'}
                       >
@@ -362,7 +362,7 @@ const BeritaArtikelPage = () => {
                       </button>
                       <button 
                         onClick={() => navigate(`/edit-berita/${article.id}`)}
-                        className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -401,8 +401,8 @@ const BeritaArtikelPage = () => {
             onClick={() => navigate('/tambah-berita')}
           >
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Plus className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Plus className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Tulis Artikel Baru</h3>
@@ -413,8 +413,8 @@ const BeritaArtikelPage = () => {
 
           <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Tag className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Tag className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Kelola Kategori</h3>
@@ -442,8 +442,8 @@ const BeritaArtikelPage = () => {
             {categories.map((category, index) => {
               const articleCount = articles.filter(article => article.kategori === category).length;
               const colors = [
-                'bg-blue-100 text-blue-800',
-                'bg-green-100 text-green-800', 
+                'bg-orange-100 text-orange-800',
+                'bg-orange-100 text-orange-800', 
                 'bg-purple-100 text-purple-800',
                 'bg-yellow-100 text-yellow-800'
               ];
@@ -468,10 +468,10 @@ const BeritaArtikelPage = () => {
         {/* Status Notice */}
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center">
-            <FileText className="w-5 h-5 text-green-600 mr-3" />
+            <FileText className="w-5 h-5 text-orange-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-800">Berita & Artikel Terintegrasi</p>
-              <p className="text-sm text-green-700 mt-1">
+              <p className="text-sm font-medium text-orange-800">Berita & Artikel Terintegrasi</p>
+              <p className="text-sm text-orange-700 mt-1">
                 Halaman ini sudah terintegrasi dengan API Laravel backend untuk manajemen berita dan artikel.
               </p>
             </div>

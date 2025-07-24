@@ -19,9 +19,11 @@ import {
   Calendar,
   HelpCircle,
   Building,
-  UserPlus
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
-import LogoDisplay from '../ui/LogoDisplay';
+import { Link } from 'react-router-dom';
+import Sidebar from './Sidebar';
 import { useGeneralSettings } from '../../contexts/GeneralSettingsContext';
 
 // Menu items utama aplikasi
@@ -43,6 +45,16 @@ const MENU_ITEMS = [
     icon: UserPlus,
     path: '/volunteers',
     id: 'volunteers'
+  },
+  {
+    title: 'Manajemen Anggota Legislatif',
+    icon: UserCheck,
+    path: '/anggota-legislatif',
+    id: 'anggota-legislatif',
+    submenu: [
+      { title: 'Daftar Anggota Legislatif', path: '/anggota-legislatif' },
+      { title: 'Tambah Anggota Legislatif', path: '/anggota-legislatif/create' }
+    ]
   },
   {
     title: 'Bantuan Sosial',
@@ -103,8 +115,6 @@ const DashboardLayout = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({});
-
   // Get general settings for logo and site name
   const { settings: generalSettings } = useGeneralSettings();
 
@@ -194,154 +204,19 @@ const DashboardLayout = ({
     }
   };
 
-  // Toggle submenu
-  const toggleSubmenu = (menuId) => {
-    setExpandedMenus(prev => ({
-      ...prev,
-      [menuId]: !prev[menuId]
-    }));
-  };
 
-  // Helper function to check if current page is a submenu item
-  const isSubmenuActive = (item) => {
-    if (!item.submenu) return false;
-    return item.submenu.some(subItem => window.location.pathname === subItem.path);
-  };
-
-
-  const renderMenuItem = (item) => {
-    if (item.type === 'separator') {
-      return (
-        <div key={item.id} className="my-2">
-          <hr className="border-slate-200" />
-        </div>
-      );
-    }
-
-    const Icon = item.icon;
-    const isActive = currentPage === item.id;
-    const isSubmenuItemActive = isSubmenuActive(item);
-    const isExpanded = expandedMenus[item.id] || isSubmenuItemActive; // Auto-expand if submenu is active
-    const hasSubmenu = item.submenu && item.submenu.length > 0;
-
-    return (
-      <div key={item.id}>
-        {/* Main Menu Item */}
-        <div
-          className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group cursor-pointer ${
-            isActive 
-              ? 'bg-blue-500 text-white shadow-lg' 
-              : isSubmenuItemActive
-              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-          onClick={(e) => {
-            if (hasSubmenu) {
-              e.preventDefault();
-              toggleSubmenu(item.id);
-            } else {
-              window.location.href = item.path;
-            }
-          }}
-        >
-          <div className="flex items-center space-x-3">
-            <Icon className={`w-5 h-5 ${
-              isActive ? 'text-white' : 
-              isSubmenuItemActive ? 'text-blue-600' :
-              'text-slate-400 group-hover:text-slate-600'
-            }`} />
-            <span className="font-medium">{item.title}</span>
-            {item.badge && (
-              <span className={`ml-auto px-2 py-1 text-xs rounded-full ${
-                item.badgeColor || 'bg-blue-100 text-blue-600'
-              }`}>
-                {item.badge}
-              </span>
-            )}
-          </div>
-          {hasSubmenu && (
-            <div className="ml-auto">
-              {isExpanded ? (
-                <ChevronDown className={`w-4 h-4 transition-transform ${
-                  isActive ? 'text-white' : 
-                  isSubmenuItemActive ? 'text-blue-600' :
-                  'text-slate-400 group-hover:text-slate-600'
-                }`} />
-              ) : (
-                <ChevronRight className={`w-4 h-4 transition-transform ${
-                  isActive ? 'text-white' : 
-                  isSubmenuItemActive ? 'text-blue-600' :
-                  'text-slate-400 group-hover:text-slate-600'
-                }`} />
-              )}
-            </div>
-          )}
-        </div>
-        
-        {/* Submenu Items */}
-        {hasSubmenu && isExpanded && (
-          <div className="mt-1 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
-            {item.submenu.map((subItem, index) => {
-              const isSubItemActive = window.location.pathname === subItem.path;
-              return (
-                <a
-                  key={index}
-                  href={subItem.path}
-                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg text-sm transition-colors ${
-                    isSubItemActive
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
-                  }`}
-                  onClick={(e) => {
-                    // Don't close submenu when clicking submenu item
-                    e.stopPropagation();
-                  }}
-                >
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      isSubItemActive ? 'bg-white' : 'bg-slate-400'
-                    }`}></div>
-                  </div>
-                  <span>{subItem.title}</span>
-                </a>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
+  
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 lg:static lg:inset-0`}>
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <LogoDisplay
-            logoUrl={generalSettings.logo_url}
-            siteName={generalSettings.site_name || 'Admin Panel'}
-            organization={generalSettings.organization}
-            size="sm"
-            textColor="text-slate-800"
-            showText={true}
-          />
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 rounded-lg hover:bg-slate-100"
-          >
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {allMenuItems.map(renderMenuItem)}
-        </nav>
-      </div>
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        generalSettings={generalSettings}
+        allMenuItems={allMenuItems}
+        currentPage={currentPage}
+      />
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0">
@@ -369,7 +244,7 @@ const DashboardLayout = ({
                 <input
                   type="text"
                   placeholder="Cari..."
-                  className="pl-10 pr-4 py-2 w-64 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 w-64 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
 
@@ -391,11 +266,11 @@ const DashboardLayout = ({
                     <div className="max-h-64 overflow-y-auto">
                       {notifications.map((notification) => (
                         <div key={notification.id} className={`p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer ${
-                          notification.unread ? 'bg-blue-50/50' : ''
+                          notification.unread ? 'bg-orange-50/50' : ''
                         }`}>
                           <div className="flex items-start space-x-3">
                             <div className={`w-2 h-2 rounded-full mt-2 ${
-                              notification.unread ? 'bg-blue-500' : 'bg-slate-300'
+                              notification.unread ? 'bg-orange-500' : 'bg-slate-300'
                             }`}></div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-slate-900 text-sm">{notification.title}</p>
@@ -416,7 +291,7 @@ const DashboardLayout = ({
                   onClick={toggleProfileDropdown}
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div className="hidden md:block text-left">
@@ -433,7 +308,7 @@ const DashboardLayout = ({
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
                     <div className="p-4 border-b border-slate-200">
                     <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                         <User className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -443,30 +318,29 @@ const DashboardLayout = ({
                     </div>
                     </div>
                     <div className="p-2">
-                    {/* 🎯 FIXED: Menggunakan onClick untuk navigation */}
-                    <button 
-                        onClick={() => window.location.href = '/admin/profile'}
+                    <Link 
+                        to='/admin/profile'
                         className="w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg hover:bg-slate-100 transition-colors"
                     >
                         <User className="w-4 h-4 text-slate-500" />
                         <span className="text-sm text-slate-700">Profil Saya 2</span>
-                    </button>
+                    </Link>
                     
-                    <button 
-                        onClick={() => window.location.href = '/settings'}
+                    <Link 
+                        to='/settings'
                         className="w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg hover:bg-slate-100 transition-colors"
                     >
                         <Settings className="w-4 h-4 text-slate-500" />
                         <span className="text-sm text-slate-700">Pengaturan</span>
-                    </button>
+                    </Link>
                     
-                    <button 
-                        onClick={() => window.location.href = '/help'}
+                    <Link 
+                        to='/help'
                         className="w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg hover:bg-slate-100 transition-colors"
                     >
                         <HelpCircle className="w-4 h-4 text-slate-500" />
                         <span className="text-sm text-slate-700">Bantuan</span>
-                    </button>
+                    </Link>
                     
                     <hr className="my-2 border-slate-200" />
                     

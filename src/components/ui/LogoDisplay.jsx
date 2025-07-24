@@ -10,7 +10,6 @@ const LogoDisplay = ({
   className = '',
   showText = true,
   textColor = 'text-white',
-  fallbackIcon: FallbackIcon = Shield
 }) => {
   const [imageError, setImageError] = useState(false);
   
@@ -83,8 +82,8 @@ const LogoDisplay = ({
 
     // Fallback to icon
     return (
-      <div className={`${sizeClasses[size]} bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center`}>
-        <FallbackIcon className={`${iconSizes[size]} text-white`} />
+      <div className={`${sizeClasses[size]} bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center`}>
+        <Shield className={`${iconSizes[size]} text-white`} />
       </div>
     );
   };

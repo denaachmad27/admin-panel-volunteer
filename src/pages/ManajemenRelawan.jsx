@@ -25,24 +25,45 @@ import Badge from '../components/ui/Badge';
 import volunteerService from '../services/volunteerService';
 import VolunteerDetailModal from '../components/VolunteerDetailModal';
 import ConfirmationModal from '../components/ConfirmationModal';
+import { useCache } from '../hooks/useCache';
 
 const ManajemenRelawan = () => {
-  const [volunteers, setVolunteers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
     profile_complete: 'all',
     city: ''
   });
+  
+  // Cache hooks for volunteers and statistics with appropriate cache durations
+  const {
+    data: volunteers,
+    loading: volunteersLoading,
+    error: volunteersError,
+    loadData: loadVolunteersData,
+    refreshData: refreshVolunteersData,
+    clearCache: clearVolunteersCache
+  } = useCache(`volunteers_${filters.search}_${filters.status}_${filters.profile_complete}_${filters.city}`, 3 * 60 * 1000, []); // 3 minutes cache for volunteer lists
+  
+  const {
+    data: statistics,
+    loading: statisticsLoading,
+    error: statisticsError,
+    loadData: loadStatisticsData,
+    refreshData: refreshStatisticsData,
+    clearCache: clearStatisticsCache
+  } = useCache('volunteer_statistics', 3 * 60 * 1000, null); // 3 minutes cache for statistics
+  
+  // Combined loading and error states
+  const loading = volunteersLoading || statisticsLoading;
+  const error = volunteersError || statisticsError;
+  
   const [pagination, setPagination] = useState({
     current_page: 1,
     per_page: 15,
     total: 0,
     last_page: 1
   });
-  const [statistics, setStatistics] = useState(null);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -51,42 +72,72 @@ const ManajemenRelawan = () => {
   useEffect(() => {
     fetchVolunteers();
     fetchStatistics();
+  }, []);
+  
+  useEffect(() => {
+    // Clear cache when filters change to force fresh data
+    clearVolunteersCache();
+    fetchVolunteers();
   }, [filters, pagination.current_page, pagination.per_page]);
 
-  const fetchVolunteers = async () => {
+  const fetchVolunteers = async (forceRefresh = false) => {
     try {
-      setLoading(true);
       const params = {
         ...filters,
         page: pagination.current_page,
         per_page: pagination.per_page
       };
       
-      const data = await volunteerService.getVolunteers(params);
-      setVolunteers(data.data);
-      setPagination(prev => ({
-        ...prev,
-        ...data
-      }));
+      const fetchFunction = async () => {
+        console.log('ManajemenRelawan: Loading volunteers from API');
+        const data = await volunteerService.getVolunteers(params);
+        
+        // Update pagination
+        setPagination(prev => ({
+          ...prev,
+          ...data
+        }));
+        
+        return data.data;
+      };
+      
+      if (forceRefresh) {
+        return await refreshVolunteersData(fetchFunction);
+      } else {
+        return await loadVolunteersData(fetchFunction);
+      }
+      
     } catch (err) {
-      setError(err.message || 'Gagal memuat data relawan');
-    } finally {
-      setLoading(false);
+      console.error('Error loading volunteers:', err);
+      throw err;
     }
   };
 
-  const fetchStatistics = async () => {
+  const fetchStatistics = async (forceRefresh = false) => {
     try {
-      const stats = await volunteerService.getVolunteerStatistics();
-      setStatistics(stats);
+      const fetchFunction = async () => {
+        console.log('ManajemenRelawan: Loading statistics from API');
+        const stats = await volunteerService.getVolunteerStatistics();
+        return stats;
+      };
+      
+      if (forceRefresh) {
+        return await refreshStatisticsData(fetchFunction);
+      } else {
+        return await loadStatisticsData(fetchFunction);
+      }
+      
     } catch (err) {
-      console.error('Gagal memuat statistik:', err);
+      console.error('Error loading statistics:', err);
+      throw err;
     }
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     setPagination(prev => ({ ...prev, current_page: 1 }));
+    // Clear cache for fresh search results
+    clearVolunteersCache();
     fetchVolunteers();
   };
 
@@ -108,9 +159,14 @@ const ManajemenRelawan = () => {
   const handleToggleStatus = async (volunteer) => {
     try {
       await volunteerService.updateVolunteerStatus(volunteer.id, !volunteer.is_active);
-      fetchVolunteers();
+      // Clear cache and refresh data
+      clearVolunteersCache();
+      clearStatisticsCache();
+      fetchVolunteers(true);
+      fetchStatistics(true);
     } catch (err) {
-      setError('Gagal mengubah status relawan');
+      console.error('Error updating volunteer status:', err);
+      throw err;
     }
   };
 
@@ -121,9 +177,14 @@ const ManajemenRelawan = () => {
       await volunteerService.deleteVolunteer(volunteerToDelete.id);
       setShowDeleteModal(false);
       setVolunteerToDelete(null);
-      fetchVolunteers();
+      // Clear cache and refresh data
+      clearVolunteersCache();
+      clearStatisticsCache();
+      fetchVolunteers(true);
+      fetchStatistics(true);
     } catch (err) {
-      setError('Gagal menghapus relawan');
+      console.error('Error deleting volunteer:', err);
+      throw err;
     }
   };
 
@@ -165,7 +226,7 @@ const ManajemenRelawan = () => {
     return (
       <DashboardLayout currentPage="volunteers">
         <div className="flex items-center justify-center min-h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -186,8 +247,11 @@ const ManajemenRelawan = () => {
             variant="primary"
             icon={RefreshCw}
             onClick={() => {
-              fetchVolunteers();
-              fetchStatistics();
+              // Clear cache and force refresh
+              clearVolunteersCache();
+              clearStatisticsCache();
+              fetchVolunteers(true);
+              fetchStatistics(true);
             }}
             loading={loading}
           >
@@ -214,25 +278,25 @@ const ManajemenRelawan = () => {
             title="Total Relawan"
             value={statistics.total_volunteers}
             icon={Users}
-            color="bg-blue-500"
+            color="bg-orange-500"
           />
           <StatCard
             title="Relawan Aktif"
             value={statistics.active_volunteers}
             icon={CheckCircle}
-            color="bg-green-500"
+            color="bg-orange-500"
           />
           <StatCard
             title="Profil Lengkap"
             value={statistics.complete_profiles}
             icon={FileText}
-            color="bg-purple-500"
+            color="bg-orange-500"
           />
           <StatCard
             title="Kelengkapan Profil"
             value={`${statistics.completion_percentage}%`}
             icon={BarChart3}
-            color="bg-yellow-500"
+            color="bg-orange-500"
           />
         </div>
       )}

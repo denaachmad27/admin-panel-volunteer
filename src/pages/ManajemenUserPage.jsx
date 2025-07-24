@@ -6,22 +6,43 @@ import userService from '../services/userService';
 import UserModal from '../components/modals/UserModal';
 import PermissionModal from '../components/modals/PermissionModal';
 import BulkActionModal from '../components/modals/BulkActionModal';
+import { useCache } from '../hooks/useCache';
 
 const ManajemenUserPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [stats, setStats] = useState({
+  
+  // Cache hooks for users and statistics with appropriate cache durations
+  const {
+    data: users,
+    loading: usersLoading,
+    error: usersError,
+    loadData: loadUsersData,
+    refreshData: refreshUsersData,
+    clearCache: clearUsersCache
+  } = useCache(`users_${activeTab}_${selectedRole}_${searchQuery}`, 3 * 60 * 1000, []); // 3 minutes cache for user lists
+  
+  const {
+    data: stats,
+    loading: statsLoading,
+    error: statsError,
+    loadData: loadStatsData,
+    refreshData: refreshStatsData,
+    clearCache: clearStatsCache
+  } = useCache('user_statistics', 3 * 60 * 1000, {
     total: 0,
     active: 0,
     inactive: 0,
     admins: 0,
     staff: 0,
     users: 0
-  });
+  }); // 3 minutes cache for statistics
+  
+  // Combined loading and error states
+  const loading = usersLoading || statsLoading;
+  const error = usersError || statsError;
+  
   const [pagination, setPagination] = useState({
     current_page: 1,
     per_page: 15,
@@ -35,12 +56,9 @@ const ManajemenUserPage = () => {
   const [showBulkActionModal, setShowBulkActionModal] = useState(false);
   const [permissionUser, setPermissionUser] = useState(null);
 
-  // Load users from API
-  const loadUsers = async (page = 1) => {
+  // Load users from API with caching
+  const loadUsers = async (page = 1, forceRefresh = false) => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const params = {
         page: page,
         per_page: pagination.per_page,
@@ -49,31 +67,51 @@ const ManajemenUserPage = () => {
         status: activeTab
       };
       
-      const response = await userService.getUsers(params);
+      const fetchFunction = async () => {
+        console.log('ManajemenUserPage: Loading users from API');
+        const response = await userService.getUsers(params);
+        
+        // Update pagination
+        setPagination({
+          current_page: response.current_page || 1,
+          per_page: response.per_page || 15,
+          total: response.total || 0,
+          last_page: response.last_page || 1
+        });
+        
+        return response.data || [];
+      };
       
-      setUsers(response.data || []);
-      setPagination({
-        current_page: response.current_page || 1,
-        per_page: response.per_page || 15,
-        total: response.total || 0,
-        last_page: response.last_page || 1
-      });
+      if (forceRefresh) {
+        return await refreshUsersData(fetchFunction);
+      } else {
+        return await loadUsersData(fetchFunction);
+      }
       
     } catch (error) {
       console.error('Error loading users:', error);
-      setError(typeof error === 'string' ? error : 'Gagal memuat data pengguna');
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
   
-  // Load statistics
-  const loadStatistics = async () => {
+  // Load statistics with caching
+  const loadStatistics = async (forceRefresh = false) => {
     try {
-      const response = await userService.getUserStatistics();
-      setStats(response);
+      const fetchFunction = async () => {
+        console.log('ManajemenUserPage: Loading statistics from API');
+        const response = await userService.getUserStatistics();
+        return response;
+      };
+      
+      if (forceRefresh) {
+        return await refreshStatsData(fetchFunction);
+      } else {
+        return await loadStatsData(fetchFunction);
+      }
+      
     } catch (error) {
       console.error('Error loading statistics:', error);
+      throw error;
     }
   };
   
@@ -85,6 +123,8 @@ const ManajemenUserPage = () => {
   
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
+      // Clear cache when filters change to force fresh data
+      clearUsersCache();
       loadUsers(1);
     }, 500);
     
@@ -101,8 +141,8 @@ const ManajemenUserPage = () => {
   const getStatusConfig = (isActive) => {
     if (isActive) {
       return { 
-        bg: 'bg-green-100', 
-        text: 'text-green-800', 
+        bg: 'bg-orange-100', 
+        text: 'text-orange-800', 
         label: 'Aktif', 
         icon: CheckCircle 
       };
@@ -119,7 +159,7 @@ const ManajemenUserPage = () => {
   const getRoleConfig = (role) => {
     const configs = {
       admin: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Admin' },
-      staff: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Staff' },
+      staff: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Staff' },
       user: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'User' }
     };
     return configs[role] || configs.user;
@@ -150,8 +190,11 @@ const ManajemenUserPage = () => {
   };
   
   const handleRefresh = () => {
-    loadUsers(pagination.current_page);
-    loadStatistics();
+    // Clear cache and force refresh
+    clearUsersCache();
+    clearStatsCache();
+    loadUsers(pagination.current_page, true);
+    loadStatistics(true);
   };
   
   const handleCreateUser = () => {
@@ -173,9 +216,11 @@ const ManajemenUserPage = () => {
       await userService.createUser(userData);
     }
     
-    // Refresh data
-    loadUsers(pagination.current_page);
-    loadStatistics();
+    // Clear cache and refresh data
+    clearUsersCache();
+    clearStatsCache();
+    loadUsers(pagination.current_page, true);
+    loadStatistics(true);
   };
   
   const handleDeleteUser = async (user) => {
@@ -188,9 +233,11 @@ const ManajemenUserPage = () => {
     try {
       await userService.deleteUser(deleteConfirm.id);
       
-      // Refresh data
-      loadUsers(pagination.current_page);
-      loadStatistics();
+      // Clear cache and refresh data
+      clearUsersCache();
+      clearStatsCache();
+      loadUsers(pagination.current_page, true);
+      loadStatistics(true);
       
       setDeleteConfirm(null);
     } catch (error) {
@@ -203,9 +250,11 @@ const ManajemenUserPage = () => {
     try {
       await userService.updateUserStatus(user.id, !user.is_active);
       
-      // Refresh data
-      loadUsers(pagination.current_page);
-      loadStatistics();
+      // Clear cache and refresh data
+      clearUsersCache();
+      clearStatsCache();
+      loadUsers(pagination.current_page, true);
+      loadStatistics(true);
     } catch (error) {
       console.error('Error updating user status:', error);
       alert('Gagal mengubah status user: ' + (typeof error === 'string' ? error : 'Terjadi kesalahan'));
@@ -224,9 +273,11 @@ const ManajemenUserPage = () => {
   const handleBulkAction = async (action, userIds) => {
     await userService.bulkAction(action, userIds);
     
-    // Refresh data
-    loadUsers(pagination.current_page);
-    loadStatistics();
+    // Clear cache and refresh data
+    clearUsersCache();
+    clearStatsCache();
+    loadUsers(pagination.current_page, true);
+    loadStatistics(true);
   };
 
   return (
@@ -237,14 +288,14 @@ const ManajemenUserPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Manajemen User</h1>
-              <p className="text-blue-100">Kelola pengguna sistem dan hak akses</p>
+              <p className="text-orange-100">Kelola pengguna sistem dan hak akses</p>
             </div>
             <div className="hidden md:block">
-              <Users className="w-16 h-16 text-blue-200" />
+              <Users className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -253,8 +304,8 @@ const ManajemenUserPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Users className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.total}</p>
@@ -265,8 +316,8 @@ const ManajemenUserPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <CheckCircle className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.active}</p>
@@ -319,7 +370,7 @@ const ManajemenUserPage = () => {
               </button>
               <button 
                 onClick={handleCreateUser}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Tambah User
@@ -338,13 +389,13 @@ const ManajemenUserPage = () => {
                   placeholder="Cari user (nama, email, telepon)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <select 
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 {roles.map(role => (
                   <option key={role.value} value={role.value}>{role.label}</option>
@@ -427,7 +478,7 @@ const ManajemenUserPage = () => {
                       {/* User Info */}
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
+                          <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -466,7 +517,7 @@ const ManajemenUserPage = () => {
                             className={`p-1.5 rounded transition-colors ${
                               user.is_active 
                                 ? 'text-slate-400 hover:text-orange-600 hover:bg-orange-50'
-                                : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                : 'text-slate-400 hover:text-orange-600 hover:bg-orange-50'
                             }`}
                             title={user.is_active ? 'Nonaktifkan User' : 'Aktifkan User'}
                           >
@@ -481,7 +532,7 @@ const ManajemenUserPage = () => {
                           </button>
                           <button 
                             onClick={() => handleEditUser(user)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" 
+                            className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" 
                             title="Edit User"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -526,7 +577,7 @@ const ManajemenUserPage = () => {
                         onClick={() => handlePageChange(page)}
                         className={`px-3 py-1 text-sm rounded-md ${
                           pagination.current_page === page
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-orange-600 text-white'
                             : 'border border-slate-300 hover:bg-slate-50'
                         }`}
                       >
@@ -560,9 +611,9 @@ const ManajemenUserPage = () => {
               <p className="text-xs text-slate-500 mt-1">Akses penuh sistem</p>
             </div>
             
-            <div className="text-center p-6 bg-blue-50 rounded-lg">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserPlus className="w-8 h-8 text-blue-600" />
+            <div className="text-center p-6 bg-orange-50 rounded-lg">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.staff}</h3>
               <p className="text-sm text-slate-600">Staff</p>
@@ -587,8 +638,8 @@ const ManajemenUserPage = () => {
             onClick={handleCreateUser}
           >
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Plus className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Plus className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Tambah User Baru</h3>
@@ -608,8 +659,8 @@ const ManajemenUserPage = () => {
             }}
           >
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Shield className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Shield className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Atur Permissions</h3>

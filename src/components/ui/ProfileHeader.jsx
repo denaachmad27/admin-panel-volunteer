@@ -30,7 +30,7 @@ const ProfileHeader = ({
   };
 
   return (
-    <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 p-6 ${className}`}>
+    <div className={`bg-gradient-to-r from-orange-50 to-red-50 p-6 ${className}`}>
       <div className="flex items-start space-x-4">
         {/* Avatar */}
         <div className="flex-shrink-0">

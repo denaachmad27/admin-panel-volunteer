@@ -350,7 +350,7 @@ const TambahBeritaPage = () => {
               {/* Article Header */}
               <header className="mb-8">
                 <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
                     {categories.find(cat => cat.value === formData.kategori)?.name || 'Uncategorized'}
                   </span>
                   <span>•</span>
@@ -383,16 +383,16 @@ const TambahBeritaPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className={`bg-gradient-to-r ${isEditMode ? 'from-blue-500 to-indigo-600' : 'from-green-500 to-emerald-600'} rounded-lg p-6 text-white`}>
+        <div className={`bg-gradient-to-r ${isEditMode ? 'from-orange-500 to-red-600' : 'from-orange-500 to-red-600'} rounded-lg p-6 text-white`}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">{isEditMode ? 'Edit Berita & Artikel' : 'Tambah Berita & Artikel'}</h1>
-              <p className={`${isEditMode ? 'text-blue-100' : 'text-green-100'}`}>
+              <p className={`${isEditMode ? 'text-orange-100' : 'text-orange-100'}`}>
                 {isEditMode ? 'Perbarui konten artikel atau berita' : 'Buat dan publikasikan artikel atau berita baru'}
               </p>
             </div>
             <div className="hidden md:block">
-              <FileText className={`w-16 h-16 ${isEditMode ? 'text-blue-200' : 'text-green-200'}`} />
+              <FileText className={`w-16 h-16 ${isEditMode ? 'text-orange-200' : 'text-orange-200'}`} />
             </div>
           </div>
         </div>
@@ -401,7 +401,7 @@ const TambahBeritaPage = () => {
         {loadingData && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
               <p className="text-slate-600">Memuat data berita...</p>
             </div>
           </div>
@@ -424,7 +424,7 @@ const TambahBeritaPage = () => {
                     name="judul"
                     value={formData.judul}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.judul ? 'border-red-300' : 'border-slate-300'
                     }`}
                     placeholder="Masukkan judul artikel yang menarik..."
@@ -453,7 +453,7 @@ const TambahBeritaPage = () => {
                             .trim();
                           setFormData(prev => ({ ...prev, slug }));
                         }}
-                        className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+                        className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded hover:bg-orange-200 transition-colors"
                       >
                         Auto-generate
                       </button>
@@ -464,7 +464,7 @@ const TambahBeritaPage = () => {
                     name="slug"
                     value={formData.slug}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="url-friendly-slug"
                   />
                   <div className="flex items-center justify-between mt-1">
@@ -472,7 +472,7 @@ const TambahBeritaPage = () => {
                       URL: /news/{formData.slug || 'url-artikel'}
                     </p>
                     {!isSlugManuallyEdited && (
-                      <p className="text-green-600 text-xs">
+                      <p className="text-orange-600 text-xs">
                         Auto-generated
                       </p>
                     )}
@@ -490,7 +490,7 @@ const TambahBeritaPage = () => {
                   value={formData.konten}
                   onChange={handleInputChange}
                   rows={15}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                     errors.konten ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Tulis konten artikel lengkap di sini...
@@ -543,7 +543,7 @@ Manfaat program ini antara lain:
                   <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
                     <Image className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                     <p className="text-slate-600 mb-4">Pilih gambar untuk artikel</p>
-                    <label className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center transition-colors">
+                    <label className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center transition-colors">
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Gambar
                       <input
@@ -572,7 +572,7 @@ Manfaat program ini antara lain:
                       name="is_published"
                       checked={formData.is_published}
                       onChange={handleInputChange}
-                      className="rounded border-slate-300 text-green-600 focus:ring-green-500"
+                      className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                     />
                     <span className="text-sm font-medium text-slate-700">
                       Publikasikan langsung
@@ -595,7 +595,7 @@ Manfaat program ini antara lain:
                   name="kategori"
                   value={formData.kategori}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                     errors.kategori ? 'border-red-300' : 'border-slate-300'
                   }`}
                 >
@@ -640,7 +640,7 @@ Manfaat program ini antara lain:
                   handleSave(true);
                 }}
                 disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 {loading ? 'Menyimpan...' : 'Publikasikan'}
@@ -651,14 +651,14 @@ Manfaat program ini antara lain:
         )}
 
         {/* Status Notice */}
-        <div className={`${isEditMode ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'} border rounded-lg p-4`}>
+        <div className={`${isEditMode ? 'bg-orange-50 border-orange-200' : 'bg-orange-50 border-orange-200'} border rounded-lg p-4`}>
           <div className="flex items-center">
-            <FileText className={`w-5 h-5 ${isEditMode ? 'text-blue-600' : 'text-green-600'} mr-3`} />
+            <FileText className={`w-5 h-5 ${isEditMode ? 'text-orange-600' : 'text-orange-600'} mr-3`} />
             <div>
-              <p className={`text-sm font-medium ${isEditMode ? 'text-blue-800' : 'text-green-800'}`}>
+              <p className={`text-sm font-medium ${isEditMode ? 'text-orange-800' : 'text-orange-800'}`}>
                 {isEditMode ? 'Form Edit Berita Terintegrasi' : 'Form Tambah Berita Terintegrasi'}
               </p>
-              <p className={`text-sm ${isEditMode ? 'text-blue-700' : 'text-green-700'} mt-1`}>
+              <p className={`text-sm ${isEditMode ? 'text-orange-700' : 'text-orange-700'} mt-1`}>
                 {isEditMode 
                   ? 'Form ini sudah terintegrasi dengan API Laravel backend untuk mengedit berita dan artikel.'
                   : 'Form ini sudah terintegrasi dengan API Laravel backend untuk menambah berita dan artikel baru.'

@@ -67,8 +67,8 @@ const PengaduanPage = () => {
         icon: AlertTriangle 
       },
       'Diproses': { 
-        bg: 'bg-blue-100', 
-        text: 'text-blue-800', 
+        bg: 'bg-orange-100', 
+        text: 'text-orange-800', 
         label: 'Diproses', 
         icon: MessageCircle 
       },
@@ -225,8 +225,8 @@ const PengaduanPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <MessageCircle className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <MessageCircle className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{stats.in_progress}</p>
@@ -410,7 +410,7 @@ const PengaduanPage = () => {
                     <div className="flex items-center space-x-2 ml-4">
                       <button 
                         onClick={() => handleQuickForward(complaint)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                         title="Quick Forward ke Dinas"
                       >
                         <Send className="w-4 h-4" />
@@ -460,7 +460,7 @@ const PengaduanPage = () => {
               const complaintCount = statistics?.by_category?.[category] || 0;
               const colors = [
                 'bg-orange-100 text-orange-800',
-                'bg-blue-100 text-blue-800', 
+                'bg-orange-100 text-orange-800', 
                 'bg-green-100 text-green-800',
                 'bg-purple-100 text-purple-800',
                 'bg-red-100 text-red-800',
@@ -500,8 +500,8 @@ const PengaduanPage = () => {
 
           <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <MessageCircle className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <MessageCircle className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Respon Cepat</h3>

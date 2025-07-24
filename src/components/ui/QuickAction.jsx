@@ -3,14 +3,14 @@ import React from 'react';
 const QuickAction = ({ title, icon: Icon, color = 'blue', onClick }) => {
   const colorClasses = {
     blue: {
-      button: 'hover:border-blue-300 hover:bg-blue-50',
-      icon: 'group-hover:text-blue-600',
-      text: 'group-hover:text-blue-700'
+      button: 'hover:border-orange-300 hover:bg-orange-50',
+      icon: 'group-hover:text-orange-600',
+      text: 'group-hover:text-orange-700'
     },
     green: {
-      button: 'hover:border-green-300 hover:bg-green-50',
-      icon: 'group-hover:text-green-600',
-      text: 'group-hover:text-green-700'
+      button: 'hover:border-orange-300 hover:bg-orange-50',
+      icon: 'group-hover:text-orange-600',
+      text: 'group-hover:text-orange-700'
     },
     purple: {
       button: 'hover:border-purple-300 hover:bg-purple-50',

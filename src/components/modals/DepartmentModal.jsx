@@ -99,7 +99,7 @@ const DepartmentModal = ({
   };
 
   const isValidPhone = (phone) => {
-    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+    const phoneRegex = /^[+]?[0-9\s\-()]{10,}$/;
     return phoneRegex.test(phone);
   };
 
@@ -162,7 +162,7 @@ const DepartmentModal = ({
       {/* Modal panel */}
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-lg px-6 py-5 border-b border-blue-500">
+        <div className="bg-gradient-to-r from-orange-600 to-red-700 rounded-t-lg px-6 py-5 border-b border-orange-500">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-white bg-opacity-30 rounded-lg flex items-center justify-center mr-4">
@@ -172,14 +172,14 @@ const DepartmentModal = ({
                 <h3 className="text-xl font-bold text-white">
                   {mode === 'create' ? 'Tambah Dinas Baru' : mode === 'edit' ? 'Edit Dinas' : 'Detail Dinas'}
                 </h3>
-                <p className="text-blue-100 text-sm mt-1">
+                <p className="text-orange-100 text-sm mt-1">
                   {mode === 'create' ? 'Lengkapi informasi dinas yang akan ditambahkan' : mode === 'edit' ? 'Perbarui informasi dinas' : 'Lihat detail informasi dinas'}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-blue-100 p-2 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all duration-200 group"
+              className="text-white hover:text-orange-100 p-2 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all duration-200 group"
               title="Tutup"
             >
               <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
@@ -202,7 +202,7 @@ const DepartmentModal = ({
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.name ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.name ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Contoh: Dinas Sosial"
                 disabled={mode === 'view'}
                 required
@@ -229,7 +229,7 @@ const DepartmentModal = ({
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.email ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="email@dinas.gov.id"
                 disabled={mode === 'view'}
               />
@@ -255,7 +255,7 @@ const DepartmentModal = ({
                 type="tel"
                 value={formData.whatsapp}
                 onChange={(e) => handleInputChange('whatsapp', e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.whatsapp ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.whatsapp ? 'border-red-500' : ''} ${mode === 'view' ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="+62 812 3456 7890"
                 disabled={mode === 'view'}
               />
@@ -282,7 +282,7 @@ const DepartmentModal = ({
                       type="checkbox"
                       checked={formData.categories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded"
+                      className="w-4 h-4 text-orange-600 bg-white border-gray-300 rounded"
                       disabled={mode === 'view'}
                     />
                     <span className="text-sm text-gray-700 font-medium">{category}</span>
@@ -297,17 +297,17 @@ const DepartmentModal = ({
 
           {/* Status Aktif */}
           <div>
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                  className="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded"
+                  className="w-5 h-5 text-orange-600 bg-white border-gray-300 rounded"
                   disabled={mode === 'view'}
                 />
                 <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-blue-600" />
+                  <Shield className="w-4 h-4 text-orange-600" />
                   <span className="text-sm font-medium text-gray-700">
                     Dinas Aktif
                   </span>
@@ -338,7 +338,7 @@ const DepartmentModal = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm font-medium rounded-lg transition-colors"
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 text-sm font-medium rounded-lg transition-colors"
               >
                 Tutup
               </button>
@@ -354,7 +354,7 @@ const DepartmentModal = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                 >
                   {isSubmitting ? (
                     <>

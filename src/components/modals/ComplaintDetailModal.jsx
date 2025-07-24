@@ -20,7 +20,6 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
 
   // Department options for forwarding
   const [departments, setDepartments] = useState([]);
-  const [departmentsLoading, setDepartmentsLoading] = useState(true);
 
   // Load departments on component mount
   useEffect(() => {
@@ -31,13 +30,10 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
 
   const loadDepartments = async () => {
     try {
-      setDepartmentsLoading(true);
       const depts = await complaintForwardingService.getDepartments();
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading departments:', error);
-    } finally {
-      setDepartmentsLoading(false);
     }
   };
 
@@ -78,21 +74,21 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
   };
 
   // Drag functions
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (event) => {
     if (imageZoom > 1) {
       setIsDragging(true);
       setDragStart({ 
-        x: e.clientX - imagePosition.x, 
-        y: e.clientY - imagePosition.y 
+        x: event.clientX - imagePosition.x, 
+        y: event.clientY - imagePosition.y 
       });
     }
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (event) => {
     if (isDragging && imageZoom > 1) {
       setImagePosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
+        x: event.clientX - dragStart.x,
+        y: event.clientY - dragStart.y
       });
     }
   };
@@ -220,8 +216,8 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
         icon: AlertTriangle 
       },
       'Diproses': { 
-        bg: 'bg-blue-100', 
-        text: 'text-blue-800', 
+        bg: 'bg-orange-100', 
+        text: 'text-orange-800', 
         label: 'Diproses', 
         icon: MessageSquare 
       },
@@ -313,9 +309,9 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                       alt="Complaint"
                       className="w-full h-auto max-h-64 object-cover hover:opacity-90 transition-opacity"
                       onClick={() => setShowImageModal(true)}
-                      onError={(e) => {
+                      onError={(event) => {
                         console.log('Image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
-                        e.target.parentNode.innerHTML = '<div class="p-4 text-center text-slate-500">Gambar tidak dapat dimuat</div>';
+                        event.target.parentNode.innerHTML = '<div class="p-4 text-center text-slate-500">Gambar tidak dapat dimuat</div>';
                       }}
                     />
                   </div>
@@ -496,17 +492,17 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
               </div>
 
               {/* Manual Forwarding Section */}
-              <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h5 className="text-lg font-semibold text-blue-900">Forward Pengaduan</h5>
-                  <Building className="w-5 h-5 text-blue-600" />
+                  <h5 className="text-lg font-semibold text-orange-900">Forward Pengaduan</h5>
+                  <Building className="w-5 h-5 text-orange-600" />
                 </div>
-                <p className="text-sm text-blue-700 mb-4">
+                <p className="text-sm text-orange-700 mb-4">
                   Teruskan pengaduan ini ke dinas terkait untuk penanganan lebih lanjut.
                 </p>
                 <button
                   onClick={() => setShowForwardingModal(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Forward ke Dinas
@@ -543,7 +539,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                   <select
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="">-- Pilih Dinas --</option>
                     {departments.map(dept => (
@@ -570,7 +566,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                     value={forwardingMessage}
                     onChange={(e) => setForwardingMessage(e.target.value)}
                     rows="3"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Tambahkan pesan untuk dinas tujuan..."
                   />
                 </div>
@@ -579,7 +575,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                   <button
                     onClick={() => handleForwardComplaint('email')}
                     disabled={!selectedDepartment || isForwarding}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center disabled:opacity-50"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     {isForwarding ? 'Mengirim...' : 'Kirim Email'}
@@ -611,8 +607,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
             
             {/* Close Button */}
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 setShowImageModal(false);
               }}
               className="absolute top-4 right-4 z-10 p-3 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white transition-colors border border-white border-opacity-30"
@@ -624,8 +619,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
             {/* Zoom Controls */}
             <div className="absolute top-4 left-4 z-10 flex flex-col space-y-2">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   handleZoomIn();
                 }}
                 className="flex items-center space-x-2 px-3 py-2 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white transition-colors border border-white border-opacity-30"
@@ -635,8 +629,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                 <span className="text-sm font-medium">+</span>
               </button>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   handleZoomOut();
                 }}
                 className="flex items-center space-x-2 px-3 py-2 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white transition-colors border border-white border-opacity-30"
@@ -646,8 +639,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                 <span className="text-sm font-medium">-</span>
               </button>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   handleFitImage();
                 }}
                 className="flex items-center space-x-2 px-3 py-2 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white transition-colors border border-white border-opacity-30"
@@ -675,7 +667,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
               src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
               alt="Complaint Full Size"
               className={`max-w-none rounded-lg transition-transform ${imageZoom > 1 ? 'cursor-move' : 'cursor-default'}`}
-              onError={(e) => {
+              onError={() => {
                 console.log('Fullscreen image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
               }}
               style={{
@@ -683,7 +675,7 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                 transformOrigin: 'center center'
               }}
               onMouseDown={handleMouseDown}
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => {} }
               draggable={false}
             />
           </div>

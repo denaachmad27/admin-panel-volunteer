@@ -171,7 +171,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="user_id"
                 value={formData.user_id}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.user_id ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -194,7 +194,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="nama_anggota"
                 value={formData.nama_anggota}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.nama_anggota ? 'border-red-500' : 'border-slate-300'
                 }`}
                 placeholder="Masukkan nama anggota keluarga"
@@ -211,7 +211,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="hubungan"
                 value={formData.hubungan}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.hubungan ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -233,7 +233,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="jenis_kelamin"
                 value={formData.jenis_kelamin}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.jenis_kelamin ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -257,7 +257,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="tanggal_lahir"
                 value={formData.tanggal_lahir}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.tanggal_lahir ? 'border-red-500' : 'border-slate-300'
                 }`}
               />
@@ -274,7 +274,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="pekerjaan"
                 value={formData.pekerjaan}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.pekerjaan ? 'border-red-500' : 'border-slate-300'
                 }`}
                 placeholder="Masukkan pekerjaan"
@@ -291,7 +291,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="pendidikan"
                 value={formData.pendidikan}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.pendidikan ? 'border-red-500' : 'border-slate-300'
                 }`}
               >
@@ -315,7 +315,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
                 name="penghasilan"
                 value={formData.penghasilan}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.penghasilan ? 'border-red-500' : 'border-slate-300'
                 }`}
                 placeholder="0"
@@ -332,7 +332,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
               name="tanggungan"
               checked={formData.tanggungan}
               onChange={handleInputChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+              className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-slate-300 rounded"
             />
             <label className="ml-2 block text-sm text-slate-700">
               Termasuk tanggungan
@@ -350,7 +350,7 @@ const FamilyModal = ({ isOpen, onClose, onSave, family, title = "Tambah Anggota 
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center"
             >
               {loading ? (
                 <>

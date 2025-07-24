@@ -11,8 +11,8 @@ const EmptyState = ({
 }) => {
   const variants = {
     default: 'text-slate-400',
-    primary: 'text-blue-400',
-    success: 'text-green-400',
+    primary: 'text-orange-400',
+    success: 'text-orange-400',
     warning: 'text-yellow-400',
     danger: 'text-red-400'
   };

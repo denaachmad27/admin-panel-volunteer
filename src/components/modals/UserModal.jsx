@@ -136,7 +136,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
                 errors.name ? 'border-red-500' : 'border-slate-300'
               }`}
               placeholder="Masukkan nama lengkap"
@@ -156,7 +156,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
                 errors.email ? 'border-red-500' : 'border-slate-300'
               }`}
               placeholder="user@example.com"
@@ -178,7 +178,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 pr-10 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                className={`w-full px-3 py-2 pr-10 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
                   errors.password ? 'border-red-500' : 'border-slate-300'
                 }`}
                 placeholder="Minimal 8 karakter"
@@ -206,7 +206,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
                 errors.phone ? 'border-red-500' : 'border-slate-300'
               }`}
               placeholder="081234567890"
@@ -225,7 +225,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
               name="role"
               value={formData.role}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+              className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
                 errors.role ? 'border-red-500' : 'border-slate-300'
               }`}
             >
@@ -246,7 +246,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
                 name="is_active"
                 checked={formData.is_active}
                 onChange={handleInputChange}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all duration-200"
+                className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all duration-200"
               />
               <span className="ml-2 text-sm font-medium text-slate-700">
                 Akun aktif
@@ -267,7 +267,7 @@ const UserModal = ({ isOpen, onClose, onSave, user = null, title = "Tambah User"
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
+              className="px-4 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <>

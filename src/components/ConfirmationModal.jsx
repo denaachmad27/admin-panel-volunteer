@@ -26,17 +26,17 @@ const ConfirmationModal = ({
       case 'success':
         return {
           icon: CheckCircle,
-          iconColor: 'text-green-600',
-          iconBgColor: 'bg-green-100',
-          confirmButtonColor: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
+          iconColor: 'text-orange-600',
+          iconBgColor: 'bg-orange-100',
+          confirmButtonColor: 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500',
           borderColor: 'border-green-200'
         };
       case 'info':
         return {
           icon: Info,
-          iconColor: 'text-blue-600',
-          iconBgColor: 'bg-blue-100',
-          confirmButtonColor: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+          iconColor: 'text-orange-600',
+          iconBgColor: 'bg-orange-100',
+          confirmButtonColor: 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500',
           borderColor: 'border-blue-200'
         };
       default: // warning

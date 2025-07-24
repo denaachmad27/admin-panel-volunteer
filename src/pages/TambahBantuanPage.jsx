@@ -185,7 +185,7 @@ const TambahBantuanPage = () => {
         {message && (
           <div className={`p-4 rounded-lg flex items-center ${
             message.includes('berhasil') 
-              ? 'bg-green-100 text-green-700 border border-green-200' 
+              ? 'bg-orange-100 text-orange-700 border border-orange-200' 
               : message.includes('kesalahan') || message.includes('Gagal')
               ? 'bg-red-100 text-red-700 border border-red-200'
               : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
@@ -214,7 +214,7 @@ const TambahBantuanPage = () => {
                     name="nama_bantuan"
                     value={formData.nama_bantuan}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.nama_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Program Bantuan Sembako Ramadan 2024"
@@ -233,7 +233,7 @@ const TambahBantuanPage = () => {
                     name="jenis_bantuan"
                     value={formData.jenis_bantuan}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.jenis_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   >
@@ -259,7 +259,7 @@ const TambahBantuanPage = () => {
                     onChange={handleChange}
                     min="0"
                     step="1000"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.nominal ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: 500000"
@@ -281,7 +281,7 @@ const TambahBantuanPage = () => {
                     value={formData.kuota}
                     onChange={handleChange}
                     min="1"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.kuota ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: 100"
@@ -301,7 +301,7 @@ const TambahBantuanPage = () => {
                     name="tanggal_mulai"
                     value={formData.tanggal_mulai}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.tanggal_mulai ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   />
@@ -320,7 +320,7 @@ const TambahBantuanPage = () => {
                     name="tanggal_selesai"
                     value={formData.tanggal_selesai}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.tanggal_selesai ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                   />
@@ -341,7 +341,7 @@ const TambahBantuanPage = () => {
                 value={formData.deskripsi}
                 onChange={handleChange}
                 rows={4}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.deskripsi ? 'border-red-500 bg-red-50' : 'border-slate-300'
                 }`}
                 placeholder="Jelaskan tujuan, manfaat, dan detail program bantuan..."
@@ -365,7 +365,7 @@ const TambahBantuanPage = () => {
                     value={formData.syarat_bantuan}
                     onChange={handleChange}
                     rows={4}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.syarat_bantuan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Warga miskin dengan pendapatan di bawah UMR, memiliki KTP aktif, tidak sedang menerima bantuan lain..."
@@ -385,7 +385,7 @@ const TambahBantuanPage = () => {
                     value={formData.dokumen_diperlukan}
                     onChange={handleChange}
                     rows={3}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                       errors.dokumen_diperlukan ? 'border-red-500 bg-red-50' : 'border-slate-300'
                     }`}
                     placeholder="Contoh: Fotokopi KTP, Surat Keterangan Tidak Mampu, Kartu Keluarga..."
@@ -421,7 +421,7 @@ const TambahBantuanPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center"
+                  className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-400 transition-colors flex items-center"
                 >
                   {loading ? (
                     <>

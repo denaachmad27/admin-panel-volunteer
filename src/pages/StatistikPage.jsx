@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, TrendingDown, Users, Heart, MessageSquare, FileText, Calendar, Download, Filter, RefreshCw, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import { useCache } from '../hooks/useCache';
 
 const StatistikPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
   const [selectedYear, setSelectedYear] = useState('2024');
 
-  // Mock data untuk statistik
+  // Cache hook for statistics data with appropriate cache duration
+  const {
+    data: statisticsData,
+    loading,
+    error,
+    loadData: loadStatisticsData,
+    refreshData: refreshStatisticsData,
+    clearCache: clearStatisticsCache
+  } = useCache(`statistics_${selectedPeriod}_${selectedYear}`, 5 * 60 * 1000, null); // 5 minutes cache for statistics
+
+  // Mock data untuk statistik (to be replaced with real API data later)
   const overallStats = {
     totalUsers: 1248,
     totalPrograms: 24,
@@ -58,6 +69,56 @@ const StatistikPage = () => {
     { category: 'Keamanan', count: 9, percentage: 10.1 }
   ];
 
+  // Load statistics data with caching (mock data for now, to be replaced with real API later)
+  const loadStatistics = async (forceRefresh = false) => {
+    try {
+      const fetchFunction = async () => {
+        console.log('StatistikPage: Loading statistics data (mock)');
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Return mock data structure that would come from API
+        return {
+          overallStats,
+          monthlyData,
+          programStats,
+          regionStats,
+          complaintCategories,
+          period: selectedPeriod,
+          year: selectedYear
+        };
+      };
+      
+      if (forceRefresh) {
+        return await refreshStatisticsData(fetchFunction);
+      } else {
+        return await loadStatisticsData(fetchFunction);
+      }
+      
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+      throw error;
+    }
+  };
+
+  // Load data on component mount and when period/year changes
+  useEffect(() => {
+    loadStatistics();
+  }, []);
+
+  useEffect(() => {
+    // Clear cache when period/year changes to force fresh data
+    clearStatisticsCache();
+    loadStatistics();
+  }, [selectedPeriod, selectedYear]);
+
+  // Handle refresh button
+  const handleRefresh = () => {
+    clearStatisticsCache();
+    loadStatistics(true);
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -75,7 +136,7 @@ const StatistikPage = () => {
   };
 
   const getGrowthColor = (growth) => {
-    return growth > 0 ? 'text-green-600' : 'text-red-600';
+    return growth > 0 ? 'text-orange-600' : 'text-red-600';
   };
 
   return (
@@ -86,7 +147,7 @@ const StatistikPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Statistik & Analisis</h1>
@@ -124,8 +185,12 @@ const StatistikPage = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <button className="flex items-center px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <button 
+              onClick={handleRefresh}
+              disabled={loading}
+              className="flex items-center px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button className="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
@@ -141,7 +206,7 @@ const StatistikPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-blue-100 mr-4">
-                  <Users className="w-6 h-6 text-blue-600" />
+                  <Users className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-900">{formatNumber(overallStats.totalUsers)}</p>
@@ -159,7 +224,7 @@ const StatistikPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-green-100 mr-4">
-                  <Heart className="w-6 h-6 text-green-600" />
+                  <Heart className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-900">{overallStats.totalPrograms}</p>
@@ -290,7 +355,7 @@ const StatistikPage = () => {
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         program.status === 'Aktif' 
-                          ? 'bg-green-100 text-green-800' 
+                          ? 'bg-orange-100 text-orange-800' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
                         {program.status}
@@ -331,7 +396,7 @@ const StatistikPage = () => {
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-2">
                     <div 
-                      className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                      className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500"
                       style={{ width: `${region.coverage}%` }}
                     />
                   </div>
@@ -346,7 +411,7 @@ const StatistikPage = () => {
           <Card className="p-4">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+                <TrendingUp className="w-6 h-6 text-orange-600" />
               </div>
               <h3 className="font-medium text-slate-900 mb-1">Pertumbuhan Positif</h3>
               <p className="text-sm text-slate-600">Registrasi pengguna naik 12.5% bulan ini</p>
@@ -356,7 +421,7 @@ const StatistikPage = () => {
           <Card className="p-4">
             <div className="text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Heart className="w-6 h-6 text-blue-600" />
+                <Heart className="w-6 h-6 text-orange-600" />
               </div>
               <h3 className="font-medium text-slate-900 mb-1">Program Efektif</h3>
               <p className="text-sm text-slate-600">1,820 penerima bantuan aktif</p>

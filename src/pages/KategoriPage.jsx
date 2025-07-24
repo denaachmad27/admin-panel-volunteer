@@ -11,7 +11,7 @@ const KategoriPage = () => {
       slug: 'program-bantuan',
       description: 'Artikel tentang program-program bantuan sosial',
       articlesCount: 45,
-      color: 'bg-blue-500',
+      color: 'bg-orange-500',
       createdAt: '2023-12-01',
       status: 'active'
     },
@@ -21,7 +21,7 @@ const KategoriPage = () => {
       slug: 'kesehatan',
       description: 'Tips dan informasi kesehatan untuk masyarakat',
       articlesCount: 28,
-      color: 'bg-green-500',
+      color: 'bg-orange-500',
       createdAt: '2023-12-01',
       status: 'active'
     },
@@ -51,7 +51,7 @@ const KategoriPage = () => {
       slug: 'laporan',
       description: 'Laporan kegiatan dan penyaluran bantuan',
       articlesCount: 15,
-      color: 'bg-indigo-500',
+      color: 'bg-orange-500',
       createdAt: '2023-12-10',
       status: 'active'
     },
@@ -74,19 +74,19 @@ const KategoriPage = () => {
     name: '',
     slug: '',
     description: '',
-    color: 'bg-blue-500'
+    color: 'bg-orange-500'
   });
   const [errors, setErrors] = useState({});
 
   const colorOptions = [
-    'bg-blue-500',
-    'bg-green-500',
+    'bg-orange-500',
+    'bg-orange-500',
     'bg-purple-500',
     'bg-orange-500',
-    'bg-indigo-500',
+    'bg-orange-500',
     'bg-red-500',
     'bg-pink-500',
-    'bg-teal-500',
+    'bg-orange-500',
     'bg-yellow-500',
     'bg-gray-500'
   ];
@@ -214,7 +214,7 @@ const KategoriPage = () => {
       name: '',
       slug: '',
       description: '',
-      color: 'bg-blue-500'
+      color: 'bg-orange-500'
     });
     setErrors({});
   };

@@ -32,6 +32,9 @@ import EmailSettingsPage from './pages/EmailSettingsPage';
 import DaftarDinasPage from './pages/DaftarDinasPage';
 import ManajemenKeluargaPage from './pages/ManajemenKeluargaPage';
 import ManajemenRelawan from './pages/ManajemenRelawan';
+import ManajemenAnggotaLegislatif from './pages/ManajemenAnggotaLegislatif';
+import TambahAnggotaLegislatif from './pages/TambahAnggotaLegislatif';
+import EditAnggotaLegislatif from './pages/EditAnggotaLegislatif';
 
 function App() {
   console.log('App component rendering...');
@@ -88,6 +91,38 @@ function App() {
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <ManajemenRelawan />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Manajemen Anggota Legislatif Routes */}
+            <Route 
+              path="/anggota-legislatif" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ManajemenAnggotaLegislatif />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/anggota-legislatif/create" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <TambahAnggotaLegislatif />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/anggota-legislatif/edit/:id" 
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <EditAnggotaLegislatif />
                   </ErrorBoundary>
                 </ProtectedRoute>
               } 

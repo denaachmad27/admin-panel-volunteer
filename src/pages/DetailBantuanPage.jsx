@@ -51,9 +51,9 @@ const DetailBantuanPage = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      'Aktif': { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+      'Aktif': { bg: 'bg-orange-100', text: 'text-orange-800', icon: CheckCircle },
       'Tidak Aktif': { bg: 'bg-gray-100', text: 'text-gray-800', icon: Clock },
-      'Selesai': { bg: 'bg-blue-100', text: 'text-blue-800', icon: CheckCircle }
+      'Selesai': { bg: 'bg-orange-100', text: 'text-orange-800', icon: CheckCircle }
     };
     
     const config = statusConfig[status] || statusConfig['Tidak Aktif'];
@@ -72,9 +72,9 @@ const DetailBantuanPage = () => {
       'Uang Tunai': { bg: 'bg-yellow-100', text: 'text-yellow-800' },
       'Sembako': { bg: 'bg-orange-100', text: 'text-orange-800' },
       'Peralatan': { bg: 'bg-purple-100', text: 'text-purple-800' },
-      'Pelatihan': { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+      'Pelatihan': { bg: 'bg-orange-100', text: 'text-orange-800' },
       'Kesehatan': { bg: 'bg-red-100', text: 'text-red-800' },
-      'Pendidikan': { bg: 'bg-blue-100', text: 'text-blue-800' }
+      'Pendidikan': { bg: 'bg-orange-100', text: 'text-orange-800' }
     };
     
     const config = jenisConfig[jenis] || { bg: 'bg-gray-100', text: 'text-gray-800' };
@@ -136,7 +136,7 @@ const DetailBantuanPage = () => {
             <p className="text-slate-600 mb-4">{error}</p>
             <button
               onClick={() => navigate('/daftar-bantuan')}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
             >
               Kembali ke Daftar Program
             </button>

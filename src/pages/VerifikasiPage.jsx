@@ -279,7 +279,7 @@ const VerifikasiPage = () => {
     const configs = {
       'high': { bg: 'bg-red-100', text: 'text-red-800', label: 'Tinggi', icon: AlertTriangle },
       'medium': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Sedang', icon: Clock },
-      'low': { bg: 'bg-green-100', text: 'text-green-800', label: 'Rendah', icon: CheckCircle }
+      'low': { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Rendah', icon: CheckCircle }
     };
     return configs[priority] || configs['medium'];
   };
@@ -339,7 +339,7 @@ const VerifikasiPage = () => {
 
         {/* Alert Messages */}
         {message && (
-          <div className="p-4 rounded-lg bg-green-100 text-green-700 border border-green-200 flex items-center">
+          <div className="p-4 rounded-lg bg-orange-100 text-orange-700 border border-orange-200 flex items-center">
             <CheckCircle className="w-5 h-5 mr-2" />
             {message}
           </div>
@@ -356,7 +356,7 @@ const VerifikasiPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-indigo-100 mr-4">
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
                 <Clock className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
@@ -380,7 +380,7 @@ const VerifikasiPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -392,7 +392,7 @@ const VerifikasiPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <div>
@@ -461,7 +461,7 @@ const VerifikasiPage = () => {
               <button
                 onClick={loadVerificationData}
                 disabled={loading}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -500,7 +500,7 @@ const VerifikasiPage = () => {
                         key={app.id}
                         className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
                           selectedApplication?.id === app.id
-                            ? 'border-indigo-300 bg-indigo-50'
+                            ? 'border-orange-300 bg-orange-50'
                             : 'border-slate-200 hover:border-slate-300'
                         }`}
                         onClick={() => setSelectedApplication(app)}
@@ -529,7 +529,7 @@ const VerifikasiPage = () => {
                             <div className="w-12 bg-slate-200 rounded-full h-2">
                               <div 
                                 className={`h-2 rounded-full ${
-                                  app.verificationScore.percentage >= 80 ? 'bg-green-500' :
+                                  app.verificationScore.percentage >= 80 ? 'bg-orange-500' :
                                   app.verificationScore.percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                 }`}
                                 style={{ width: `${app.verificationScore.percentage}%` }}
@@ -581,7 +581,7 @@ const VerifikasiPage = () => {
                     <div className="flex items-center space-x-2">
                       {getPriorityBadge(selectedApplication.priority)}
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedApplication.verificationScore.percentage >= 80 ? 'bg-green-100 text-green-800' :
+                        selectedApplication.verificationScore.percentage >= 80 ? 'bg-orange-100 text-green-800' :
                         selectedApplication.verificationScore.percentage >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                       }`}>
                         Score: {selectedApplication.verificationScore.percentage}%
@@ -631,13 +631,13 @@ const VerifikasiPage = () => {
                           </div>
                           <div className="text-xs text-slate-600">Tanggungan</div>
                         </div>
-                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-center p-3 bg-orange-50 rounded-lg">
                           <div className="text-lg font-bold text-blue-700">
                             {selectedApplication.user.profile.pekerjaan || 'Tidak Ada'}
                           </div>
                           <div className="text-xs text-blue-600">Pekerjaan</div>
                         </div>
-                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-center p-3 bg-orange-50 rounded-lg">
                           <div className="text-sm font-bold text-green-700">
                             {formatCurrency(selectedApplication.user.profile.penghasilan_bulanan)}
                           </div>
@@ -659,7 +659,7 @@ const VerifikasiPage = () => {
                       <Heart className="w-4 h-4 mr-2" />
                       Informasi Program
                     </h3>
-                    <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
                       <h4 className="font-medium text-indigo-900">{selectedApplication.bantuan_sosial?.nama_bantuan}</h4>
                       <p className="text-sm text-indigo-700 mt-1">{selectedApplication.bantuan_sosial?.jenis_bantuan}</p>
                       {selectedApplication.bantuan_sosial?.nominal && (
@@ -680,7 +680,7 @@ const VerifikasiPage = () => {
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Pesan Pemohon
                       </h3>
-                      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                      <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
                         <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{selectedApplication.alasan_pengajuan}</p>
                       </div>
                     </div>
@@ -740,7 +740,7 @@ const VerifikasiPage = () => {
                       </div>
 
                       {/* Total Score */}
-                      <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-indigo-900">Total Score Verifikasi</span>
                           <span className="text-2xl font-bold text-indigo-900">
@@ -748,10 +748,10 @@ const VerifikasiPage = () => {
                             <span className="text-lg"> ({selectedApplication.verificationScore.percentage}%)</span>
                           </span>
                         </div>
-                        <div className="w-full bg-indigo-200 rounded-full h-3 mt-2">
+                        <div className="w-full bg-orange-200 rounded-full h-3 mt-2">
                           <div 
                             className={`h-3 rounded-full ${
-                              selectedApplication.verificationScore.percentage >= 80 ? 'bg-green-600' :
+                              selectedApplication.verificationScore.percentage >= 80 ? 'bg-orange-600' :
                               selectedApplication.verificationScore.percentage >= 60 ? 'bg-yellow-600' : 'bg-red-600'
                             }`}
                             style={{ width: `${selectedApplication.verificationScore.percentage}%` }}
@@ -784,7 +784,7 @@ const VerifikasiPage = () => {
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200">
                     <button 
                       onClick={handleApprove}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                      className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Setujui

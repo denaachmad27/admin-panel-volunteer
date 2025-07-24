@@ -22,9 +22,9 @@ const TabNavigation = ({
     
     if (isActive) {
       return {
-        border: 'border-blue-500',
-        text: 'text-blue-600',
-        bg: 'bg-blue-50'
+        border: 'border-orange-500',
+        text: 'text-orange-600',
+        bg: 'bg-orange-50'
       };
     }
     

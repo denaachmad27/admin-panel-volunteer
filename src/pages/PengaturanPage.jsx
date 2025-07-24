@@ -570,16 +570,16 @@ const PengaturanPage = () => {
         {/* Save Status */}
         {saveStatus && (
           <div className={`p-4 rounded-lg border ${
-            saveStatus === 'saving' ? 'bg-blue-50 border-blue-200' :
-            saveStatus === 'success' ? 'bg-green-50 border-green-200' :
+            saveStatus === 'saving' ? 'bg-orange-50 border-orange-200' :
+            saveStatus === 'success' ? 'bg-orange-50 border-orange-200' :
             'bg-red-50 border-red-200'
           }`}>
             <div className="flex items-center">
-              {saveStatus === 'saving' && <RefreshCw className="w-5 h-5 text-blue-600 mr-3 animate-spin" />}
-              {saveStatus === 'success' && <CheckCircle className="w-5 h-5 text-green-600 mr-3" />}
+              {saveStatus === 'saving' && <RefreshCw className="w-5 h-5 text-orange-600 mr-3 animate-spin" />}
+              {saveStatus === 'success' && <CheckCircle className="w-5 h-5 text-orange-600 mr-3" />}
               <span className={`font-medium ${
-                saveStatus === 'saving' ? 'text-blue-800' :
-                saveStatus === 'success' ? 'text-green-800' :
+                saveStatus === 'saving' ? 'text-orange-800' :
+                saveStatus === 'success' ? 'text-orange-800' :
                 'text-red-800'
               }`}>
                 {saveStatus === 'saving' ? 'Menyimpan pengaturan...' :
@@ -784,8 +784,8 @@ const PengaturanPage = () => {
                                   onLoad={() => console.log('Preview image loaded successfully')}
                                   onError={(e) => console.error('Preview image failed to load:', e)}
                                 />
-                                <div className="absolute inset-0 bg-blue-500/10 border border-blue-500/30"></div>
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="absolute inset-0 bg-orange-500/10 border border-orange-500/30"></div>
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
                                   <span className="text-white text-xs">●</span>
                                 </div>
                               </div>
@@ -828,7 +828,7 @@ const PengaturanPage = () => {
                           {/* Debug info and status */}
                           <div className="mt-2 text-xs text-slate-500">
                             {logoPreview && (
-                              <div className="text-blue-600 font-medium">
+                              <div className="text-orange-600 font-medium">
                                 <p>● Preview: {logoFile?.name}</p>
                                 <p className="text-orange-600">Belum disimpan - klik "Simpan Pengaturan"</p>
                               </div>
@@ -874,7 +874,7 @@ const PengaturanPage = () => {
 
                     <div className="pt-6 border-t border-slate-200">
                       {logoPreview && (
-                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                           <div className="flex items-center text-blue-800">
                             <AlertCircle className="w-4 h-4 mr-2" />
                             <span className="text-sm font-medium">
@@ -1088,7 +1088,7 @@ const PengaturanPage = () => {
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center">
                             <div className="p-3 rounded-full bg-blue-100 mr-4">
-                              <Mail className="w-6 h-6 text-blue-600" />
+                              <Mail className="w-6 h-6 text-orange-600" />
                             </div>
                             <div>
                               <h4 className="font-semibold text-blue-900">Email Integration</h4>
@@ -1101,15 +1101,15 @@ const PengaturanPage = () => {
                         
                         <div className="space-y-3 mb-4">
                           <div className="flex items-center text-sm">
-                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <CheckCircle className="w-4 h-4 text-orange-600 mr-2" />
                             <span className="text-blue-700">SMTP configuration</span>
                           </div>
                           <div className="flex items-center text-sm">
-                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <CheckCircle className="w-4 h-4 text-orange-600 mr-2" />
                             <span className="text-blue-700">Email templates</span>
                           </div>
                           <div className="flex items-center text-sm">
-                            <CheckCircle className="w-4 h-4 text-blue-600 mr-2" />
+                            <CheckCircle className="w-4 h-4 text-orange-600 mr-2" />
                             <span className="text-blue-700">Department mapping</span>
                           </div>
                         </div>
@@ -1187,7 +1187,7 @@ const PengaturanPage = () => {
                         onClick={() => navigate('/settings/email')}
                         className="p-3 bg-white border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors text-left"
                       >
-                        <Mail className="w-5 h-5 text-blue-600 mb-1" />
+                        <Mail className="w-5 h-5 text-orange-600 mb-1" />
                         <p className="text-sm font-medium text-slate-900">Email Settings</p>
                         <p className="text-xs text-slate-600">Configure email integration</p>
                       </button>

@@ -40,7 +40,7 @@ export const InputField = ({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
             icon ? 'pl-10' : ''
           } ${
             error ? 'border-red-300 bg-red-50' : 'border-slate-300'
@@ -98,7 +98,7 @@ export const TextareaField = ({
         placeholder={placeholder}
         disabled={disabled}
         rows={rows}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-vertical ${
+        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors resize-vertical ${
           error ? 'border-red-300 bg-red-50' : 'border-slate-300'
         } ${
           disabled ? 'bg-slate-100 cursor-not-allowed' : 'bg-white'
@@ -141,7 +141,7 @@ export const SelectField = ({
         value={value}
         onChange={onChange}
         disabled={disabled}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors ${
           error ? 'border-red-300 bg-red-50' : 'border-slate-300'
         } ${
           disabled ? 'bg-slate-100 cursor-not-allowed' : 'bg-white'
@@ -223,7 +223,7 @@ export const FileUploadField = ({
       
       <div
         className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-          dragActive ? 'border-blue-400 bg-blue-50' : 'border-slate-300'
+          dragActive ? 'border-orange-400 bg-orange-50' : 'border-slate-300'
         } ${
           error ? 'border-red-300 bg-red-50' : ''
         } ${
@@ -245,7 +245,7 @@ export const FileUploadField = ({
         
         <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
         <p className="text-sm text-slate-600">
-          Drag & drop file di sini, atau <span className="text-blue-600 font-medium">browse</span>
+          Drag & drop file di sini, atau <span className="text-orange-600 font-medium">browse</span>
         </p>
         <p className="text-xs text-slate-500 mt-1">
           Max {maxSize}MB {accept && `• ${accept}`}
@@ -288,7 +288,7 @@ export const Button = ({
   const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
   
   const variants = {
-    primary: "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500",
+    primary: "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500",
     secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-500",
     danger: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500",
     success: "bg-green-500 text-white hover:bg-green-600 focus:ring-green-500",
@@ -403,7 +403,7 @@ export const Badge = ({
 }) => {
   const variants = {
     default: "bg-slate-100 text-slate-800",
-    primary: "bg-blue-100 text-blue-800",
+    primary: "bg-orange-100 text-orange-800",
     success: "bg-green-100 text-green-800",
     warning: "bg-yellow-100 text-yellow-800",
     danger: "bg-red-100 text-red-800"
@@ -491,7 +491,7 @@ export const LoadingSpinner = ({ size = "md", text }) => {
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
-      <div className={`animate-spin rounded-full border-b-2 border-blue-500 ${sizes[size]}`}></div>
+      <div className={`animate-spin rounded-full border-b-2 border-orange-500 ${sizes[size]}`}></div>
       {text && <p className="text-slate-600 mt-4 text-sm">{text}</p>}
     </div>
   );
@@ -545,7 +545,7 @@ export const Tabs = ({
             onClick={() => onChange && onChange(tab.id)}
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === tab.id
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-orange-500 text-orange-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
             }`}
           >
@@ -568,12 +568,12 @@ export const ProgressBar = ({
   max = 100, 
   label, 
   showPercentage = true,
-  color = "blue" 
+  color = "orange" 
 }) => {
   const percentage = Math.round((value / max) * 100);
   
   const colors = {
-    blue: "bg-blue-500",
+    orange: "bg-orange-500",
     green: "bg-green-500",
     yellow: "bg-yellow-500",
     red: "bg-red-500"

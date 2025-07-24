@@ -7,20 +7,26 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { bantuanSosialAPI } from '../services/api';
+import { useCache } from '../hooks/useCache';
 
 const BantuanSosialPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [bantuanList, setBantuanList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    aktif: 0,
-    selesai: 0,
-    totalPenerima: 0
-  });
+  
+  // Cache hook for bantuan sosial data with appropriate cache duration
+  const {
+    data: bantuanData,
+    loading,
+    error,
+    loadData: loadBantuanData,
+    refreshData: refreshBantuanData,
+    clearCache: clearBantuanCache
+  } = useCache(`bantuan_sosial_${activeTab}_${searchQuery}`, 2 * 60 * 1000, { list: [], stats: { total: 0, aktif: 0, selesai: 0, totalPenerima: 0 } }); // 2 minutes cache for bantuan sosial
+  
+  // Extract data from cache
+  const bantuanList = bantuanData?.list || [];
+  const stats = bantuanData?.stats || { total: 0, aktif: 0, selesai: 0, totalPenerima: 0 };
 
   const jenisOptions = [
     'Uang Tunai',
@@ -31,18 +37,9 @@ const BantuanSosialPage = () => {
     'Pendidikan'
   ];
 
-  const statusOptions = [
-    'Aktif',
-    'Tidak Aktif',
-    'Selesai'
-  ];
-
-  // Fetch bantuan sosial data
-  const fetchBantuanSosial = async () => {
+  // Fetch bantuan sosial data with caching
+  const fetchBantuanSosial = async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const params = {};
       if (activeTab !== 'all') {
         params.status = activeTab === 'aktif' ? 'Aktif' : activeTab === 'selesai' ? 'Selesai' : 'Tidak Aktif';
@@ -51,27 +48,37 @@ const BantuanSosialPage = () => {
         params.search = searchQuery;
       }
       
-      const response = await bantuanSosialAPI.getAll(params);
+      const fetchFunction = async () => {
+        console.log('BantuanSosialPage: Loading bantuan sosial from API');
+        const response = await bantuanSosialAPI.getAll(params);
+        
+        if (response.data.status === 'success') {
+          const bantuanList = response.data.data.data || [];
+          
+          // Calculate stats
+          const total = bantuanList.length;
+          const aktif = bantuanList.filter(bantuan => bantuan.status === 'Aktif').length;
+          const selesai = bantuanList.filter(bantuan => bantuan.status === 'Selesai').length;
+          const totalPenerima = bantuanList.reduce((sum, bantuan) => sum + (bantuan.kuota_terpakai || 0), 0);
+          
+          return {
+            list: bantuanList,
+            stats: { total, aktif, selesai, totalPenerima }
+          };
+        } else {
+          throw new Error('Gagal mengambil data bantuan sosial');
+        }
+      };
       
-      if (response.data.status === 'success') {
-        const bantuanData = response.data.data.data || [];
-        setBantuanList(bantuanData);
-        
-        // Calculate stats
-        const total = bantuanData.length;
-        const aktif = bantuanData.filter(bantuan => bantuan.status === 'Aktif').length;
-        const selesai = bantuanData.filter(bantuan => bantuan.status === 'Selesai').length;
-        const totalPenerima = bantuanData.reduce((sum, bantuan) => sum + (bantuan.kuota_terpakai || 0), 0);
-        
-        setStats({ total, aktif, selesai, totalPenerima });
+      if (forceRefresh) {
+        return await refreshBantuanData(fetchFunction);
       } else {
-        setError('Gagal mengambil data bantuan sosial');
+        return await loadBantuanData(fetchFunction);
       }
+      
     } catch (err) {
       console.error('Error fetching bantuan sosial:', err);
-      setError(err.response?.data?.message || 'Gagal mengambil data bantuan sosial');
-    } finally {
-      setLoading(false);
+      throw err;
     }
   };
 
@@ -83,7 +90,9 @@ const BantuanSosialPage = () => {
     
     try {
       await bantuanSosialAPI.delete(id);
-      await fetchBantuanSosial(); // Refresh data
+      // Clear cache and refresh data
+      clearBantuanCache();
+      await fetchBantuanSosial(true);
       alert('Program bantuan berhasil dihapus');
     } catch (err) {
       console.error('Error deleting bantuan sosial:', err);
@@ -94,13 +103,19 @@ const BantuanSosialPage = () => {
   // Load data on component mount and when filters change
   useEffect(() => {
     fetchBantuanSosial();
+  }, []);
+  
+  useEffect(() => {
+    // Clear cache when filters change to force fresh data
+    clearBantuanCache();
+    fetchBantuanSosial();
   }, [activeTab, searchQuery]);
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      'Aktif': { bg: 'bg-green-100', text: 'text-green-800', label: 'Aktif' },
+      'Aktif': { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Aktif' },
       'Tidak Aktif': { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Tidak Aktif' },
-      'Selesai': { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Selesai' }
+      'Selesai': { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Selesai' }
     };
     
     const config = statusConfig[status] || statusConfig['Tidak Aktif'];
@@ -117,9 +132,9 @@ const BantuanSosialPage = () => {
       'Uang Tunai': { bg: 'bg-yellow-100', text: 'text-yellow-800' },
       'Sembako': { bg: 'bg-orange-100', text: 'text-orange-800' },
       'Peralatan': { bg: 'bg-purple-100', text: 'text-purple-800' },
-      'Pelatihan': { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+      'Pelatihan': { bg: 'bg-orange-100', text: 'text-orange-800' },
       'Kesehatan': { bg: 'bg-red-100', text: 'text-red-800' },
-      'Pendidikan': { bg: 'bg-blue-100', text: 'text-blue-800' }
+      'Pendidikan': { bg: 'bg-orange-100', text: 'text-orange-800' }
     };
     
     const config = jenisConfig[jenis] || { bg: 'bg-gray-100', text: 'text-gray-800' };
@@ -140,10 +155,7 @@ const BantuanSosialPage = () => {
     });
   };
 
-  const formatCurrency = (amount) => {
-    if (!amount) return '-';
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
-  };
+  
 
   const getProgressPercentage = (used, total) => {
     if (!total) return 0;
@@ -158,14 +170,14 @@ const BantuanSosialPage = () => {
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Bantuan Sosial</h1>
-              <p className="text-green-100">Kelola program bantuan sosial untuk masyarakat</p>
+              <p className="text-orange-100">Kelola program bantuan sosial untuk masyarakat</p>
             </div>
             <div className="hidden md:block">
-              <Heart className="w-16 h-16 text-green-200" />
+              <Heart className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -174,8 +186,8 @@ const BantuanSosialPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Heart className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Heart className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
@@ -186,8 +198,8 @@ const BantuanSosialPage = () => {
 
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <CheckCircle className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{stats.aktif}</p>
@@ -232,7 +244,7 @@ const BantuanSosialPage = () => {
             <div className="flex space-x-2 mt-4 sm:mt-0">
               <button 
                 onClick={() => navigate('/tambah-bantuan')}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Tambah Program
@@ -258,7 +270,7 @@ const BantuanSosialPage = () => {
                 placeholder="Cari program bantuan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -298,7 +310,7 @@ const BantuanSosialPage = () => {
                 <p className="text-red-600 mb-2">{error}</p>
                 <button 
                   onClick={fetchBantuanSosial}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Coba Lagi
                 </button>
@@ -332,7 +344,7 @@ const BantuanSosialPage = () => {
                       {/* Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                         <div className="flex items-center text-sm text-slate-600">
-                          <span className="w-4 h-4 mr-2 text-green-600 font-bold">Rp</span>
+                          <span className="w-4 h-4 mr-2 text-orange-600 font-bold">Rp</span>
                           {bantuan.nominal ? new Intl.NumberFormat('id-ID').format(bantuan.nominal) : 'Tidak ada nominal'}
                         </div>
                         <div className="flex items-center text-sm text-slate-600">
@@ -353,7 +365,7 @@ const BantuanSosialPage = () => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-orange-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${Math.min(getProgressPercentage(bantuan.kuota_terpakai || 0, bantuan.kuota), 100)}%` }}
                           ></div>
                         </div>
@@ -369,14 +381,14 @@ const BantuanSosialPage = () => {
                     <div className="flex items-center space-x-2 ml-4">
                       <button 
                         onClick={() => navigate(`/bantuan/${bantuan.id}`)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                         title="Lihat Detail"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => navigate(`/edit-bantuan/${bantuan.id}`)}
-                        className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -415,8 +427,8 @@ const BantuanSosialPage = () => {
             onClick={() => navigate('/tambah-bantuan')}
           >
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Plus className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <Plus className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Tambah Program Baru</h3>
@@ -430,8 +442,8 @@ const BantuanSosialPage = () => {
             onClick={() => navigate('/pendaftaran')}
           >
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <FileText className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-orange-100 mr-4">
+                <FileText className="w-6 h-6 text-orange-600" />
               </div>
               <div>
                 <h3 className="font-medium text-slate-900">Review Pendaftaran</h3>
@@ -462,9 +474,9 @@ const BantuanSosialPage = () => {
                 'bg-yellow-100 text-yellow-800',
                 'bg-orange-100 text-orange-800', 
                 'bg-purple-100 text-purple-800',
-                'bg-indigo-100 text-indigo-800',
+                'bg-orange-100 text-orange-800',
                 'bg-red-100 text-red-800',
-                'bg-blue-100 text-blue-800'
+                'bg-orange-100 text-orange-800'
               ];
               
               return (

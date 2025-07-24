@@ -107,7 +107,7 @@ const BulkActionModal = ({ isOpen, onClose, users = [], onBulkAction }) => {
                     key={action.value}
                     className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                       selectedAction === action.value
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-orange-500 bg-orange-50'
                         : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
@@ -146,7 +146,7 @@ const BulkActionModal = ({ isOpen, onClose, users = [], onBulkAction }) => {
                     if (input) input.indeterminate = someSelected;
                   }}
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                 />
                 <span className="ml-2 text-sm font-medium text-slate-700">
                   Pilih Semua
@@ -171,10 +171,10 @@ const BulkActionModal = ({ isOpen, onClose, users = [], onBulkAction }) => {
                         type="checkbox"
                         checked={selectedUsers.includes(user.id)}
                         onChange={(e) => handleUserSelect(user.id, e.target.checked)}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                       />
                       <div className="flex items-center ml-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-medium text-xs mr-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-medium text-xs mr-3">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -214,8 +214,8 @@ const BulkActionModal = ({ isOpen, onClose, users = [], onBulkAction }) => {
 
           {/* Summary */}
           {selectedAction && selectedUsers.length > 0 && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-              <p className="text-sm text-blue-800">
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+              <p className="text-sm text-orange-800">
                 <strong>Ringkasan:</strong> {selectedAction_obj?.label} untuk {selectedUsers.length} pengguna
               </p>
             </div>
@@ -234,7 +234,7 @@ const BulkActionModal = ({ isOpen, onClose, users = [], onBulkAction }) => {
           <button
             onClick={handleSubmit}
             disabled={loading || !selectedAction || selectedUsers.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
+            className="px-4 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200 flex items-center disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <>

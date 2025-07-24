@@ -2,14 +2,14 @@ import React from 'react';
 
 const StatCard = ({ title, value, change, icon: Icon, color = 'blue' }) => {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
+    blue: 'bg-orange-100 text-orange-600',
+    green: 'bg-orange-100 text-orange-600',
     yellow: 'bg-yellow-100 text-yellow-600',
     purple: 'bg-purple-100 text-purple-600',
     red: 'bg-red-100 text-red-600'
   };
 
-  const changeColor = change?.startsWith('+') ? 'text-green-600' : 'text-red-600';
+  const changeColor = change?.startsWith('+') ? 'text-orange-600' : 'text-red-600';
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">

@@ -138,7 +138,7 @@ Terima kasih.`
       >
         <div className="flex items-center justify-center min-h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
             <p className="text-slate-600">Loading email settings...</p>
           </div>
         </div>
@@ -154,14 +154,14 @@ Terima kasih.`
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">Email Integration</h1>
-              <p className="text-blue-100">Configure email settings for complaint forwarding and notifications</p>
+              <p className="text-orange-100">Configure email settings for complaint forwarding and notifications</p>
             </div>
             <div className="hidden md:block">
-              <Mail className="w-16 h-16 text-blue-200" />
+              <Mail className="w-16 h-16 text-orange-200" />
             </div>
           </div>
         </div>
@@ -187,10 +187,10 @@ Terima kasih.`
               
               <div className="text-center">
                 <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                  emailSettings.smtp_host ? 'bg-blue-100' : 'bg-gray-100'
+                  emailSettings.smtp_host ? 'bg-orange-100' : 'bg-gray-100'
                 }`}>
                   <Server className={`w-6 h-6 ${
-                    emailSettings.smtp_host ? 'text-blue-600' : 'text-gray-600'
+                    emailSettings.smtp_host ? 'text-orange-600' : 'text-gray-600'
                   }`} />
                 </div>
                 <p className="text-sm font-medium text-slate-900">SMTP Server</p>
@@ -261,7 +261,7 @@ Terima kasih.`
                       type="text"
                       value={emailSettings.smtp_host}
                       onChange={(e) => handleInputChange('smtp_host', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="smtp.gmail.com"
                     />
                   </div>
@@ -274,7 +274,7 @@ Terima kasih.`
                       type="number"
                       value={emailSettings.smtp_port}
                       onChange={(e) => handleInputChange('smtp_port', parseInt(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="587"
                     />
                   </div>
@@ -289,7 +289,7 @@ Terima kasih.`
                       type="text"
                       value={emailSettings.smtp_username}
                       onChange={(e) => handleInputChange('smtp_username', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="your-email@gmail.com"
                     />
                   </div>
@@ -302,7 +302,7 @@ Terima kasih.`
                       type="password"
                       value={emailSettings.smtp_password}
                       onChange={(e) => handleInputChange('smtp_password', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="••••••••"
                     />
                   </div>
@@ -316,7 +316,7 @@ Terima kasih.`
                     <select
                       value={emailSettings.smtp_encryption}
                       onChange={(e) => handleInputChange('smtp_encryption', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
                       <option value="tls">TLS</option>
                       <option value="ssl">SSL</option>
@@ -332,7 +332,7 @@ Terima kasih.`
                       type="email"
                       value={emailSettings.from_email}
                       onChange={(e) => handleInputChange('from_email', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="noreply@bantuan-sosial.gov.id"
                     />
                   </div>
@@ -346,7 +346,7 @@ Terima kasih.`
                     type="text"
                     value={emailSettings.from_name}
                     onChange={(e) => handleInputChange('from_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Admin Panel Bantuan Sosial"
                   />
                 </div>
@@ -357,7 +357,7 @@ Terima kasih.`
                     id="is_active"
                     checked={emailSettings.is_active}
                     onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <label htmlFor="is_active" className="ml-2 text-sm text-slate-700">
                     Enable email forwarding
@@ -365,15 +365,15 @@ Terima kasih.`
                 </div>
 
                 {/* Test Connection */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Test Email Configuration</h4>
-                  <p className="text-sm text-blue-700 mb-3">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h4 className="font-medium text-orange-900 mb-2">Test Email Configuration</h4>
+                  <p className="text-sm text-orange-700 mb-3">
                     Send a test email to verify your SMTP configuration
                   </p>
                   <button
                     onClick={testEmailConnection}
                     disabled={testingEmail || !emailSettings.smtp_host}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50"
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50"
                   >
                     {testingEmail ? (
                       <>
@@ -441,7 +441,7 @@ Terima kasih.`
                     type="text"
                     value={templateSettings.complaint_subject}
                     onChange={(e) => handleTemplateChange('complaint_subject', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Pengaduan Baru - #{ticket_number}"
                   />
                 </div>
@@ -454,7 +454,7 @@ Terima kasih.`
                     value={templateSettings.complaint_template}
                     onChange={(e) => handleTemplateChange('complaint_template', e.target.value)}
                     rows={12}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 
@@ -481,7 +481,7 @@ Terima kasih.`
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
+            className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center"
           >
             {saving ? (
               <>

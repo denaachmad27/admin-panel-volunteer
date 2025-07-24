@@ -10,7 +10,7 @@ const InfoCard = ({
 }) => {
   const variants = {
     default: 'bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-sm hover:shadow-md transition-shadow',
-    primary: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-shadow',
+    primary: 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-sm hover:shadow-md transition-shadow',
     success: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-sm hover:shadow-md transition-shadow',
     warning: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 shadow-sm hover:shadow-md transition-shadow',
     danger: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-sm hover:shadow-md transition-shadow'
@@ -18,7 +18,7 @@ const InfoCard = ({
 
   const iconColors = {
     default: 'text-slate-600',
-    primary: 'text-blue-600',
+    primary: 'text-orange-600',
     success: 'text-green-600',
     warning: 'text-yellow-600',
     danger: 'text-red-600'
