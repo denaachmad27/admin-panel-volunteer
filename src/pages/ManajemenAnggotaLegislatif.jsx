@@ -14,7 +14,11 @@ import {
   AlertCircle,
   Plus,
   Phone,
-  Mail
+  Mail,
+  Calendar,
+  Building,
+  MapPinIcon,
+  X
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
@@ -67,6 +71,8 @@ const ManajemenAnggotaLegislatif = () => {
   const [anggotaToDelete, setAnggotaToDelete] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAnggota, setSelectedAnggota] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
 
   // Load anggota legislatif from API with caching
   const loadAnggotaLegislatif = async (page = 1, forceRefresh = false) => {
@@ -169,11 +175,30 @@ const ManajemenAnggotaLegislatif = () => {
 
   const handleViewDetail = async (anggota) => {
     try {
-      const detailData = await anggotaLegislatifService.getAnggotaLegislatifById(anggota.id);
-      setSelectedAnggota(detailData);
+      console.log('=== MODAL DEBUG ===');
+      console.log('Opening detail modal for anggota:', anggota.id);
+      console.log('Current states before:', { detailLoading, detailError, selectedAnggota });
+      
+      setDetailLoading(true);
+      setDetailError(null);
+      setSelectedAnggota(null); // Reset selected anggota
       setShowDetailModal(true);
+      
+      console.log('States after setting loading:', { detailLoading: true, detailError: null, selectedAnggota: null });
+      console.log('Fetching detail data...');
+      
+      const detailData = await anggotaLegislatifService.getAnggotaLegislatifById(anggota.id);
+      console.log('Detail data received:', detailData);
+      console.log('Data keys:', Object.keys(detailData || {}));
+      
+      setSelectedAnggota(detailData);
+      console.log('selectedAnggota set to:', detailData);
     } catch (err) {
-      setError(err.message);
+      console.error('Error loading detail:', err);
+      setDetailError(err.message || 'Gagal memuat detail anggota legislatif');
+    } finally {
+      setDetailLoading(false);
+      console.log('Loading finished, detailLoading set to false');
     }
   };
 
@@ -226,11 +251,20 @@ const ManajemenAnggotaLegislatif = () => {
   };
 
   return (
-    <DashboardLayout
-      currentPage="anggota-legislatif"
-      pageTitle="Manajemen Anggota Legislatif"
-      breadcrumbs={['Manajemen Anggota Legislatif']}
-    >
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      <DashboardLayout
+        currentPage="anggota-legislatif"
+        pageTitle="Manajemen Anggota Legislatif"
+        breadcrumbs={['Manajemen Anggota Legislatif']}
+      >
       <div className="space-y-6">
         {/* Page Header */}
         <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
@@ -610,161 +644,279 @@ const ManajemenAnggotaLegislatif = () => {
         />
 
         {/* Detail Modal */}
-        {showDetailModal && selectedAnggota && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">Detail Anggota Legislatif</h2>
+        {showDetailModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            overflowY: 'auto',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '100vh',
+              padding: '16px'
+            }}>
+              {/* Modal */}
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                maxWidth: '800px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+              }}>
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '24px',
+                  borderBottom: '1px solid #e5e7eb'
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1f2937'
+                  }}>
+                    Detail Anggota Legislatif
+                  </h3>
                   <button
-                    onClick={() => setShowDetailModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      setSelectedAnggota(null);
+                      setDetailError(null);
+                      setDetailLoading(false);
+                    }}
+                    style={{
+                      color: '#9ca3af',
+                      cursor: 'pointer',
+                      border: 'none',
+                      background: 'none',
+                      padding: '4px'
+                    }}
                   >
-                    ×
+                    <X style={{ width: '20px', height: '20px' }} />
                   </button>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Photo */}
-                  <div className="flex justify-center">
-                    {selectedAnggota.foto_profil ? (
-                      <img
-                        className="h-32 w-32 rounded-full object-cover"
-                        src={`http://127.0.0.1:8000/storage/${selectedAnggota.foto_profil}`}
-                        alt={selectedAnggota.nama_lengkap}
-                      />
-                    ) : (
-                      <div className="h-32 w-32 rounded-full bg-gray-300 flex items-center justify-center">
-                        <User className="w-16 h-16 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Basic Info */}
-                  <div className="md:col-span-2 space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                      <p className="text-gray-900">{selectedAnggota.nama_lengkap}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Kode Aleg</label>
-                        <p className="text-gray-900">{selectedAnggota.kode_aleg}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <p className="text-gray-900">{selectedAnggota.jenis_kelamin}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Tempat Lahir</label>
-                        <p className="text-gray-900">{selectedAnggota.tempat_lahir}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                        <p className="text-gray-900">{formatDate(selectedAnggota.tanggal_lahir)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact & Address */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Kontak</h3>
-                    <div className="space-y-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">No. Telepon</label>
-                        <p className="text-gray-900">{selectedAnggota.no_telepon}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <p className="text-gray-900">{selectedAnggota.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Alamat</h3>
-                    <div className="space-y-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
-                        <p className="text-gray-900">{selectedAnggota.alamat}</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Kelurahan</label>
-                          <p className="text-gray-900">{selectedAnggota.kelurahan}</p>
+                
+                {/* Content */}
+                <div style={{ padding: '24px' }}>
+                  {(() => {
+                    
+                    if (detailLoading) {
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            border: '2px solid transparent', 
+                            borderTop: '2px solid #f97316', 
+                            borderRadius: '50%', 
+                            animation: 'spin 1s linear infinite' 
+                          }}></div>
+                          <p style={{ color: '#64748b', marginTop: '16px', fontSize: '14px' }}>Memuat detail anggota legislatif...</p>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Kecamatan</label>
-                          <p className="text-gray-900">{selectedAnggota.kecamatan}</p>
+                      );
+                    }
+                    
+                    if (detailError) {
+                      return (
+                        <div style={{ 
+                          backgroundColor: '#fef2f2', 
+                          border: '1px solid #fecaca', 
+                          borderRadius: '8px', 
+                          padding: '16px', 
+                          display: 'flex', 
+                          alignItems: 'center' 
+                        }}>
+                          <AlertCircle style={{ width: '20px', height: '20px', color: '#ef4444', marginRight: '12px' }} />
+                          <div style={{ flex: '1' }}>
+                            <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#991b1b' }}>Gagal Memuat Detail</h3>
+                            <p style={{ fontSize: '14px', color: '#b91c1c', marginTop: '4px' }}>{detailError}</p>
+                          </div>
+                          <button
+                            onClick={() => setDetailError(null)}
+                            style={{ marginLeft: '12px', color: '#ef4444' }}
+                          >
+                            <X style={{ width: '16px', height: '16px' }} />
+                          </button>
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Kota</label>
-                          <p className="text-gray-900">{selectedAnggota.kota}</p>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Provinsi</label>
-                          <p className="text-gray-900">{selectedAnggota.provinsi}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      );
+                    }
+                    
+                    if (selectedAnggota) {
+                      return (
+                        <div style={{ padding: '0' }}>
+                          {/* Basic Info */}
+                          <div className="bg-gray-50 p-5 rounded-xl mb-6">
+                            <div className="flex items-center mb-4">
+                              {selectedAnggota.foto_profil ? (
+                                <img
+                                  className="h-20 w-20 rounded-full object-cover mr-5 border-3 border-gray-200"
+                                  src={`http://127.0.0.1:8000/storage/${selectedAnggota.foto_profil}`}
+                                  alt={selectedAnggota.nama_lengkap}
+                                />
+                              ) : (
+                                <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center mr-5 border-3 border-gray-300">
+                                  <User className="w-10 h-10 text-gray-500" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <h2 className="text-2xl font-bold mb-2 text-gray-900">
+                                  {selectedAnggota.nama_lengkap}
+                                </h2>
+                                <p className="text-gray-600 text-base mb-3 font-medium">
+                                  {selectedAnggota.jabatan_saat_ini}
+                                </p>
+                                <span className={`inline-block px-4 py-1.5 text-sm rounded-full font-semibold border-2 ${
+                                  selectedAnggota.status === 'Aktif' 
+                                    ? 'bg-green-100 text-green-800 border-green-200' 
+                                    : 'bg-red-100 text-red-800 border-red-200'
+                                }`}>
+                                  {selectedAnggota.status}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-                {/* Political Info */}
-                <div className="mt-6">
-                  <h3 className="font-medium text-gray-900 mb-3">Informasi Politik</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Jabatan Saat Ini</label>
-                      <p className="text-gray-900">{selectedAnggota.jabatan_saat_ini}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Partai Politik</label>
-                      <p className="text-gray-900">{selectedAnggota.partai_politik}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Daerah Pemilihan</label>
-                      <p className="text-gray-900">{selectedAnggota.daerah_pemilihan}</p>
-                    </div>
-                  </div>
-                  {selectedAnggota.riwayat_jabatan && (
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700">Riwayat Jabatan</label>
-                      <p className="text-gray-900 whitespace-pre-line">{selectedAnggota.riwayat_jabatan}</p>
-                    </div>
-                  )}
-                </div>
+                          {/* Info Grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <Card className="p-5">
+                              <h3 className="text-lg font-bold mb-4 text-gray-700">
+                                📋 Informasi Personal
+                              </h3>
+                              <div className="text-sm space-y-3">
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-24">Kode Aleg:</span>
+                                  <span className="text-gray-900">{selectedAnggota.kode_aleg}</span>
+                                </div>
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-24">Jenis Kelamin:</span>
+                                  <span className="text-gray-900">{selectedAnggota.jenis_kelamin}</span>
+                                </div>
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-24">Tempat Lahir:</span>
+                                  <span className="text-gray-900">{selectedAnggota.tempat_lahir}</span>
+                                </div>
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-24">Tanggal Lahir:</span>
+                                  <span className="text-gray-900">{formatDate(selectedAnggota.tanggal_lahir)}</span>
+                                </div>
+                              </div>
+                            </Card>
+                            
+                            <Card className="p-5">
+                              <h3 className="text-lg font-bold mb-4 text-gray-700">
+                                📞 Kontak
+                              </h3>
+                              <div className="text-sm space-y-3">
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-16">Telepon:</span>
+                                  <span className="text-gray-900">{selectedAnggota.no_telepon}</span>
+                                </div>
+                                <div className="flex">
+                                  <span className="font-semibold text-gray-600 w-16">Email:</span>
+                                  <span className="text-gray-900">{selectedAnggota.email}</span>
+                                </div>
+                              </div>
+                            </Card>
+                          </div>
 
-                {/* Volunteers */}
-                {selectedAnggota.volunteers && selectedAnggota.volunteers.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="font-medium text-gray-900 mb-3">Relawan ({selectedAnggota.volunteers.length})</h3>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {selectedAnggota.volunteers.map((volunteer) => (
-                        <div key={volunteer.id} className="flex items-center p-2 bg-gray-50 rounded">
-                          <User className="w-4 h-4 text-gray-500 mr-2" />
-                          <span className="text-sm">{volunteer.name}</span>
-                          {volunteer.profile && (
-                            <span className="text-xs text-gray-500 ml-2">
-                              ({volunteer.profile.nama_lengkap})
-                            </span>
+                          {/* Address */}
+                          <Card className="p-5 mb-6">
+                            <h3 className="text-lg font-bold mb-4 text-gray-700">
+                              📍 Alamat
+                            </h3>
+                            <p className="text-sm mb-2 text-gray-900 leading-relaxed">
+                              {selectedAnggota.alamat}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {selectedAnggota.kelurahan}, {selectedAnggota.kecamatan}, {selectedAnggota.kota}, {selectedAnggota.provinsi}
+                            </p>
+                          </Card>
+
+                          {/* Political Info */}
+                          <Card className="p-5 mb-6">
+                            <h3 className="text-lg font-bold mb-4 text-gray-700">
+                              🏛️ Informasi Politik
+                            </h3>
+                            <div className="text-sm space-y-3">
+                              <div className="flex">
+                                <span className="font-semibold text-gray-600 w-32">Partai Politik:</span>
+                                <span className="text-gray-900">{selectedAnggota.partai_politik}</span>
+                              </div>
+                              <div className="flex">
+                                <span className="font-semibold text-gray-600 w-32">Daerah Pemilihan:</span>
+                                <span className="text-gray-900">{selectedAnggota.daerah_pemilihan}</span>
+                              </div>
+                              {selectedAnggota.riwayat_jabatan && (
+                                <div className="mt-4">
+                                  <p className="font-semibold mb-2 text-gray-600">Riwayat Jabatan:</p>
+                                  <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-700 leading-relaxed">
+                                    {selectedAnggota.riwayat_jabatan}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+
+                          {/* Volunteers */}
+                          {selectedAnggota.volunteers && selectedAnggota.volunteers.length > 0 && (
+                            <Card className="p-5">
+                              <h3 className="text-lg font-bold mb-4 text-gray-700">
+                                👥 Relawan Terdaftar ({selectedAnggota.volunteers.length})
+                              </h3>
+                              <div className="max-h-48 overflow-y-auto">
+                                {selectedAnggota.volunteers.map((volunteer, index) => (
+                                  <div key={volunteer.id} className={`
+                                    flex items-center p-3 rounded-lg text-sm mb-2 border
+                                    ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-gray-100
+                                  `}>
+                                    <User className="w-5 h-5 text-gray-500 mr-3" />
+                                    <div className="flex-1">
+                                      <div className="font-semibold text-gray-900">{volunteer.name}</div>
+                                      {volunteer.profile && (
+                                        <div className="text-gray-600 text-xs mt-0.5">
+                                          {volunteer.profile.nama_lengkap}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </Card>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      );
+                    }
+                    
+                    // Fallback case
+                    return (
+                      <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                        <p style={{ color: '#64748b', fontSize: '16px', marginBottom: '8px' }}>Tidak ada data untuk ditampilkan</p>
+                        <p style={{ color: '#9ca3af', fontSize: '14px' }}>
+                          Debug: detailLoading={detailLoading ? 'true' : 'false'}, 
+                          detailError={detailError || 'null'}, 
+                          selectedAnggota={selectedAnggota ? 'exists' : 'null'}
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           </div>
         )}
       </div>
     </DashboardLayout>
+    </>
   );
 };
 
