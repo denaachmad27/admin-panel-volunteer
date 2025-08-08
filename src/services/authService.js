@@ -17,7 +17,9 @@ class AuthService {
         email: user.email,
         role: user.role || 'admin',
         avatar: user.avatar || null,
-        created_at: user.created_at
+        created_at: user.created_at,
+        anggota_legislatif_id: user.anggota_legislatif_id || null,
+        anggota_legislatif: user.anggota_legislatif || null
       }));
       
       return response.data;

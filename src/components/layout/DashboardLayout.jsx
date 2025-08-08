@@ -156,7 +156,9 @@ const DashboardLayout = ({
     name: userData.name || 'Admin User',
     email: userData.email || 'admin@example.com',
     role: userData.role || 'Administrator',
-    avatar: userData.avatar || null
+    avatar: userData.avatar || null,
+    anggota_legislatif: userData.anggota_legislatif || null,
+    is_admin_aleg: userData.role === 'admin_aleg'
   };
 
   // Combine menu items dengan cara yang aman
@@ -296,7 +298,12 @@ const DashboardLayout = ({
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-medium text-slate-900">{defaultUserData.name}</p>
-                    <p className="text-xs text-slate-500">{defaultUserData.role}</p>
+                    <p className="text-xs text-slate-500">
+                      {defaultUserData.is_admin_aleg && defaultUserData.anggota_legislatif 
+                        ? `Admin ${defaultUserData.anggota_legislatif.nama}`
+                        : defaultUserData.role
+                      }
+                    </p>
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
                     profileDropdownOpen ? 'rotate-180' : ''
@@ -314,6 +321,12 @@ const DashboardLayout = ({
                         <div>
                         <p className="font-medium text-slate-900">{defaultUserData.name}</p>
                         <p className="text-sm text-slate-500">{defaultUserData.email}</p>
+                        <p className="text-xs text-slate-400">
+                          {defaultUserData.is_admin_aleg && defaultUserData.anggota_legislatif 
+                            ? `Admin ${defaultUserData.anggota_legislatif.nama}`
+                            : defaultUserData.role
+                          }
+                        </p>
                         </div>
                     </div>
                     </div>

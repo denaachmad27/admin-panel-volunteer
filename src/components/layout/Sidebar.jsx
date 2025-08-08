@@ -33,6 +33,9 @@ const Sidebar = ({
   allMenuItems,
   currentPage,
 }) => {
+  // Get user data untuk admin aleg indicator
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdminAleg = userData.role === 'admin_aleg';
   const [expandedMenus, setExpandedMenus] = useState({});
 
   const toggleSubmenu = (menuId) => {
@@ -198,8 +201,28 @@ const Sidebar = ({
         </button>
       </div>
 
+      {/* Admin Aleg Indicator */}
+      {isAdminAleg && userData.anggota_legislatif && (
+        <div className="px-4 py-3 mx-4 mt-4 mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-sm">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <Shield className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">Administrator</p>
+              <p className="text-sm font-bold text-blue-900 leading-tight">
+                {userData.anggota_legislatif.nama || userData.anggota_legislatif.nama_lengkap}
+              </p>
+              <p className="text-xs text-blue-600 mt-1 opacity-80">
+                {userData.anggota_legislatif.partai_politik || userData.anggota_legislatif.partai || 'Anggota Legislatif'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-4 pt-2 pb-6 space-y-2 overflow-y-auto">
         {allMenuItems.map(renderMenuItem)}
       </nav>
     </div>

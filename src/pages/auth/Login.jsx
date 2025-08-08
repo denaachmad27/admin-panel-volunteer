@@ -68,9 +68,9 @@ const Login = () => {
       
       console.log('Login successful:', response);
       
-      // Check if user is admin
+      // Check if user is admin or admin_aleg
       const user = authService.getCurrentUser();
-      if (user.role !== 'admin') {
+      if (!['admin', 'admin_aleg'].includes(user.role)) {
         setErrors({
           general: 'Akses ditolak. Hanya admin yang dapat menggunakan panel ini.'
         });
