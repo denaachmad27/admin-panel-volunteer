@@ -20,12 +20,27 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card, Button, InputField, SelectField } from '../components/ui/UIComponents';
-import StatCard from '../components/ui/StatsCard';
+import QuickStatsRow from '../components/ui/QuickStatsRow';
 import Badge from '../components/ui/Badge';
 import volunteerService from '../services/volunteerService';
 import VolunteerDetailModal from '../components/VolunteerDetailModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useCache } from '../hooks/useCache';
+
+// Per-user cache suffix to avoid cross-account cache mixing
+const getUserCacheSuffix = () => {
+  try {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return 'guest';
+    const user = JSON.parse(userStr);
+    const role = user.role || 'unknown';
+    const id = user.id || '0';
+    const alegId = user.anggota_legislatif_id ?? 'none';
+    return `${role}_${id}_${alegId}`;
+  } catch {
+    return 'guest';
+  }
+};
 
 const ManajemenRelawan = () => {
   const [filters, setFilters] = useState({
@@ -43,7 +58,7 @@ const ManajemenRelawan = () => {
     loadData: loadVolunteersData,
     refreshData: refreshVolunteersData,
     clearCache: clearVolunteersCache
-  } = useCache(`volunteers_${filters.search}_${filters.status}_${filters.profile_complete}_${filters.city}`, 3 * 60 * 1000, []); // 3 minutes cache for volunteer lists
+  } = useCache(`volunteers_${getUserCacheSuffix()}_${filters.search}_${filters.status}_${filters.profile_complete}_${filters.city}`, 3 * 60 * 1000, []); // 3 minutes cache for volunteer lists
   
   const {
     data: statistics,
@@ -52,7 +67,7 @@ const ManajemenRelawan = () => {
     loadData: loadStatisticsData,
     refreshData: refreshStatisticsData,
     clearCache: clearStatisticsCache
-  } = useCache('volunteer_statistics', 3 * 60 * 1000, null); // 3 minutes cache for statistics
+  } = useCache(`volunteer_statistics_${getUserCacheSuffix()}`, 3 * 60 * 1000, null); // 3 minutes cache for statistics
   
   // Combined loading and error states
   const loading = volunteersLoading || statisticsLoading;
@@ -233,30 +248,23 @@ const ManajemenRelawan = () => {
   }
 
   return (
-    <DashboardLayout currentPage="volunteers">
+    <DashboardLayout 
+      currentPage="volunteers"
+      pageTitle="Manajemen Relawan"
+      breadcrumbs={["Manajemen Relawan"]}
+    >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Manajemen Relawan</h1>
-            <p className="text-slate-600 mt-1">
-              Kelola data relawan dan profil lengkap mereka
-            </p>
+        {/* Gradient Welcome Banner (consistent across pages) */}
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Manajemen Relawan</h1>
+              <p className="text-orange-100">Kelola data relawan dan kelengkapan profil mereka.</p>
+            </div>
+            <div className="hidden md:block">
+              <Users className="w-16 h-16 text-orange-200" />
+            </div>
           </div>
-          <Button
-            variant="primary"
-            icon={RefreshCw}
-            onClick={() => {
-              // Clear cache and force refresh
-              clearVolunteersCache();
-              clearStatisticsCache();
-              fetchVolunteers(true);
-              fetchStatistics(true);
-            }}
-            loading={loading}
-          >
-            Refresh Data
-          </Button>
         </div>
 
         {/* Error Alert */}
@@ -271,34 +279,16 @@ const ManajemenRelawan = () => {
           </div>
         )}
 
-      {/* Statistics Cards */}
+      {/* Quick Stats - match Bantuan & Berita styles */}
       {statistics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Relawan"
-            value={statistics.total_volunteers}
-            icon={Users}
-            color="bg-orange-500"
-          />
-          <StatCard
-            title="Relawan Aktif"
-            value={statistics.active_volunteers}
-            icon={CheckCircle}
-            color="bg-orange-500"
-          />
-          <StatCard
-            title="Profil Lengkap"
-            value={statistics.complete_profiles}
-            icon={FileText}
-            color="bg-orange-500"
-          />
-          <StatCard
-            title="Kelengkapan Profil"
-            value={`${statistics.completion_percentage}%`}
-            icon={BarChart3}
-            color="bg-orange-500"
-          />
-        </div>
+        <QuickStatsRow
+          items={[
+            { icon: Users, value: statistics.total_volunteers, label: 'Total Relawan', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: CheckCircle, value: statistics.active_volunteers, label: 'Relawan Aktif', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: FileText, value: statistics.complete_profiles, label: 'Profil Lengkap', bgClass: 'bg-yellow-100', iconClass: 'text-yellow-600' },
+            { icon: BarChart3, value: `${statistics.completion_percentage}%`, label: 'Kelengkapan Profil', bgClass: 'bg-purple-100', iconClass: 'text-purple-600' }
+          ]}
+        />
       )}
 
         {/* Filters */}

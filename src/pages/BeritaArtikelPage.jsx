@@ -3,6 +3,7 @@ import { FileText, Plus, Edit3, Eye, Trash2, Calendar, User, Tag, Search, Filter
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import QuickStatsRow from '../components/ui/QuickStatsRow';
 import { newsAPI } from '../services/api';
 
 const BeritaArtikelPage = () => {
@@ -151,55 +152,14 @@ const BeritaArtikelPage = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <FileText className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-sm text-slate-600">Total Artikel</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <Eye className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.totalViews}</p>
-                <p className="text-sm text-slate-600">Total Views</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Edit3 className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.draft}</p>
-                <p className="text-sm text-slate-600">Draft</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.published}</p>
-                <p className="text-sm text-slate-600">Published</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <QuickStatsRow
+          items={[
+            { icon: FileText, value: stats.total, label: 'Total Artikel', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: Eye, value: stats.totalViews, label: 'Total Views', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: Edit3, value: stats.draft, label: 'Draft', bgClass: 'bg-yellow-100', iconClass: 'text-yellow-600' },
+            { icon: Calendar, value: stats.published, label: 'Published', bgClass: 'bg-purple-100', iconClass: 'text-purple-600' },
+          ]}
+        />
 
         {/* Main Content */}
         <Card>

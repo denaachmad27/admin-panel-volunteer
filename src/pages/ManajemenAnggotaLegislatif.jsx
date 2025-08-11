@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import QuickStatsRow from '../components/ui/QuickStatsRow';
 import anggotaLegislatifService from '../services/anggotaLegislatifService';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useCache } from '../hooks/useCache';
@@ -280,55 +281,14 @@ const ManajemenAnggotaLegislatif = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <UserCheck className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.total_aleg}</p>
-                <p className="text-sm text-slate-600">Total Anggota Legislatif</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.active_aleg}</p>
-                <p className="text-sm text-slate-600">Aktif</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-red-100 mr-4">
-                <XCircle className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.inactive_aleg}</p>
-                <p className="text-sm text-slate-600">Tidak Aktif</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{loading ? '-' : stats.total_volunteers}</p>
-                <p className="text-sm text-slate-600">Total Relawan</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <QuickStatsRow
+          items={[
+            { icon: UserCheck, value: loading ? '-' : stats.total_aleg, label: 'Total Anggota Legislatif', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: CheckCircle, value: loading ? '-' : stats.active_aleg, label: 'Aktif', bgClass: 'bg-green-100', iconClass: 'text-green-600' },
+            { icon: XCircle, value: loading ? '-' : stats.inactive_aleg, label: 'Tidak Aktif', bgClass: 'bg-red-100', iconClass: 'text-red-600' },
+            { icon: Users, value: loading ? '-' : stats.total_volunteers, label: 'Total Relawan', bgClass: 'bg-purple-100', iconClass: 'text-purple-600' },
+          ]}
+        />
 
         {/* Main Content */}
         <Card>

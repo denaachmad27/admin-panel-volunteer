@@ -173,6 +173,13 @@ const DashboardLayout = ({
     ...additionalMenuItems
   ];
 
+  // Filter menu for admin_aleg (hide Manajemen Anggota Legislatif)
+  const visibleMenuItems = allMenuItems.filter(item => {
+    const isAdminAleg = defaultUserData.is_admin_aleg;
+    if (isAdminAleg && item.id === 'anggota-legislatif') return false;
+    return true;
+  });
+
   // Notifications structure
   const notifications = [
     {
@@ -216,7 +223,7 @@ const DashboardLayout = ({
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         generalSettings={generalSettings}
-        allMenuItems={allMenuItems}
+        allMenuItems={visibleMenuItems}
         currentPage={currentPage}
       />
 

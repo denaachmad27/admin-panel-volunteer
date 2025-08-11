@@ -6,6 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
+import QuickStatsRow from '../components/ui/QuickStatsRow';
 import { bantuanSosialAPI } from '../services/api';
 import { useCache } from '../hooks/useCache';
 
@@ -183,55 +184,14 @@ const BantuanSosialPage = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <Heart className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-sm text-slate-600">Total Program</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <CheckCircle className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.aktif}</p>
-                <p className="text-sm text-slate-600">Program Aktif</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Users className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.totalPenerima}</p>
-                <p className="text-sm text-slate-600">Total Penerima</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.selesai}</p>
-                <p className="text-sm text-slate-600">Program Selesai</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <QuickStatsRow
+          items={[
+            { icon: Heart, value: stats.total, label: 'Total Program', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: CheckCircle, value: stats.aktif, label: 'Program Aktif', bgClass: 'bg-orange-100', iconClass: 'text-orange-600' },
+            { icon: Users, value: stats.totalPenerima, label: 'Total Penerima', bgClass: 'bg-yellow-100', iconClass: 'text-yellow-600' },
+            { icon: Calendar, value: stats.selesai, label: 'Program Selesai', bgClass: 'bg-purple-100', iconClass: 'text-purple-600' },
+          ]}
+        />
 
         {/* Main Content */}
         <Card>

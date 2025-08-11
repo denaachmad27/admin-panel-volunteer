@@ -4,6 +4,7 @@ import './index.css';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleGuard from './components/RoleGuard';
 import ErrorBoundary from './components/ErrorBoundary';
 import { GeneralSettingsProvider } from './contexts/GeneralSettingsContext';
 
@@ -101,9 +102,11 @@ function App() {
               path="/anggota-legislatif" 
               element={
                 <ProtectedRoute>
-                  <ErrorBoundary>
-                    <ManajemenAnggotaLegislatif />
-                  </ErrorBoundary>
+                  <RoleGuard allowedRoles={['admin']}>
+                    <ErrorBoundary>
+                      <ManajemenAnggotaLegislatif />
+                    </ErrorBoundary>
+                  </RoleGuard>
                 </ProtectedRoute>
               } 
             />
@@ -111,9 +114,11 @@ function App() {
               path="/anggota-legislatif/create" 
               element={
                 <ProtectedRoute>
-                  <ErrorBoundary>
-                    <TambahAnggotaLegislatif />
-                  </ErrorBoundary>
+                  <RoleGuard allowedRoles={['admin']}>
+                    <ErrorBoundary>
+                      <TambahAnggotaLegislatif />
+                    </ErrorBoundary>
+                  </RoleGuard>
                 </ProtectedRoute>
               } 
             />
@@ -121,9 +126,11 @@ function App() {
               path="/anggota-legislatif/edit/:id" 
               element={
                 <ProtectedRoute>
-                  <ErrorBoundary>
-                    <EditAnggotaLegislatif />
-                  </ErrorBoundary>
+                  <RoleGuard allowedRoles={['admin']}>
+                    <ErrorBoundary>
+                      <EditAnggotaLegislatif />
+                    </ErrorBoundary>
+                  </RoleGuard>
                 </ProtectedRoute>
               } 
             />
