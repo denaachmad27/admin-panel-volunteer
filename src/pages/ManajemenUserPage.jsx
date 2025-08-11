@@ -8,6 +8,21 @@ import PermissionModal from '../components/modals/PermissionModal';
 import BulkActionModal from '../components/modals/BulkActionModal';
 import { useCache } from '../hooks/useCache';
 
+// Helper to scope cache per logged-in user to avoid cross-account leakage
+const getUserCacheSuffix = () => {
+  try {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return 'guest';
+    const user = JSON.parse(userStr);
+    const role = user.role || 'unknown';
+    const id = user.id || '0';
+    const alegId = user.anggota_legislatif_id ?? 'none';
+    return `${role}_${id}_${alegId}`;
+  } catch {
+    return 'guest';
+  }
+};
+
 const ManajemenUserPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,7 +36,7 @@ const ManajemenUserPage = () => {
     loadData: loadUsersData,
     refreshData: refreshUsersData,
     clearCache: clearUsersCache
-  } = useCache(`users_${activeTab}_${selectedRole}_${searchQuery}`, 3 * 60 * 1000, []); // 3 minutes cache for user lists
+  } = useCache(`users_${getUserCacheSuffix()}_${activeTab}_${selectedRole}_${searchQuery}`, 3 * 60 * 1000, []); // 3 minutes cache for user lists
   
   const {
     data: stats,
@@ -30,7 +45,7 @@ const ManajemenUserPage = () => {
     loadData: loadStatsData,
     refreshData: refreshStatsData,
     clearCache: clearStatsCache
-  } = useCache('user_statistics', 3 * 60 * 1000, {
+  } = useCache(`user_statistics_${getUserCacheSuffix()}`, 3 * 60 * 1000, {
     total: 0,
     active: 0,
     inactive: 0,

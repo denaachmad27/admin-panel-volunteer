@@ -8,15 +8,31 @@ import { Card } from '../../components/ui/UIComponents';
 import { dashboardAPI } from '../../services/api';
 
 // Cache configuration
-const CACHE_KEY = 'dashboard_stats_cache';
-const CACHE_TIMESTAMP_KEY = 'dashboard_stats_timestamp';
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes for dashboard stats
+
+// Create per-user cache keys to prevent cross-account leakage
+const getUserCacheSuffix = () => {
+  try {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return 'guest';
+    const user = JSON.parse(userStr);
+    const role = user.role || 'unknown';
+    const id = user.id || '0';
+    const alegId = user.anggota_legislatif_id ?? 'none';
+    return `${role}_${id}_${alegId}`;
+  } catch {
+    return 'guest';
+  }
+};
+
+const getCacheKey = () => `dashboard_stats_cache_${getUserCacheSuffix()}`;
+const getCacheTimestampKey = () => `${getCacheKey()}_timestamp`;
 
 // Cache utilities
 const getCachedData = () => {
   try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+    const cached = localStorage.getItem(getCacheKey());
+    const timestamp = localStorage.getItem(getCacheTimestampKey());
     
     if (cached && timestamp) {
       const age = Date.now() - parseInt(timestamp);
@@ -33,8 +49,8 @@ const getCachedData = () => {
 
 const setCachedData = (data) => {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.setItem(getCacheKey(), JSON.stringify(data));
+    localStorage.setItem(getCacheTimestampKey(), Date.now().toString());
     console.log('Dashboard: Data cached');
   } catch (error) {
     console.error('Dashboard: Error caching data:', error);
