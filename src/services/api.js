@@ -1,16 +1,42 @@
 import axios from 'axios'
 
-// Base URL dari Laravel backend Anda
-const API_BASE_URL = 'http://127.0.0.1:8000/api'
+// Base URL dari Laravel backend (gunakan env untuk prod)
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+  ? import.meta.env.VITE_API_BASE_URL
+  : 'http://127.0.0.1:8000/api'
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 })
+
+// Helper to derive base origin (remove trailing /api)
+const BASE_ORIGIN = API_BASE_URL.replace(/\/?api\/?$/, '')
+
+export const webApi = axios.create({
+  baseURL: BASE_ORIGIN,
+  withCredentials: true,
+  headers: {
+    'Accept': 'application/json',
+  },
+})
+
+// Response interceptor for webApi (dev-only verbose logs)
+webApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isProd = !(typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV)
+    if (!isProd) {
+      console.error('Web API Error:', error.response?.status, error.response?.data?.message || error.message)
+    }
+    return Promise.reject(error)
+  }
+)
 
 // Request interceptor untuk menambahkan token
 api.interceptors.request.use(
@@ -30,15 +56,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log error untuk debugging
-    console.error('API Error:', error.response?.status, error.response?.data);
-    
-    // JANGAN auto-redirect, biarkan component yang handle
-    // if (error.response?.status === 401) {
-    //   localStorage.removeItem('token')
-    //   window.location.href = '/login'
-    // }
-    
+    // Log ringkas saat dev, hindari membocorkan data di produksi
+    const isProd = !(typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV)
+    if (!isProd) {
+      console.error('API Error:', error.response?.status, error.response?.data?.message || error.message)
+    }
     return Promise.reject(error)
   }
 )

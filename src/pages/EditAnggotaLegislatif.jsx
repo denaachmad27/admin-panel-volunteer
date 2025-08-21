@@ -33,7 +33,8 @@ const EditAnggotaLegislatif = () => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
 
@@ -444,29 +445,22 @@ const EditAnggotaLegislatif = () => {
           </Card>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
-            <a
-              href="/anggota-legislatif"
-              className="inline-flex items-center px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg transition-colors"
+          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.history.back()}
+              disabled={loading}
             >
               Batal
-            </a>
+            </Button>
             <Button
               type="submit"
+              loading={loading}
               disabled={loading}
-              className="bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50"
+              icon={Save}
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Perbarui
-                </>
-              )}
+              {loading ? 'Menyimpan...' : 'Perbarui'}
             </Button>
           </div>
         </form>

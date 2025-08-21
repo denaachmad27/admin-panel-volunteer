@@ -60,7 +60,8 @@ const ManajemenAnggotaLegislatif = () => {
   
   // Combined loading and error states
   const loading = anggotaLoading || statsLoading;
-  const error = anggotaError || statsError;
+  const combinedError = anggotaError || statsError;
+  const [errorMessage, setErrorMessage] = useState(null);
   
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -138,6 +139,11 @@ const ManajemenAnggotaLegislatif = () => {
     }
   };
   
+  // Sync local error message with combined error from caches
+  useEffect(() => {
+    setErrorMessage(combinedError || null);
+  }, [combinedError]);
+
   // Load data on component mount and when filters change
   useEffect(() => {
     loadAnggotaLegislatif(1);
@@ -373,13 +379,13 @@ const ManajemenAnggotaLegislatif = () => {
           </div>
 
           {/* Error Message */}
-          {error && (
+          {errorMessage && (
             <div className="p-6 border-b border-slate-200">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
                 <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
-                <span className="text-red-700">{error}</span>
+                <span className="text-red-700">{errorMessage}</span>
                 <button
-                  onClick={() => setError(null)}
+                  onClick={() => setErrorMessage(null)}
                   className="ml-auto text-red-500 hover:text-red-700"
                 >
                   ×

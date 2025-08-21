@@ -21,7 +21,8 @@ const Login = () => {
   // Check if already authenticated
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    const user = localStorage.getItem('user');
+    if (token || user) {
       navigate('/dashboard', { replace: true });
     }
   }, [navigate]);
@@ -60,11 +61,20 @@ const Login = () => {
     try {
       console.log('Login attempt:', formData);
       
-      // Call the actual API using authService
-      const response = await authService.login({
-        email: formData.email,
-        password: formData.password
-      });
+      // Coba login via cookie (Sanctum SPA) terlebih dahulu
+      let response;
+      try {
+        response = await authService.loginWithCookie({
+          email: formData.email,
+          password: formData.password
+        });
+      } catch (e) {
+        // Fallback ke token-based jika cookie login gagal (mis. CORS/dev)
+        response = await authService.login({
+          email: formData.email,
+          password: formData.password
+        });
+      }
       
       console.log('Login successful:', response);
       

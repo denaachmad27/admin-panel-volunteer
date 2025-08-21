@@ -211,7 +211,7 @@ const Sidebar = ({
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">Administrator</p>
               <p className="text-sm font-bold text-blue-900 leading-tight">
-                {userData.anggota_legislatif.nama || userData.anggota_legislatif.nama_lengkap}
+                {userData.anggota_legislatif.nama_lengkap || userData.anggota_legislatif.nama}
               </p>
               <p className="text-xs text-blue-600 mt-1 opacity-80">
                 {userData.anggota_legislatif.partai_politik || userData.anggota_legislatif.partai || 'Anggota Legislatif'}
