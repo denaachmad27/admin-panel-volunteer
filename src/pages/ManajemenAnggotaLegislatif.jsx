@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  UserCheck, 
-  Eye, 
-  Edit, 
+import {
+  UserCheck,
+  Eye,
+  Edit,
   Trash2,
   Search,
   CheckCircle,
@@ -26,6 +26,7 @@ import QuickStatsRow from '../components/ui/QuickStatsRow';
 import anggotaLegislatifService from '../services/anggotaLegislatifService';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useCache } from '../hooks/useCache';
+import { constructImageUrl } from '../utils/urlHelper';
 
 const ManajemenAnggotaLegislatif = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -449,7 +450,7 @@ const ManajemenAnggotaLegislatif = () => {
                                 {anggota.foto_profil ? (
                                   <img
                                     className="h-10 w-10 rounded-full object-cover"
-                                    src={`http://127.0.0.1:8000/storage/${anggota.foto_profil}`}
+                                    src={constructImageUrl(`/storage/${anggota.foto_profil}`)}
                                     alt={anggota.nama_lengkap}
                                   />
                                 ) : (
@@ -726,7 +727,7 @@ const ManajemenAnggotaLegislatif = () => {
                               {selectedAnggota.foto_profil ? (
                                 <img
                                   className="h-20 w-20 rounded-full object-cover mr-5 border-3 border-gray-200"
-                                  src={`http://127.0.0.1:8000/storage/${selectedAnggota.foto_profil}`}
+                                  src={constructImageUrl(`/storage/${selectedAnggota.foto_profil}`)}
                                   alt={selectedAnggota.nama_lengkap}
                                 />
                               ) : (

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  User, Edit3, Save, X, Camera, Mail, Phone, 
+import {
+  User, Edit3, Save, X, Camera, Mail, Phone,
   Shield, Eye, EyeOff, Check, Settings, Key
 } from 'lucide-react';
+import { constructImageUrl } from '../../utils/urlHelper';
 
 const AdminProfile = () => {
   // State untuk mode view/edit
@@ -390,7 +391,7 @@ const AdminProfile = () => {
               <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden">
                 {photoPreview || adminData?.profile_photo ? (
                   <img
-                    src={photoPreview || `http://127.0.0.1:8000/storage/${adminData.profile_photo}`}
+                    src={photoPreview || constructImageUrl(`/storage/${adminData.profile_photo}`)}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

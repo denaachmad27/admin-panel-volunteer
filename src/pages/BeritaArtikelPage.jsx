@@ -5,6 +5,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import QuickStatsRow from '../components/ui/QuickStatsRow';
 import { newsAPI } from '../services/api';
+import { constructImageUrl } from '../utils/urlHelper';
 
 const BeritaArtikelPage = () => {
   const navigate = useNavigate();
@@ -256,7 +257,7 @@ const BeritaArtikelPage = () => {
                       <div className="flex-shrink-0">
                         {article.gambar_utama ? (
                           <img
-                            src={`http://127.0.0.1:8000/storage/${article.gambar_utama}`}
+                            src={constructImageUrl(`/storage/${article.gambar_utama}`)}
                             alt={article.judul}
                             className="w-20 h-20 object-cover rounded-lg border border-slate-200"
                             onError={(e) => {

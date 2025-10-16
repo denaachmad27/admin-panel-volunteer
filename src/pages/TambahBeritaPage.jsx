@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/UIComponents';
 import { newsAPI } from '../services/api';
+import { constructImageUrl } from '../utils/urlHelper';
 
 const TambahBeritaPage = () => {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ const TambahBeritaPage = () => {
           konten: newsData.konten || '',
           kategori: newsData.kategori || '',
           is_published: newsData.is_published || false,
-          gambar_utama: newsData.gambar_utama ? `http://127.0.0.1:8000/storage/${newsData.gambar_utama}` : null,
+          gambar_utama: newsData.gambar_utama ? constructImageUrl(`/storage/${newsData.gambar_utama}`) : null,
           tags: newsData.tags || []
         });
       } else {

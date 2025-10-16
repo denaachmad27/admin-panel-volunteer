@@ -7,6 +7,7 @@ import complaintForwardingService from '../services/complaintForwardingService';
 import { generalSettingsAPI } from '../services/api';
 import DepartmentModal from '../components/modals/DepartmentModal';
 import { useGeneralSettings } from '../contexts/GeneralSettingsContext';
+import { constructImageUrl } from '../utils/urlHelper';
 
 const PengaturanPage = () => {
   const navigate = useNavigate();
@@ -802,13 +803,7 @@ const PengaturanPage = () => {
                                   // Only try alternate URL once to avoid infinite loop
                                   if (!e.target.dataset.retried) {
                                     e.target.dataset.retried = 'true';
-                                    let fullUrl;
-                                    if (localGeneralSettings.logo_url.startsWith('http')) {
-                                      // Replace localhost with 127.0.0.1:8000 if needed
-                                      fullUrl = localGeneralSettings.logo_url.replace('localhost', '127.0.0.1:8000');
-                                    } else {
-                                      fullUrl = `http://127.0.0.1:8000${localGeneralSettings.logo_url}`;
-                                    }
+                                    const fullUrl = constructImageUrl(localGeneralSettings.logo_url);
                                     console.log('Trying corrected URL:', fullUrl);
                                     e.target.src = fullUrl;
                                   } else {

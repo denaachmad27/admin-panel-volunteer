@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, User, Calendar, MessageSquare, AlertTriangle, Clock, Mail, Star, Edit3, Save, XCircle, ZoomIn, ZoomOut, Maximize, Phone, Send, Building } from 'lucide-react';
 import { complaintAPI } from '../../services/api';
 import complaintForwardingService from '../../services/complaintForwardingService';
+import { constructImageUrl } from '../../utils/urlHelper';
 
 const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -305,12 +306,12 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
                   <h5 className="text-sm font-medium text-slate-900 mb-2">Foto Pengaduan</h5>
                   <div className="border border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
                     <img
-                      src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
+                      src={constructImageUrl(`/storage/${complaint.image_path}`)}
                       alt="Complaint"
                       className="w-full h-auto max-h-64 object-cover hover:opacity-90 transition-opacity"
                       onClick={() => setShowImageModal(true)}
                       onError={(event) => {
-                        console.log('Image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
+                        console.log('Image failed to load:', constructImageUrl(`/storage/${complaint.image_path}`));
                         event.target.parentNode.innerHTML = '<div class="p-4 text-center text-slate-500">Gambar tidak dapat dimuat</div>';
                       }}
                     />
@@ -664,11 +665,11 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate }) =>
 
             {/* Image */}
             <img
-              src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
+              src={constructImageUrl(`/storage/${complaint.image_path}`)}
               alt="Complaint Full Size"
               className={`max-w-none rounded-lg transition-transform ${imageZoom > 1 ? 'cursor-move' : 'cursor-default'}`}
               onError={() => {
-                console.log('Fullscreen image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
+                console.log('Fullscreen image failed to load:', constructImageUrl(`/storage/${complaint.image_path}`));
               }}
               style={{
                 transform: `translate(${imagePosition.x}px, ${imagePosition.y}px) scale(${imageZoom})`,

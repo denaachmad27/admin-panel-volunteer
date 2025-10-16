@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Eye, 
-  Edit, 
+import {
+  Users,
+  Eye,
+  Edit,
   Trash2,
   Search,
   ChevronDown,
@@ -26,6 +26,7 @@ import volunteerService from '../services/volunteerService';
 import VolunteerDetailModal from '../components/VolunteerDetailModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useCache } from '../hooks/useCache';
+import { constructImageUrl } from '../utils/urlHelper';
 
 // Per-user cache suffix to avoid cross-account cache mixing
 const getUserCacheSuffix = () => {
@@ -395,9 +396,9 @@ const ManajemenRelawan = () => {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           {volunteer.profile?.foto_profil ? (
-                            <img 
-                              className="h-10 w-10 rounded-full object-cover" 
-                              src={`http://127.0.0.1:8000/storage/${volunteer.profile.foto_profil}`} 
+                            <img
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={constructImageUrl(`/storage/${volunteer.profile.foto_profil}`)}
                               alt={volunteer.name}
                               onError={(e) => {
                                 e.target.style.display = 'none';

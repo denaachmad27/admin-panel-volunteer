@@ -5,6 +5,7 @@ import { Card } from '../components/ui/UIComponents';
 import { complaintAPI } from '../services/api';
 import ComplaintDetailModal from '../components/modals/ComplaintDetailModal';
 import complaintForwardingService from '../services/complaintForwardingService';
+import { constructImageUrl } from '../utils/urlHelper';
 
 const PengaduanPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -337,11 +338,11 @@ const PengaduanPage = () => {
                       {complaint.image_path && (
                         <div className="flex-shrink-0">
                           <img
-                            src={`http://127.0.0.1:8000/storage/${complaint.image_path}`}
+                            src={constructImageUrl(`/storage/${complaint.image_path}`)}
                             alt="Complaint"
                             className="w-16 h-16 object-cover rounded-lg border border-slate-200"
                             onError={(e) => {
-                              console.log('Image failed to load:', `http://127.0.0.1:8000/storage/${complaint.image_path}`);
+                              console.log('Image failed to load:', constructImageUrl(`/storage/${complaint.image_path}`));
                               e.target.style.display = 'none';
                             }}
                           />

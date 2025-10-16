@@ -3,6 +3,7 @@ import { User, Calendar, MapPin } from 'lucide-react';
 import Badge from './Badge';
 import ProgressBar from './ProgressBar';
 import volunteerService from '../../services/volunteerService';
+import { constructImageUrl } from '../../utils/urlHelper';
 
 // Komponen Profile Header yang dapat digunakan kembali
 const ProfileHeader = ({ 
@@ -35,9 +36,9 @@ const ProfileHeader = ({
         {/* Avatar */}
         <div className="flex-shrink-0">
           {volunteer.profile?.foto_profil ? (
-            <img 
+            <img
               className={`${sizes[size].avatar} rounded-full object-cover border-4 border-white shadow-md`}
-              src={`http://127.0.0.1:8000/storage/${volunteer.profile.foto_profil}`} 
+              src={constructImageUrl(`/storage/${volunteer.profile.foto_profil}`)}
               alt={volunteer.name}
               onError={(e) => {
                 e.target.style.display = 'none';
