@@ -221,6 +221,14 @@ export const dashboardAPI = {
   }
 }
 
+// Aleg API Services
+export const alegAPI = {
+  // Get aleg-specific dashboard (relawan + warga counts)
+  getDashboard: () => {
+    return api.get('/dashboard/aleg')
+  }
+}
+
 // Complaint API Services
 export const complaintAPI = {
   // Get all complaints for admin

@@ -5,7 +5,7 @@ import { Users, Heart, MessageSquare, FileText, TrendingUp, Calendar, RefreshCw,
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { StatsCardTemplate } from '../../components/templates/PageTemplates';
 import { Card } from '../../components/ui/UIComponents';
-import { dashboardAPI } from '../../services/api';
+import { dashboardAPI, alegAPI } from '../../services/api';
 
 // Cache configuration
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes for dashboard stats
@@ -70,6 +70,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false); // Mulai false jika ada cache
   const [error, setError] = useState(null);
   const [lastLoadTime, setLastLoadTime] = useState(null);
+  const [alegStats, setAlegStats] = useState(null);
 
   useEffect(() => {
     // Hanya load jika tidak ada cached data
@@ -77,6 +78,7 @@ const Dashboard = () => {
     if (!cached) {
       loadDashboardData();
     }
+    loadAlegStats();
   }, []);
 
   const loadDashboardData = async (forceRefresh = false) => {
@@ -138,6 +140,29 @@ const Dashboard = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const isAlegRole = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return false;
+      const user = JSON.parse(userStr);
+      return user.role === 'admin_aleg' || user.role === 'aleg';
+    } catch {
+      return false;
+    }
+  };
+
+  const loadAlegStats = async () => {
+    if (!isAlegRole()) return;
+    try {
+      const res = await alegAPI.getDashboard();
+      if (res.data?.status === 'success') {
+        setAlegStats(res.data.data);
+      }
+    } catch (e) {
+      console.error('Dashboard: Failed to load aleg stats', e);
     }
   };
 
@@ -279,7 +304,35 @@ const Dashboard = () => {
             </div>
           </div>
         ) : (
-          <StatsCardTemplate stats={statsData} />
+          <>
+            <StatsCardTemplate stats={statsData} />
+            {alegStats && (
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <div className="p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-gray-500">Total Relawan</div>
+                      <div className="text-2xl font-bold">{alegStats.total_relawan || 0}</div>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                  </div>
+                </Card>
+                <Card>
+                  <div className="p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-gray-500">Total Warga</div>
+                      <div className="text-2xl font-bold">{alegStats.total_warga || 0}</div>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-orange-600" />
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+          </>
         )}
 
         {/* Main Content Grid */}

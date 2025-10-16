@@ -16,7 +16,8 @@ const TambahBeritaPage = () => {
     konten: '',
     kategori: '',
     is_published: false,
-    gambar_utama: null
+    gambar_utama: null,
+    tags: []
   });
 
   const [imageFile, setImageFile] = useState(null);
@@ -25,6 +26,7 @@ const TambahBeritaPage = () => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [tagInput, setTagInput] = useState('');
 
   // Kategori sesuai dengan backend Laravel
   const categories = [
@@ -59,7 +61,8 @@ const TambahBeritaPage = () => {
           konten: newsData.konten || '',
           kategori: newsData.kategori || '',
           is_published: newsData.is_published || false,
-          gambar_utama: newsData.gambar_utama ? `http://127.0.0.1:8000/storage/${newsData.gambar_utama}` : null
+          gambar_utama: newsData.gambar_utama ? `http://127.0.0.1:8000/storage/${newsData.gambar_utama}` : null,
+          tags: newsData.tags || []
         });
       } else {
         alert('Gagal memuat data berita');
@@ -158,6 +161,28 @@ const TambahBeritaPage = () => {
     }
   };
 
+  const handleAddTag = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      e.preventDefault();
+      const trimmedTag = tagInput.trim();
+
+      if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+        setFormData(prev => ({
+          ...prev,
+          tags: [...prev.tags, trimmedTag]
+        }));
+        setTagInput('');
+      }
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
   const validateForm = () => {
     console.log('=== VALIDATION DEBUG ===');
     console.log('Current form data during validation:', formData);
@@ -250,7 +275,12 @@ const TambahBeritaPage = () => {
       formDataToSend.append('konten', kontenValue);
       formDataToSend.append('kategori', kategoriValue);
       formDataToSend.append('is_published', shouldPublish ? '1' : '0');
-      
+
+      // Append tags as JSON string
+      if (formData.tags && formData.tags.length > 0) {
+        formDataToSend.append('tags', JSON.stringify(formData.tags));
+      }
+
       // Only append image if new file is selected
       if (imageFile) {
         formDataToSend.append('gambar_utama', imageFile);
@@ -358,8 +388,23 @@ const TambahBeritaPage = () => {
                   <span>•</span>
                   <span>Admin</span>
                 </div>
-                
+
                 <h1 className="text-3xl font-bold text-slate-900 mb-4">{formData.judul}</h1>
+
+                {/* Tags in Preview */}
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {formData.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm"
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </header>
 
               {/* Article Content */}
@@ -609,6 +654,60 @@ Manfaat program ini antara lain:
                 {errors.kategori && (
                   <p className="text-red-600 text-sm mt-1">{errors.kategori}</p>
                 )}
+              </div>
+            </Card>
+
+            {/* Tags */}
+            <Card title="Tags" subtitle="Tambahkan tag untuk artikel">
+              <div className="space-y-3">
+                {/* Tag Input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleAddTag}
+                    placeholder="Ketik tag dan tekan Enter..."
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTag}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Tags Display */}
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm"
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="ml-1 hover:text-orange-900 focus:outline-none"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tags Info */}
+                <p className="text-xs text-slate-500">
+                  {formData.tags.length === 0
+                    ? 'Belum ada tag. Tambahkan tag untuk memudahkan pencarian artikel.'
+                    : `${formData.tags.length} tag ditambahkan`
+                  }
+                </p>
               </div>
             </Card>
 
