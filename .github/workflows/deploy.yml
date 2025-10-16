@@ -1,0 +1,60 @@
+name: Deploy Admin Panel to Production
+
+on:
+  push:
+    branches:
+      - main  # Ganti dengan branch Anda (main/master)
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/volunteer/admin-panel-bantuan-sosial
+
+            echo "🚀 Starting Frontend Deployment..."
+
+            # Pull latest changes
+            echo "📥 Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Install dependencies
+            echo "📦 Installing npm dependencies..."
+            npm install
+
+            # Build production
+            echo "🔨 Building for production..."
+            npm run build
+
+            # Copy build to public directory
+            echo "📋 Copying build files..."
+            rm -rf /var/www/volunteer/public/*
+            cp -r dist/* /var/www/volunteer/public/
+
+            # Set permissions
+            echo "🔐 Setting permissions..."
+            sudo chown -R www-data:www-data /var/www/volunteer/public
+            sudo chmod -R 755 /var/www/volunteer/public
+
+            echo "✅ Frontend deployment completed successfully!"
+
+      - name: Notify on Success
+        if: success()
+        run: echo "✅ Deployment successful!"
+
+      - name: Notify on Failure
+        if: failure()
+        run: echo "❌ Deployment failed!"
