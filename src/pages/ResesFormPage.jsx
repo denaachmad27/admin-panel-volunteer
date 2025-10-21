@@ -34,7 +34,7 @@ const ResesFormPage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/anggota-legislatif/options`,
+        `${import.meta.env.VITE_API_BASE_URL}/anggota-legislatif/options`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAnggotaLegislatifs(response.data.data || []);
@@ -47,7 +47,7 @@ const ResesFormPage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/reses/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/reses/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = response.data.data;
@@ -87,7 +87,7 @@ const ResesFormPage = () => {
 
       if (isEdit) {
         await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/admin/reses/${id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/admin/reses/${id}`,
           formDataToSend,
           {
             headers: {
@@ -99,7 +99,7 @@ const ResesFormPage = () => {
         alert('Reses berhasil diperbarui');
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/admin/reses`,
+          `${import.meta.env.VITE_API_BASE_URL}/admin/reses`,
           formDataToSend,
           {
             headers: {

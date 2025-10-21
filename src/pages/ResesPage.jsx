@@ -37,7 +37,7 @@ const ResesPage = () => {
       }
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/reses?${params}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/reses?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -76,7 +76,7 @@ const ResesPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/reses/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/reses/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

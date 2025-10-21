@@ -38,7 +38,7 @@ const PokirPage = () => {
       }
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/pokir?${params}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/pokir?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -78,7 +78,7 @@ const PokirPage = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/pokir/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/pokir/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

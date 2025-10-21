@@ -43,7 +43,7 @@ const PokirFormPage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/anggota-legislatif/options`,
+        `${import.meta.env.VITE_API_BASE_URL}/anggota-legislatif/options`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAnggotaLegislatifs(response.data.data || []);
@@ -56,7 +56,7 @@ const PokirFormPage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/pokir/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/admin/pokir/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = response.data.data;
@@ -91,14 +91,14 @@ const PokirFormPage = () => {
 
       if (isEdit) {
         await axios.put(
-          `${import.meta.env.VITE_API_BASE_URL}/api/admin/pokir/${id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/admin/pokir/${id}`,
           dataToSend,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert('Pokir berhasil diperbarui');
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/admin/pokir`,
+          `${import.meta.env.VITE_API_BASE_URL}/admin/pokir`,
           dataToSend,
           { headers: { Authorization: `Bearer ${token}` } }
         );
