@@ -22,7 +22,9 @@ import {
   HelpCircle,
   Building,
   UserPlus,
-  UserCheck
+  UserCheck,
+  Lightbulb,
+  CalendarCheck
 } from 'lucide-react';
 import LogoDisplay from '../ui/LogoDisplay';
 

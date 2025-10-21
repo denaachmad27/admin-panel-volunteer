@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Users, 
-  Heart, 
-  FileText, 
-  MessageSquare, 
-  Settings, 
-  Bell, 
-  Search, 
+import {
+  Menu,
+  X,
+  Home,
+  Users,
+  Heart,
+  FileText,
+  MessageSquare,
+  Settings,
+  Bell,
+  Search,
   ChevronDown,
   ChevronRight,
   LogOut,
@@ -20,7 +20,9 @@ import {
   HelpCircle,
   Building,
   UserPlus,
-  UserCheck
+  UserCheck,
+  Lightbulb,
+  CalendarCheck
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -66,6 +68,26 @@ const MENU_ITEMS = [
       { title: 'Tambah Program', path: '/tambah-bantuan' },
       { title: 'Pendaftaran', path: '/pendaftaran' },
       { title: 'Verifikasi', path: '/pendaftaran/verify' }
+    ]
+  },
+  {
+    title: 'Reses',
+    icon: CalendarCheck,
+    path: '/reses',
+    id: 'reses',
+    submenu: [
+      { title: 'Daftar Reses', path: '/reses' },
+      { title: 'Tambah Reses', path: '/reses/create' }
+    ]
+  },
+  {
+    title: 'Pokir',
+    icon: Lightbulb,
+    path: '/pokir',
+    id: 'pokir',
+    submenu: [
+      { title: 'Daftar Pokir', path: '/pokir' },
+      { title: 'Tambah Pokir', path: '/pokir/create' }
     ]
   },
   {

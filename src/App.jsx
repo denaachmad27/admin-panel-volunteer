@@ -36,6 +36,10 @@ import ManajemenRelawan from './pages/ManajemenRelawan';
 import ManajemenAnggotaLegislatif from './pages/ManajemenAnggotaLegislatif';
 import TambahAnggotaLegislatif from './pages/TambahAnggotaLegislatif';
 import EditAnggotaLegislatif from './pages/EditAnggotaLegislatif';
+import ResesPage from './pages/ResesPage';
+import ResesFormPage from './pages/ResesFormPage';
+import PokirPage from './pages/PokirPage';
+import PokirFormPage from './pages/PokirFormPage';
 
 function App() {
   console.log('App component rendering...');
@@ -358,21 +362,85 @@ function App() {
             />
             
             {/* Daftar Dinas Route */}
-            <Route 
-              path="/settings/daftar-dinas" 
+            <Route
+              path="/settings/daftar-dinas"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <DaftarDinasPage />
                   </ErrorBoundary>
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
+            {/* Reses Routes */}
+            <Route
+              path="/reses"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ResesPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reses/create"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ResesFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reses/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ResesFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Pokir Routes */}
+            <Route
+              path="/pokir"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <PokirPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pokir/create"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <PokirFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pokir/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <PokirFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
             {/* 🔄 ALTERNATIVE: Jika ada route lama, redirect ke yang baru */}
-            <Route 
-              path="/profile" 
-              element={<Navigate to="/admin/profile" replace />} 
+            <Route
+              path="/profile"
+              element={<Navigate to="/admin/profile" replace />}
             />
             
             {/* Default redirect */}
