@@ -40,6 +40,10 @@ import ResesPage from './pages/ResesPage';
 import ResesFormPage from './pages/ResesFormPage';
 import PokirPage from './pages/PokirPage';
 import PokirFormPage from './pages/PokirFormPage';
+import WargaBinaanPage from './pages/WargaBinaanPage';
+import WargaBinaanFormPage from './pages/WargaBinaanFormPage';
+import WargaBinaanUploadPage from './pages/WargaBinaanUploadPage';
+import WargaBinaanDetailPage from './pages/WargaBinaanDetailPage';
 
 function App() {
   console.log('App component rendering...');
@@ -432,6 +436,58 @@ function App() {
                 <ProtectedRoute>
                   <ErrorBoundary>
                     <PokirFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Warga Binaan Routes */}
+            <Route
+              path="/warga-binaan"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WargaBinaanPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/warga-binaan/create"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WargaBinaanFormPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/warga-binaan/upload"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WargaBinaanUploadPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/warga-binaan/:id"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WargaBinaanDetailPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/warga-binaan/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <WargaBinaanFormPage />
                   </ErrorBoundary>
                 </ProtectedRoute>
               }

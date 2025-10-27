@@ -400,6 +400,74 @@ export const whatsappAPI = {
   }
 }
 
+// Warga Binaan API Services
+export const wargaBinaanAPI = {
+  // Get all warga binaan
+  getAll: (params = {}) => {
+    return api.get('/admin/warga-binaan', { params })
+  },
+
+  // Get single warga binaan by ID
+  getById: (id) => {
+    return api.get(`/admin/warga-binaan/${id}`)
+  },
+
+  // Create new warga binaan
+  create: (data) => {
+    return api.post('/admin/warga-binaan', data)
+  },
+
+  // Update warga binaan
+  update: (id, data) => {
+    return api.put(`/admin/warga-binaan/${id}`, data)
+  },
+
+  // Delete warga binaan
+  delete: (id) => {
+    return api.delete(`/admin/warga-binaan/${id}`)
+  },
+
+  // Get statistics
+  getStatistics: (params = {}) => {
+    return api.get('/admin/warga-binaan/statistics', { params })
+  },
+
+  // Get relawan options for dropdown
+  getRelawanOptions: () => {
+    return api.get('/admin/warga-binaan/relawan-options')
+  },
+
+  // Download CSV template
+  downloadTemplate: () => {
+    return api.get('/admin/warga-binaan/download-template', {
+      responseType: 'blob'
+    })
+  },
+
+  // Mass upload CSV
+  massUpload: (formData) => {
+    return api.post('/admin/warga-binaan/mass-upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  // Bulk delete
+  bulkDelete: (ids) => {
+    return api.post('/admin/warga-binaan/bulk-delete', { ids })
+  },
+
+  // Preview CSV
+  previewCsv: (formData) => {
+    return api.post('/admin/warga-binaan/preview-csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  }
+}
+
 // General Settings API Services
 export const generalSettingsAPI = {
   // Get general settings

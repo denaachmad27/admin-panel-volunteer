@@ -49,8 +49,19 @@ const MENU_ITEMS = [
     id: 'volunteers'
   },
   {
-    title: 'Manajemen Anggota Legislatif',
+    title: 'Warga Binaan',
     icon: UserCheck,
+    path: '/warga-binaan',
+    id: 'warga-binaan',
+    submenu: [
+      { title: 'Daftar Warga Binaan', path: '/warga-binaan' },
+      { title: 'Tambah Warga Binaan', path: '/warga-binaan/create' },
+      { title: 'Upload CSV', path: '/warga-binaan/upload' }
+    ]
+  },
+  {
+    title: 'Manajemen Anggota Legislatif',
+    icon: Shield,
     path: '/anggota-legislatif',
     id: 'anggota-legislatif',
     submenu: [
