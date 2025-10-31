@@ -59,10 +59,18 @@ export const GeneralSettingsProvider = ({ children }) => {
         }
       }
 
+      // Check if user is authenticated before loading settings
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('GeneralSettingsContext: User not authenticated, using default settings');
+        setHasLoadedOnce(true);
+        return;
+      }
+
       console.log('GeneralSettingsContext: Loading settings from API');
       setLoading(true);
       setError(null);
-      
+
       const response = await generalSettingsAPI.getSettings();
       if (response.data.status === 'success') {
         console.log('GeneralSettingsContext: Settings loaded:', response.data.data);
